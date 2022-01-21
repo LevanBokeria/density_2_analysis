@@ -1,29 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Apr 13 15:38:26 2021
 
-Density model class
-
-@author: robert.mok
 """
 
 # Description:
-
-# Just a simple script that takes triplets or any object specifying exemplars,
-# And shows you the resulting density space
-
-# NOT WELL WRITTEN. SHOULD TAKE ROBs CODE OUT AS A SEPARATE FUNCTION
-
-
-# Close figures and clear the environment
 
 # Import other libraries
 import numpy as np
 import matplotlib.pyplot as plt
 from itertools import combinations
 import pandas as pd
-# from scipy.stats import bootstrap
 
 # %% Density model 
 
@@ -130,6 +117,7 @@ class DensityModel():
 
 # %% Other Functions
 
+# Convert old guys to a new range:
 def new_range(old_value,old_max,old_min,new_max,new_min):
     
     new_value = ((old_value - old_min)/(old_max - old_min)) * (new_max - new_min) + new_min
@@ -150,55 +138,27 @@ upd_dns = False
 
 # all possible stimuli (to set the density map, index stimuli, etc.)
 px_min = 30
-px_max = 300
+px_max = 120
 all_stim = np.arange(px_min, px_max+1, dtype=float)  # assumning stimuli start from 10-300 pixels
 
 # input stimuli (exposure phase)
 
 # - Create gaps of the dense and sparse regions
-step_dense  = 5
-step_sparse = 20
+step_dense  = 2
+step_sparse = 8
 
 # - make the dense and sparse sections
-section_1 = np.arange(px_min,px_min+(px_max-px_min)/2,step_sparse, dtype=int)
-section_2 = np.arange(px_min+(px_max-px_min)/2,px_max,step_dense, dtype=int) + step_dense
+section_1 = np.arange(px_min,px_min+(px_max-px_min)/2+1,step_sparse, dtype=int)
+
+section_2 = np.arange(section_1[-1]+step_sparse,px_max+1,step_dense, dtype=int)
+# Drop the ones less than mid point
+section_2 = np.delete(section_2,np.where(section_2 < px_min + (px_max-px_min)/2))
 
 # stim_seq = np.around(len(all_stim) * np.array([.5, .25, .11, .75]))
 stim_exposure = np.concatenate((section_1,section_2))
 
-# Create an empty stim_test 
-stim_test = np.array([]).reshape(0,3)
-
-# A separate variable that I would sometimes use to subset the stim_test, and 
-# create triplets only from that subset
-arr_for_stim_test = stim_exposure.copy()
-# arr_for_stim_test = arr_for_stim_test[0:20]
-
-
-# Iterate over exemplars and create all the triplets
-for idx, istim in enumerate(np.nditer(arr_for_stim_test)):
-    # print(idx)
-    # print(istim)
-    
-    # Get the array without this istim
-    rr = np.delete(arr_for_stim_test,idx)
-    
-    # Generate all combinations of 2 items from this list
-    ref_combs = np.asarray(list(combinations(rr, 2))).T
-    
-    # Create one list with 1st col as the quety, the rest as refs
-    q_col = np.repeat(istim,ref_combs.shape[1])
-    q_col = q_col.reshape(len(q_col),1)
-    
-    i_stim_test = np.concatenate((q_col,ref_combs.T),axis=1)
-    
-    stim_test = np.concatenate((stim_test,i_stim_test))
-    
-    
-stim_test = stim_test.astype(int)
-
 # %% Load the manually selected triplets
-chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets.xlsx')
+chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_new_range.xlsx')
 
 skip_balancing = False
 
@@ -207,59 +167,13 @@ if skip_balancing:
         chosen_triplets_df['simulation name'] != 'balancing',:
             ]
 
-stim_seq_pilot_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()    
+stim_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()    
 
-# flipped_stim_for_balancing = np.array([[260,210,300],
-#                                        [250,220,280],
-#                                        [280,260,300],
-#                                        [210,50,280],
-#                                        [220,50,250],
-#                                        [260,210,290],
-#                                        [280,220,300],
-#                                        [50,30,70]
-#                                        ])
+n_triplet_rep  = 1
+n_exposure_rep = 0
 
-# flipped_stim_for_balancing = flip_triplets.flip_triplets(stim_for_balancing)
-
-# stim_seq_pilot_triplets = np.concatenate(
-#     (stim_seq_pilot_triplets,flipped_stim_for_balancing.flatten())
-#     )
-
-n_exposure_rep = 1
-
-stim_seq = np.concatenate((np.repeat(stim_seq_pilot_triplets,0),
+stim_seq = np.concatenate((np.repeat(stim_triplets,n_triplet_rep),
                            np.repeat(stim_exposure,n_exposure_rep)))
-
-# stim_seq = np.concatenate((stim_test.flatten(),stim_seq))
-
-# stim_seq = stim_seq_pilot
-    
-# balance_out = np.array([60,60,60,60,60,60,60,60,70,70,70,70])
-
-# stim_seq = np.concatenate((stim_seq,balance_out))
-
-# This is the output of the exposure trial creator in JS. Check that this produces the density space you want!
-# fromjs = np.array([160,145,240,240,125,80,280,115,110,35,115,100,70,60,60,60,150,75,110,130,130,125,125,100,125,160,30,155,155,35,35,35,125,125,220,140,90,95,150,40,140,140,90,90,140,75,30,35,75,120,85,30,55,45,135,220,155,40,180,80,70,70,120,95,100,70,145,240,95,105,105,100,100,160,140,160,160,300,45,45,75,75,115,150,180,80,40,40,145,65,85,85,160,200,200,155,105,280,280,180,200,260,200,200,110,220,50,105,125,180,180,180,180,135,260,45,145,145,65,120,120,95,280,260,260,140,140,145,30,30,155,130,150,35,35,130,45,135,75,200,40,130,110,110,200,155,55,140,50,155,155,55,300,280,280,35,160,115,85,45,95,240,135,260,70,105,90,200,95,95,130,55,85,80,125,145,65,280,135,100,160,160,85,95,95,70,90,220,240,40,100,80,135,135,240,240,240,150,150,220,220,75,260,30,260,260,95,100,85,85,120,300,300,200,110,50,110,280,85,105,120,220,65,150,110,110,60,300,50,30,45,80,80,140,120,120,45,50,40,30,45,45,110,160,145,145,55,55,85,40,40,150,55,55,150,135,280,300,135,135,130,105,220,115,90,90,115,80,80,70,65,65,70,220,280,35,70,145,90,240,90,180,55,155,125,150,75,65,120,300,115,120,65,130,130,240,60,300,260,60,35,60,50,65,65,60,100,100,140,180,220,180,70,200,130,115,125,90,40,105,55,60,60,260,300,30,30,300,155,105,105,115,115,50,50,75,75,50,50,80])
-# stim_seq = fromjs
-
-# %% Transform everything to the new range
-
-# px_min = new_range(px_min, 300, 30, 120, 20)
-# px_max = new_range(px_max, 300, 30, 120, 20)
-
-# stim_exposure = new_range(stim_exposure, 300, 30, 120, 20)
-
-# stim_test = new_range(stim_test, 300, 30, 120, 20)
-
-# stim_seq = new_range(stim_seq, 300, 30, 120, 20)
-
-# all_stim = new_range(all_stim, 300, 30, 120, 20)
-
-
-# stim_seq_pilot_triplets = new_range(stim_seq_pilot_triplets, 300, 30, 120, 20)
-
-# step_dense = stim_seq[33]-stim_seq[32]
-# step_sparse = stim_seq[1]-stim_seq[0]
 
 # %% initialize model
 model = DensityModel(model_type, params, all_stim)
@@ -276,18 +190,12 @@ plot_test_sim    = False
 plot_full_sim    = False
 plot_triplet_sim = False
 
-# if upd_dns is False:
-#     sm = res['s_mat']
-#     dm = res['ds_mat']
-# else:  # if computed online density, get last one
-#     sm = res['s_mat'][:, :, -1]
-#     dm = res['ds_mat'][:, :, -1]
-
 if plot_density:
     # plot density map
     plt.plot(all_stim, model.density_map)
     plt.title('With exposure trials: shown ' + str(n_exposure_rep) + 'x')
-    plt.xticks(np.arange(0,px_max+20,step=10),fontsize=7,rotation=45)
+    # plt.xticks(np.arange(0,px_max+20,step=10),fontsize=7,rotation=45)
+    plt.xticks(stim_seq,fontsize=7,rotation=60)
     plt.grid(axis='x')
     # plt.ylim((7,23))
     plt.show()

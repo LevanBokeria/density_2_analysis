@@ -170,7 +170,7 @@ if skip_balancing:
 stim_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()    
 
 n_triplet_rep  = 2
-n_exposure_rep = 0
+n_exposure_rep = 10
 
 stim_seq = np.concatenate((np.repeat(stim_triplets,n_triplet_rep),
                            np.repeat(stim_exposure,n_exposure_rep)))
@@ -193,7 +193,8 @@ plot_triplet_sim = False
 if plot_density:
     # plot density map
     plt.plot(all_stim, model.density_map)
-    plt.title('With exposure trials: shown ' + str(n_exposure_rep) + 'x')
+    plt.title('Triplets shown 2x. Exposure trials shown ' + str(n_exposure_rep) + 'x')
+    # plt.title('Balanced space')
     # plt.xticks(np.arange(0,px_max+20,step=10),fontsize=7,rotation=45)
     plt.xticks(stim_seq,fontsize=7,rotation=60)
     plt.grid(axis='x')

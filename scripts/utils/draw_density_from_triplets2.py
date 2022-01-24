@@ -158,7 +158,7 @@ section_2 = np.delete(section_2,np.where(section_2 < px_min + (px_max-px_min)/2)
 stim_exposure = np.concatenate((section_1,section_2))
 
 # %% Load the manually selected triplets
-chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_new_range.xlsx')
+chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_new_range2.xlsx')
 
 skip_balancing = False
 
@@ -169,7 +169,7 @@ if skip_balancing:
 
 stim_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()    
 
-n_triplet_rep  = 1
+n_triplet_rep  = 2
 n_exposure_rep = 0
 
 stim_seq = np.concatenate((np.repeat(stim_triplets,n_triplet_rep),

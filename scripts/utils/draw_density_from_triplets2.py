@@ -124,6 +124,24 @@ def new_range(old_value,old_max,old_min,new_max,new_min):
     
     return new_value
 
+
+def plot_density_fn(model,x_tick_marks,title_text,ylims=None):
+    # plot density map
+    plt.plot(all_stim, model.density_map)
+
+    plt.title(title_text)
+
+    # plt.xticks(np.arange(0,px_max+20,step=10),fontsize=7,rotation=45)
+
+    plt.xticks(x_tick_marks,fontsize=5,rotation=90)
+
+    plt.grid(axis='x')
+    
+    if (ylims is not None):
+        plt.ylim((ylims[0],ylims[1]))        
+        
+    plt.show()
+
 # %% Define model parameters, and stimulus spaces
 
 model_type = 'density'
@@ -135,6 +153,9 @@ params = {
 
 # update density at test phase
 upd_dns = False
+
+# Show low density stimuli
+expose_low_density = False
 
 # all possible stimuli (to set the density map, index stimuli, etc.)
 px_min = 30
@@ -154,99 +175,174 @@ section_2 = np.arange(section_1[-1]+step_sparse,px_max+1,step_dense, dtype=int)
 # Drop the ones less than mid point
 section_2 = np.delete(section_2,np.where(section_2 < px_min + (px_max-px_min)/2))
 
-# stim_seq = np.around(len(all_stim) * np.array([.5, .25, .11, .75]))
-stim_exposure = np.concatenate((section_1,section_2))
+if expose_low_density:
+    stim_exposure = np.concatenate((section_1,section_2))    
+else:
+    stim_exposure = section_2
 
 # %% Load the manually selected triplets
-chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_new_range2.xlsx')
+chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_new_range3.xlsx')
 
-skip_balancing = False
+skip_balancing_from_excel = True
 
-if skip_balancing:
+if skip_balancing_from_excel:
     chosen_triplets_df = chosen_triplets_df.loc[
         chosen_triplets_df['simulation name'] != 'balancing',:
             ]
 
 stim_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()    
 
-n_triplet_rep  = 2
-n_exposure_rep = 10
-
-stim_seq = np.concatenate((np.repeat(stim_triplets,n_triplet_rep),
-                           np.repeat(stim_exposure,n_exposure_rep)))
-
 # %% initialize model
 model = DensityModel(model_type, params, all_stim)
 
 # run model
-res = model.train(stim_seq, test_upd_density=upd_dns)
+res = model.train(stim_triplets, test_upd_density=upd_dns)
 
   
 # %% plot results
 
 # Flags
-plot_density     = True
-plot_test_sim    = False
-plot_full_sim    = False
-plot_triplet_sim = False
+plot_initial_density = False
+plot_average_density = False
 
-if plot_density:
-    # plot density map
-    plt.plot(all_stim, model.density_map)
-    plt.title('Triplets shown 2x. Exposure trials shown ' + str(n_exposure_rep) + 'x')
-    # plt.title('Balanced space')
-    # plt.xticks(np.arange(0,px_max+20,step=10),fontsize=7,rotation=45)
-    plt.xticks(stim_seq,fontsize=7,rotation=60)
-    plt.grid(axis='x')
-    # plt.ylim((7,23))
-    plt.show()
+# Get y lims of the existing density space
+ylims = [np.min(model.density_map)-1,np.max(model.density_map)+2]
+
+if plot_initial_density:
+    plot_density_fn(model,stim_triplets,'Initial density space',ylims)
+
+# %% Supplement with X number of balancing triplets
+
+plot_each_step = False
+choose_any_exemplar = False
+
+n_balance = 10
+
+# Create an empty array to hold the generated triplets
+bal_triplets = np.zeros((n_balance,3))
+
+for iBal in range(n_balance):
+    
+    print('Balance triplet ' + str(iBal))
+    
+    for iTrip in range(3):
+        
+        # Find the lowest exemplar index
+        if choose_any_exemplar:
+            min_idx = np.argmin(model.density_map)
+        else:        
+            # Find the smallest value among the exemplars shown
+            min_val = np.min(model.density_map[np.concatenate((section_1,section_2))-px_min])
+            min_idx = np.where(model.density_map == min_val)
+        
+        # Whats the exemplar index here?
+        exemplar_to_add = all_stim[min_idx]
+                
+        # Retrain the model
+        res = model.train(exemplar_to_add, test_upd_density=upd_dns)
+        
+        # Record these as a triplet
+        bal_triplets[iBal,iTrip] = exemplar_to_add
+        
+    # Plot the density again:
+    x_tick_marks = np.concatenate((bal_triplets.flatten()[bal_triplets.flatten() != 0],stim_triplets))
+        
+        
+    if plot_each_step:
+        plot_density_fn(model,x_tick_marks,'Density after ' + \
+                        str(iBal+1) + ' additional triplet', ylims)
+
+# %% Move around exemplars in the balanced triplet set, if triplets are "bad"
+triplets_good = False
+
+threshold_diff = 8
+
+i = 1
+
+while not triplets_good:
+    print(i)
+    i+=1    
+    # Sort each row 
+    bal_triplets = np.sort(bal_triplets, axis=1)
+    
+    # Take a difference between col 1 and col 2
+    col_diff = abs(bal_triplets[:,0] - bal_triplets[:,1])
+    
+    # If its less than threshold, shuffle.
+    if np.min(col_diff) < threshold_diff:
+        
+        # Randomly choose another row
+        row_idx = np.random.randint(0,n_balance)
+        col_idx = np.random.randint(0,3)
+        
+        # Swap the min value
+        
+        min_idx = np.argmin(col_diff)
+        
+        bal_triplets[min_idx,0], bal_triplets[row_idx,col_idx] = \
+            bal_triplets[row_idx,col_idx], bal_triplets[min_idx,0], 
+            
+    else:
+        triplets_good = True
+
+# %% Add exposure trials and see what the final density space looks like
+
+skip_balancing = False
+
+n_triplet_rep  = 2
+n_exposure_rep = 10
+
+stim_seq = np.concatenate((np.repeat(stim_triplets,n_triplet_rep),
+                           np.repeat(stim_exposure,n_exposure_rep)))
+if not skip_balancing:
+    # So also add the balancing triplets
+    stim_seq = np.concatenate((stim_seq,np.repeat(bal_triplets.flatten(),n_triplet_rep)))
+
+# Retrain the model again:
+model_after_bal = DensityModel(model_type, params, all_stim)
+res = model_after_bal.train(stim_seq, test_upd_density=upd_dns)
+
+# Plot
+plot_density_fn(model_after_bal,stim_seq,'Pre-exposure\n' + \
+                'Balancing trials: ' + str(n_balance) + '\n' + \
+                    'Triplets repeated ' + \
+                    str(n_triplet_rep) + 'x' + '\n' + 'Exposure repeated ' + \
+                        str(n_exposure_rep) + 'x',[26,105])
 
 # %% Find the average difference between the dense and sparse areas
-
-# mid_point = 160
-# mid_point_idx = np.where(all_stim == mid_point)[0][0]
-
-# sparse_sum = model.density_map[range(0,mid_point_idx)].sum()
-# sparse_mean = model.density_map[range(0,mid_point_idx)].mean()
-# sparse_std = model.density_map[range(0,mid_point_idx)].std()
-# dense_sum = model.density_map[range(mid_point_idx,len(model.density_map))].sum()
-# dense_mean = model.density_map[range(mid_point_idx,len(model.density_map))].mean()
-# dense_std = model.density_map[range(mid_point_idx,len(model.density_map))].std()
-
-# density_diff = dense_sum - sparse_sum
-# print(density_diff)
-
-
-# materials = ['sparse','dense']
-# x_pos = np.arange(len(materials))
-# CTEs  = [sparse_mean,dense_mean]
-# error = [sparse_std,dense_std]
-
-# # Build the plot
-# fig, ax = plt.subplots()
-# ax.bar(x_pos, 
-#        CTEs, 
-#        yerr=error, 
-#        align='center', 
-#        alpha=0.5, 
-#        ecolor='black', 
-#        capsize=10)
-# ax.set_ylabel('Density')
-# ax.set_xticks(x_pos)
-# ax.set_xticklabels(materials)
-# ax.set_title('Exposure shown: ' + str(n_exposure_rep) + 'x')
-# ax.yaxis.grid(True)
-# plt.ylim((0,65))
-
-# %% Use bootstrapping from scipy
-
-# rng = 123
-
-# # - For the sparse
-# data = (model.density_map[range(0,mid_point_idx)],)
-# ci = bootstrap(data,np.mean,confidence_level=0.9,n_resamples=1000,random_state=rng).confidence_interval
-
-
+if plot_average_density:
+    
+    mid_point = 78
+    mid_point_idx = np.where(all_stim == mid_point)[0][0]
+    
+    sparse_sum  = model.density_map[range(0,mid_point_idx)].sum()
+    sparse_mean = model.density_map[range(0,mid_point_idx)].mean()
+    sparse_std  = model.density_map[range(0,mid_point_idx)].std()
+    dense_sum   = model.density_map[range(mid_point_idx,len(model.density_map))].sum()
+    dense_mean  = model.density_map[range(mid_point_idx,len(model.density_map))].mean()
+    dense_std   = model.density_map[range(mid_point_idx,len(model.density_map))].std()
+    
+    materials = ['shallow','dense']
+    x_pos = np.arange(len(materials))
+    CTEs  = [sparse_mean,dense_mean]
+    error = [sparse_std,dense_std]
+    
+    # Build the plot
+    fig, ax = plt.subplots()
+    ax.bar(x_pos, 
+            CTEs, 
+            yerr=error, 
+            align='center', 
+            alpha=0.5, 
+            ecolor='black', 
+            capsize=10)
+    ax.set_ylabel('Density')
+    ax.set_xticks(x_pos)
+    ax.set_xticklabels(materials)
+    # ax.set_title('Average density + stdev. \n After exposure. With balancing. \n Mid-point=78')
+    # ax.set_title('Exposure shown: ' + str(n_exposure_rep) + 'x')
+    ax.yaxis.grid(True)
+    plt.ylim((0,120))
 
 
 

@@ -23,14 +23,20 @@ end
 addpath(genpath(home));
 
 curr_space = 'base_funnel_space';
-debugMode = 0;
+debugMode = 1;
 
 % Flags
 saveImg      = 1;
 saveImgNames = 0;
+
+flip_space = 1;
 %% Load the appropriate subject and condition specific files
 
-saveFolder = 'try_4';
+saveFolder = 'try_5';
+
+if flip_space
+    saveFolder = [saveFolder '_flipped'];
+end
 
 % Make save folders
 saveLoc = fullfile(home,'docs','triplet_screenshots',saveFolder);
@@ -108,7 +114,7 @@ Screen('Flip',ptb_window);
 ShowCursor('Arrow');
 
 %% Read the excel file
-triplets = readtable(fullfile(home,'docs','choosing_triplets_new_range4.xlsx'));
+triplets = readtable(fullfile(home,'docs','choosing_triplets.xlsx'));
 
 % Do not use if comment says "removed" or "replaced to balance out"
 
@@ -119,7 +125,7 @@ nTriplets = height(triplets);
 
 %% Read the inset picture
 [inset, ~, ~] = imread(fullfile(home,'docs',...
-    'density_space_1.png'));
+    'density_space_2.png'));
 
 inset_idx = Screen('MakeTexture', ptb_window, inset);
 
@@ -151,6 +157,18 @@ for iTriplet = 1:nTriplets
         elseif iOption == 3
             xPos1_val = triplets.ref2(iTriplet);
         end
+        
+        if flip_space
+            if iOption == 1
+                xPos1_val = triplets.ref1_flipped(iTriplet);
+            elseif iOption == 2
+                xPos1_val = triplets.query_flipped(iTriplet);
+            elseif iOption == 3
+                xPos1_val = triplets.ref2_flipped(iTriplet);
+            end
+            
+        end
+        
         yPos1_val = 100;
                 
         switch curr_space
@@ -195,6 +213,17 @@ for iTriplet = 1:nTriplets
             '_ref2_' int2str(triplets.ref2(iTriplet))...
             '.png'];
         
+        if flip_space
+            fileName = ['triplet_' int2str(iTriplet) ...
+                '_template_' int2str(triplets.dist_query_ref1_flipped(iTriplet)) '_' ...
+                int2str(triplets.dist_query_ref2_flipped(iTriplet)) '_' ...
+                int2str(triplets.dist_ref1_ref2_flipped(iTriplet)) ...
+                '_query_' int2str(triplets.query_flipped(iTriplet))...
+                '_ref1_' int2str(triplets.ref1_flipped(iTriplet))...
+                '_ref2_' int2str(triplets.ref2_flipped(iTriplet))...
+                '.png'];
+        end
+        
         DrawFormattedText(ptb_window, fileName, ...
             70,470, [1 1 1]);            
         
@@ -202,9 +231,9 @@ for iTriplet = 1:nTriplets
     end
     
     %% Add an inset of the density image
-    inset_width = 600;
+    inset_width = 550;
 %     inset_height = inset_width*3352/3944;
-    inset_height = inset_width*747/1042;
+    inset_height = inset_width*847/1042;
     
     inset_x_center = screenXpixels/2+50;
     inset_y_center = 220;
@@ -217,36 +246,45 @@ for iTriplet = 1:nTriplets
         [rinset]');
     
     % Draw the query and refs on the density map
-    inset_scale = 130;
     
-    inset_left_edge_to_30 = 78; % How many pixels from the left corner to the 30th x tick?
-    inset_right_edge_to_120 = 35;
-    inset_30_to_120_width = inset_width - inset_left_edge_to_30 - inset_right_edge_to_120;
-    inset_unit_pixel_value = inset_30_to_120_width/90;
+    inset_left_edge_to_30 = 72; % How many pixels from the left corner to the 30th x tick?
+    inset_right_edge_to_118 = 23;
+    inset_30_to_118_width = inset_width - inset_left_edge_to_30 - inset_right_edge_to_118;
+    inset_unit_pixel_value = inset_30_to_118_width/90;
     
     % Query
+    qval = triplets.query(iTriplet);
+    ref1val = triplets.ref1(iTriplet);
+    ref2val = triplets.ref2(iTriplet);
+
+    if flip_space
+        qval = triplets.query_flipped(iTriplet);
+        ref1val = triplets.ref1_flipped(iTriplet);
+        ref2val = triplets.ref2_flipped(iTriplet);
+    end
+    
     inset_query_x = inset_x_center - inset_width/2 + ...
         inset_left_edge_to_30 + ...
-        (triplets.query(iTriplet)-30)*inset_unit_pixel_value;
-    inset_query_y = inset_y_center-6;
+        (qval-30)*inset_unit_pixel_value;
+    inset_query_y = inset_y_center+25;
     
-    query_rect = CenterRectOnPoint([0 0 4 inset_height-80],inset_query_x,inset_query_y);
+    query_rect = CenterRectOnPoint([0 0 4 inset_height-120],inset_query_x,inset_query_y);
     Screen('FillRect', ptb_window, [1 0 0], query_rect);
     
     % ref1
     inset_ref1_x = inset_x_center - inset_width/2 + ...
         inset_left_edge_to_30 + ...
-        (triplets.ref1(iTriplet)-30)*inset_unit_pixel_value;
+        (ref1val-30)*inset_unit_pixel_value;
     
-    ref1_rect = CenterRectOnPoint([0 0 4 inset_height-80],inset_ref1_x,inset_query_y);
+    ref1_rect = CenterRectOnPoint([0 0 4 inset_height-120],inset_ref1_x,inset_query_y);
     Screen('FillRect', ptb_window, [0 0 0], ref1_rect);
     
     % ref2
     inset_ref2_x = inset_x_center - inset_width/2 + ...
         inset_left_edge_to_30 + ...
-        (triplets.ref2(iTriplet)-30)*inset_unit_pixel_value;
+        (ref2val-30)*inset_unit_pixel_value;
     
-    ref2_rect = CenterRectOnPoint([0 0 4 inset_height-80],inset_ref2_x,inset_query_y);
+    ref2_rect = CenterRectOnPoint([0 0 4 inset_height-120],inset_ref2_x,inset_query_y);
     Screen('FillRect', ptb_window, [0 0 0], ref2_rect);
     
     pause(0.05);

@@ -182,16 +182,31 @@ else:
     stim_exposure = section_2
 
 # %% Load the manually selected triplets
-chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_new_range4.xlsx')
+chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets.xlsx')
 
-skip_balancing_from_excel = True
+skip_balancing_from_excel = False
+plot_only_balancing = False
 
 if skip_balancing_from_excel:
     chosen_triplets_df = chosen_triplets_df.loc[
         chosen_triplets_df['simulation name'] != 'balancing',:
             ]
 
+if plot_only_balancing:
+    chosen_triplets_df = chosen_triplets_df.loc[
+        chosen_triplets_df['simulation name'] == 'balancing',:
+            ]
+
 stim_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()    
+
+# %% Flip the space
+flip_space = True
+
+if flip_space:
+    stim_triplets = (px_min+(px_max-px_min)/2)*2 - stim_triplets
+    section_1 = (px_min+(px_max-px_min)/2)*2 - section_1
+    section_2 = (px_min+(px_max-px_min)/2)*2 - section_2
+    stim_exposure = (px_min+(px_max-px_min)/2)*2 - stim_exposure
 
 # %% initialize model
 model = DensityModel(model_type, params, all_stim)
@@ -214,7 +229,7 @@ if plot_initial_density:
 
 # %% Supplement with X number of balancing triplets
 
-plot_each_step      = True
+plot_each_step      = False
 choose_any_exemplar = False
 
 n_balance = 10
@@ -328,6 +343,9 @@ if plot_average_density:
     
     # Plot materias
     materials = ['shallow','dense']
+    if flip_space:
+        materials = ['dense','shallow']
+        
     x_pos = np.arange(len(materials))
     
     mid_point = 78

@@ -30,7 +30,7 @@ saveImg      = 1;
 saveImgNames = 0;
 %% Load the appropriate subject and condition specific files
 
-saveFolder = 'try_1';
+saveFolder = 'try_4';
 
 % Make save folders
 saveLoc = fullfile(home,'docs','triplet_screenshots',saveFolder);
@@ -108,7 +108,7 @@ Screen('Flip',ptb_window);
 ShowCursor('Arrow');
 
 %% Read the excel file
-triplets = readtable(fullfile(home,'docs','choosing_triplets_new_range2.xlsx'));
+triplets = readtable(fullfile(home,'docs','choosing_triplets_new_range4.xlsx'));
 
 % Do not use if comment says "removed" or "replaced to balance out"
 

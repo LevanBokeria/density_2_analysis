@@ -9,6 +9,7 @@
 # Import other libraries
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
 from itertools import combinations
 import pandas as pd
 
@@ -159,7 +160,7 @@ expose_low_density = False
 
 # all possible stimuli (to set the density map, index stimuli, etc.)
 px_min = 30
-px_max = 120
+px_max = 118
 all_stim = np.arange(px_min, px_max+1, dtype=float)  # assumning stimuli start from 10-300 pixels
 
 # input stimuli (exposure phase)
@@ -181,7 +182,7 @@ else:
     stim_exposure = section_2
 
 # %% Load the manually selected triplets
-chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_new_range3.xlsx')
+chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_new_range4.xlsx')
 
 skip_balancing_from_excel = True
 
@@ -202,18 +203,18 @@ res = model.train(stim_triplets, test_upd_density=upd_dns)
 # %% plot results
 
 # Flags
-plot_initial_density = False
-plot_average_density = False
+plot_initial_density = True
+plot_average_density = True
 
 # Get y lims of the existing density space
-ylims = [np.min(model.density_map)-1,np.max(model.density_map)+2]
+ylims = [np.min(model.density_map)-1,np.max(model.density_map)+10]
 
 if plot_initial_density:
     plot_density_fn(model,stim_triplets,'Initial density space',ylims)
 
 # %% Supplement with X number of balancing triplets
 
-plot_each_step = False
+plot_each_step      = True
 choose_any_exemplar = False
 
 n_balance = 10
@@ -232,7 +233,12 @@ for iBal in range(n_balance):
             min_idx = np.argmin(model.density_map)
         else:        
             # Find the smallest value among the exemplars shown
-            min_val = np.min(model.density_map[np.concatenate((section_1,section_2))-px_min])
+            
+            allowed_exemplars = np.arange(px_min,px_max+1,step_sparse, dtype=int)
+            
+            min_val = np.min(model.density_map[allowed_exemplars-px_min])
+            
+            # min_val = np.min(model.density_map[np.concatenate((section_1,section_2))-px_min])
             min_idx = np.where(model.density_map == min_val)
         
         # Whats the exemplar index here?
@@ -303,46 +309,161 @@ model_after_bal = DensityModel(model_type, params, all_stim)
 res = model_after_bal.train(stim_seq, test_upd_density=upd_dns)
 
 # Plot
-plot_density_fn(model_after_bal,stim_seq,'Pre-exposure\n' + \
+lower_ylim = 20
+if n_exposure_rep == 0:
+    upper_ylim = 40
+    titlestr = 'Pre'
+else:
+    upper_ylim = 110
+    titlestr = 'Post'
+    
+plot_density_fn(model_after_bal,stim_seq,titlestr + '-exposure\n' + \
                 'Balancing trials: ' + str(n_balance) + '\n' + \
                     'Triplets repeated ' + \
                     str(n_triplet_rep) + 'x' + '\n' + 'Exposure repeated ' + \
-                        str(n_exposure_rep) + 'x',[26,105])
+                        str(n_exposure_rep) + 'x',[lower_ylim,upper_ylim])
 
 # %% Find the average difference between the dense and sparse areas
 if plot_average_density:
     
-    mid_point = 78
-    mid_point_idx = np.where(all_stim == mid_point)[0][0]
-    
-    sparse_sum  = model.density_map[range(0,mid_point_idx)].sum()
-    sparse_mean = model.density_map[range(0,mid_point_idx)].mean()
-    sparse_std  = model.density_map[range(0,mid_point_idx)].std()
-    dense_sum   = model.density_map[range(mid_point_idx,len(model.density_map))].sum()
-    dense_mean  = model.density_map[range(mid_point_idx,len(model.density_map))].mean()
-    dense_std   = model.density_map[range(mid_point_idx,len(model.density_map))].std()
-    
+    # Plot materias
     materials = ['shallow','dense']
     x_pos = np.arange(len(materials))
-    CTEs  = [sparse_mean,dense_mean]
-    error = [sparse_std,dense_std]
     
-    # Build the plot
-    fig, ax = plt.subplots()
-    ax.bar(x_pos, 
-            CTEs, 
-            yerr=error, 
+    mid_point = 78
+    mid_point_idx = np.where(all_stim == mid_point)[0][0]
+        
+    # %% Density at each possible exemplar
+    sparse_sum  = model_after_bal.density_map[range(0,mid_point_idx)].sum()
+    sparse_mean = model_after_bal.density_map[range(0,mid_point_idx)].mean()
+    sparse_std  = model_after_bal.density_map[range(0,mid_point_idx)].std()
+    dense_sum   = model_after_bal.density_map[range(mid_point_idx,len(model_after_bal.density_map))].sum()
+    dense_mean  = model_after_bal.density_map[range(mid_point_idx,len(model_after_bal.density_map))].mean()
+    dense_std   = model_after_bal.density_map[range(mid_point_idx,len(model_after_bal.density_map))].std()
+    
+    CTEs_each_possible  = [sparse_mean,dense_mean]
+    error_each_possible = [sparse_std,dense_std]
+    
+    
+    
+    # %% Density at allowed exemplars
+    sparse_allowed = np.unique(stim_seq)
+    sparse_allowed = np.delete(sparse_allowed,np.where(sparse_allowed >= px_min + (px_max-px_min)/2))
+    sparse_allowed_idx = sparse_allowed - px_min
+    sparse_allowed_idx = sparse_allowed_idx.astype(int)
+    
+    dense_allowed = np.unique(stim_seq)
+    dense_allowed = np.delete(dense_allowed,np.where(dense_allowed < px_min + (px_max-px_min)/2))    
+    dense_allowed_idx = dense_allowed - px_min
+    dense_allowed_idx = dense_allowed_idx.astype(int)
+    
+    sparse_sum  = model_after_bal.density_map[sparse_allowed_idx].sum()
+    sparse_mean = model_after_bal.density_map[sparse_allowed_idx].mean()
+    sparse_std  = model_after_bal.density_map[sparse_allowed_idx].std()
+    dense_sum   = model_after_bal.density_map[dense_allowed_idx].sum()
+    dense_mean  = model_after_bal.density_map[dense_allowed_idx].mean()
+    dense_std   = model_after_bal.density_map[dense_allowed_idx].std()
+    
+    CTEs_allowed  = [sparse_mean,dense_mean]
+    error_allowed = [sparse_std,dense_std]    
+    
+    # %% Get count of exemplars at each location
+    count_sparse = np.delete(stim_seq,np.where(stim_seq >= px_min + (px_max-px_min)/2)).astype(int)
+    count_sparse = np.bincount(count_sparse)[np.unique(count_sparse)]
+    
+    count_dense = np.delete(stim_seq,np.where(stim_seq < px_min + (px_max-px_min)/2)).astype(int)
+    count_dense = np.bincount(count_dense)[np.unique(count_dense)]    
+    
+    sparse_sum  = count_sparse.sum()
+    sparse_mean = count_sparse.mean()
+    sparse_std  = count_sparse.std()
+    dense_sum   = count_dense.sum()
+    dense_mean  = count_dense.mean()
+    dense_std   = count_dense.std()   
+    
+    CTEs_counts_mean  = [sparse_mean,dense_mean]
+    error_counts_mean = [sparse_std,dense_std] 
+    
+    CTEs_counts_sum  = [sparse_sum,dense_sum]    
+    
+    # %% Build the plot
+    # figure(figsize=(3, 6), dpi=80)
+    fig, axs = plt.subplots(4)
+    
+    fig.set_size_inches(5,10)
+    
+    materials = ['shallow','dense']
+    x_pos = np.array((1,2))    
+    
+    barwidth = 0.8
+    
+    if n_exposure_rep != 0:        
+        fig.suptitle('Post-exposure')
+    else:
+        fig.suptitle('Pre-exposure')
+        
+    axs[0].bar(x_pos, 
+            CTEs_each_possible, 
+            yerr=error_each_possible, 
             align='center', 
             alpha=0.5, 
             ecolor='black', 
-            capsize=10)
-    ax.set_ylabel('Density')
-    ax.set_xticks(x_pos)
-    ax.set_xticklabels(materials)
+            capsize=10,
+            width=barwidth)
+    axs[1].bar(x_pos, 
+            CTEs_allowed, 
+            yerr=error_allowed, 
+            align='center', 
+            alpha=0.5, 
+            ecolor='black', 
+            capsize=10,
+            width=barwidth)    
+    axs[2].bar(x_pos, 
+            CTEs_counts_mean, 
+            yerr=error_counts_mean, 
+            align='center', 
+            alpha=0.5, 
+            ecolor='black', 
+            capsize=10,
+            width=barwidth)    
+    axs[3].bar(x_pos, 
+            CTEs_counts_sum, 
+            align='center', 
+            alpha=0.5, 
+            ecolor='black', 
+            capsize=10,
+            width=barwidth)      
+    
+    # axs[0].set_ylim((20,40))
+    # axs[1].set_ylim((30,40))
+    # axs[2].set_ylim((10,25))
+    
+    axs[0].set_ylabel('Density')
+    axs[1].set_ylabel('Density')
+    axs[2].set_ylabel('Mean Count')
+    axs[3].set_ylabel('Total Count')    
+    axs[0].set_xticks(x_pos)
+    axs[0].set_xticklabels(materials)
+    axs[0].set_xticks([])
+    axs[1].set_xticks(x_pos)
+    axs[1].set_xticklabels(materials)    
+    axs[1].set_xticks([])
+    axs[2].set_xticks(x_pos)
+    axs[2].set_xticklabels(materials)        
+    axs[2].set_xticks([])
+    axs[3].set_xticks(x_pos)
+    axs[3].set_xticklabels(materials)            
     # ax.set_title('Average density + stdev. \n After exposure. With balancing. \n Mid-point=78')
     # ax.set_title('Exposure shown: ' + str(n_exposure_rep) + 'x')
-    ax.yaxis.grid(True)
-    plt.ylim((0,120))
+    axs[0].yaxis.grid(True)
+    axs[1].yaxis.grid(True)
+    axs[2].yaxis.grid(True)
+    axs[3].yaxis.grid(True)
+    
+    axs[0].set_title('Density at each possible exemplar',fontsize=8)
+    axs[1].set_title('Density at used exemplars',fontsize=8)
+    axs[2].set_title('Mean Count of exemplars',fontsize=8)
+    axs[3].set_title('Total Count of exemplars',fontsize=8)
 
 
 

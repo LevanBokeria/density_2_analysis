@@ -1,0 +1,11 @@
+prolific_id,rt,response,test_part,trial_type,trial_index,time_elapsed,internal_node_id
+selftest,71974.10000002384,{'Q0': ''},break,survey-text,0,71984,0.0-0.0
+selftest,75301.89999997616,{'Q0': ''},break,survey-text,0,75304,0.0-0.0
+selftest,39040.0,{'Q0': ''},break,survey-text,0,39045,0.0-0.0
+selftest,26654.899999976158,{'Q0': ''},break,survey-text,0,26658,0.0-0.0
+selftest,6137.899999976158,{'Q0': ''},break,survey-text,0,6141,0.0-0.0
+selftest,187209.19999992847,{'Q0': ''},break,survey-text,0,187212,0.0-0.0
+selftest,27997.399999976158,{'Q0': ''},break,survey-text,0,28000,0.0-0.0
+selftest,5625.600000023842,{'Q0': ''},break,survey-text,0,5629,0.0-0.0
+selftest,2179.899999976158,{'Q0': ''},break,survey-text,0,2183,0.0-0.0
+selftest,3248.5,{'Q0': ''},break,survey-text,0,3252,0.0-0.0

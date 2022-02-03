@@ -25,13 +25,13 @@ import json
 print(os.getcwd())
 
 # Set the working directory
-os.chdir(r'C:\Users\levan\GitHub\density_asymmetry_similarity')
+os.chdir(r'C:\Users\lb08\GitHub\density_2_analysis')
 
 saveData = True
 
 # %% Import the files
 
-file_name = 'batch1.txt'
+file_name = 'jatos_results_20220203162114.txt'
 
 f = open('./data/pilots/gui_downloads/' + file_name,'r')    
 

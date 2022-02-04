@@ -25,15 +25,27 @@ print(os.getcwd())
 # Set the working directory
 os.chdir(r'C:\Users\lb08\GitHub\density_2_analysis')
 
-save_tt_data = True
-save_debriefing = True
+save_tt_data      = True
+save_debriefing   = True
 save_instructions = True
-save_breaks = True
-save_exposure = True
+save_breaks       = True
+save_exposure     = True
+
+# A quick flag
+save_nothing = False
+
+if save_nothing:
+    save_tt_data      = False
+    save_debriefing   = False
+    save_instructions = False
+    save_breaks       = False
+    save_exposure     = False
+    
+    
 
 # %% Import the files
 
-file_list = ['jatos_prolific_id_selftest.txt']
+file_list = os.listdir('./data/pilots/gui_downloads/')
 
 # Create empty data frames to append to
 ind_tt  = []
@@ -98,11 +110,11 @@ for iF in file_list:
     
     pre_exp_output  = pd.DataFrame(data_decoded['outputData']['pre_exposure'])
     post_exp_output = pd.DataFrame(data_decoded['outputData']['post_exposure'])
-    exp      = pd.DataFrame(data_decoded['outputData']['exposure'])
+    exp             = pd.DataFrame(data_decoded['outputData']['exposure'])
     
     pre_exp_output  = pre_exp_output.drop(columns=['trial_type', 'internal_node_id'])
     post_exp_output = post_exp_output.drop(columns=['trial_type', 'internal_node_id'])
-    exp      = exp.drop(columns=['trial_type', 'internal_node_id'])
+    exp             = exp.drop(columns=['trial_type', 'internal_node_id'])
     
     # Get the input data into long format
     
@@ -140,7 +152,7 @@ for iF in file_list:
     
     tt = pd.concat([pre_exp_output,post_exp_output],ignore_index=True)
     
-    tt = tt.drop(columns=['correct','correct_response'])
+    # tt = tt.drop(columns=['correct','correct_response'])
     
     # Do the same for practice
     practice_input = list(
@@ -155,6 +167,8 @@ for iF in file_list:
     # Join the input and output
     practice_output = pd.DataFrame(data_decoded['outputData']['practice'])    
     practice = pd.concat([practice_input,practice_output],axis=1,join='outer')    
+    practice = practice.drop(columns=['trial_type', 'internal_node_id'])
+    
     
     tt = pd.concat([practice,tt],ignore_index=True)    
     

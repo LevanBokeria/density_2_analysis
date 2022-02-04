@@ -108,16 +108,21 @@ for iF in file_list:
     if 'prolific_ID' in data_decoded['inputData']:
         data_decoded['prolific_ID'] = data_decoded['inputData']['prolific_ID']        
     
+    # %% Pre and post exposure trials 
     pre_exp_output  = pd.DataFrame(data_decoded['outputData']['pre_exposure'])
     post_exp_output = pd.DataFrame(data_decoded['outputData']['post_exposure'])
+    practice_output = pd.DataFrame(data_decoded['outputData']['practice'])        
     exp             = pd.DataFrame(data_decoded['outputData']['exposure'])
     
+    # Drop some unnecessary columns
     pre_exp_output  = pre_exp_output.drop(columns=['trial_type', 'internal_node_id'])
     post_exp_output = post_exp_output.drop(columns=['trial_type', 'internal_node_id'])
+    practice_output = practice_output.drop(columns=['trial_type', 'internal_node_id'])    
     exp             = exp.drop(columns=['trial_type', 'internal_node_id'])
     
     # Get the input data into long format
     
+    # %% Pre exposure
     # Concatenate the input info into one data frame
     pre_exp_input = list(
         map(
@@ -125,19 +130,13 @@ for iF in file_list:
             )
         )
     pre_exp_input = pd.concat(pre_exp_input,ignore_index=True)
-    pre_exp_input = pre_exp_input.drop(columns=['correct_response'])
     
-    # Combine with output
-    # - sanity check, compare the correct responses
-    # conditions = [pre_exp_input['correct_response'].isnull() & \
-    #               pre_exp_output['correct_response'].isnull(),
-    #               pre_exp_input['correct_response'] == pre_exp_output['correct_response']]
-    # choices = [True,True]   
-    # comparison_column = np.select(conditions, choices, default=False)
-
+    # Rename the correct_response column so we can do a sanity check later
+    pre_exp_input = pre_exp_input.rename(columns={'correct_response': 'correct_response_input'})
+        
+    pre_exp = pd.concat([pre_exp_output,pre_exp_input],axis=1)
     
-    pre_exp_output = pd.concat([pre_exp_output,pre_exp_input],axis=1)
-    
+    # %% Post exposure trials 
     # Concatenate the input info into one data frame
     post_exp_input = list(
         map(
@@ -145,32 +144,47 @@ for iF in file_list:
             )
         )
     post_exp_input = pd.concat(post_exp_input,ignore_index=True)
-    post_exp_input = post_exp_input.drop(columns=['correct_response'])
+    
+    # Rename the correct_response column so we can do a sanity check later
+    post_exp_input = post_exp_input.rename(columns={'correct_response': 'correct_response_input'})    
     
     # Combine with output
-    post_exp_output = pd.concat([post_exp_output,post_exp_input],axis=1)
-    
-    tt = pd.concat([pre_exp_output,post_exp_output],ignore_index=True)
-    
-    # tt = tt.drop(columns=['correct','correct_response'])
-    
-    # Do the same for practice
+    post_exp = pd.concat([post_exp_output,post_exp_input],axis=1)
+
+    # %% Do the same for practice
     practice_input = list(
         map(
             pd.DataFrame,data_decoded['inputData']['triplet_practice_trials']
             )
         )
     practice_input = pd.concat(practice_input,ignore_index=True)
-    practice_input = practice_input.drop(columns=['correct_response'])
-    
+
+    # Rename the correct_response column so we can do a sanity check later
+    practice_input = practice_input.rename(columns={'correct_response': 'correct_response_input'})        
     
     # Join the input and output
-    practice_output = pd.DataFrame(data_decoded['outputData']['practice'])    
     practice = pd.concat([practice_input,practice_output],axis=1,join='outer')    
-    practice = practice.drop(columns=['trial_type', 'internal_node_id'])
     
-    
+    # %% Combine everything
+    tt = pd.concat([pre_exp,post_exp],ignore_index=True)    
     tt = pd.concat([practice,tt],ignore_index=True)    
+    
+    # Now, sanity check that input and output correct_responses match.
+    # If so, drop them
+    
+    # - sanity check, compare the correct responses
+    conditions = [tt['correct_response_input'].isnull() & \
+                  tt['correct_response'].isnull(),
+                  tt['correct_response_input'] == tt['correct_response']]
+    choices = [True,True]   
+    comparison_column = np.select(conditions, choices, default=False)    
+    
+    if not all(comparison_column):
+        raise Exception('Input and output "correct_response" values do not match! Sub ' + data_decoded['prolific_ID'])
+    else:
+        
+        # Drop the input column
+        tt = tt.drop(columns=['correct_response_input'])
     
     # %% Add extra columns to the triplet trials
     
@@ -242,14 +256,13 @@ for iF in file_list:
         '_' + tt['dist_abs_ref_lowdim_ref_highdim'].astype(str)    
         
     # Label each repetition of the unique triplet
-    tt['triplet_rep'] = tt.groupby(['trial_stage','triplet_unique_name']).cumcount()+1    
+    tt['triplet_unique_name_rep'] = tt.groupby(['trial_stage','triplet_unique_name']).cumcount()+1    
     
     # Label each repetition of the template_distances
-    tt['triplet_rep'] = tt.groupby(['trial_stage','triplet_unique_name']).cumcount()+1        
+    tt['template_distances_rep'] = tt.groupby(['trial_stage','template_distances']).cumcount()+1        
     
     # Label each repetition of the template_abs_dist
-    tt['template_distances_rep'] = tt.groupby(['trial_stage','template_distances']).cumcount()+1    
-    
+    tt['template_abs_distances_rep'] = tt.groupby(['trial_stage','template_abs_distances']).cumcount()+1    
     
     # %% How easy is the triplet?
     tt['triplet_easiness'] = abs(
@@ -276,7 +289,7 @@ for iF in file_list:
     # %% Which ref was chosen? ref_lowdim and ref_highdim
     
     # - identify which ref was chosen
-    tt['chosen_ref_value'] = np.where(
+    tt['chosen_ref_left_right'] = np.where(
         np.isnan(tt['rt']),float('nan'),
         np.where(
             tt['response'] == 'q',
@@ -286,10 +299,10 @@ for iF in file_list:
         )
     
     # - was the chosen one ref_lowdim or ref_highdim
-    tt['chosen_ref'] = np.where(
-        np.isnan(tt['chosen_ref_value']),float('nan'),
+    tt['chosen_ref_lowdim_highdim'] = np.where(
+        np.isnan(tt['chosen_ref_left_right']),float('nan'),
         np.where(    
-            tt['chosen_ref_value'] == tt['ref_lowdim'],
+            tt['chosen_ref_left_right'] == tt['ref_lowdim'],
             'ref_lowdim','ref_highdim'
             )
         )
@@ -342,10 +355,19 @@ for iF in file_list:
             )
         )     
     
+    # %% Add the counterbalancing condition as a column
+    tt.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])
+    exp.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])
 
     # %% Add the prolific ID as a column
     tt.insert(loc=0, column='prolific_id', value=data_decoded['prolific_ID'])
     exp.insert(loc=0, column='prolific_id', value=data_decoded['prolific_ID'])
+
+
+    # %% Some sanity checks on the tt data
+    
+
+
     
     
     # %% Exposure dataframe

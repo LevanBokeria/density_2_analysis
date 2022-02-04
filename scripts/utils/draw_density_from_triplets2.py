@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 from itertools import combinations
 import pandas as pd
+import random
+
+random.seed(10)
 
 # %% Density model 
 
@@ -184,7 +187,7 @@ else:
 # %% Load the manually selected triplets
 chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets.xlsx')
 
-skip_balancing_from_excel = False
+skip_balancing_from_excel = True
 plot_only_balancing = False
 
 if skip_balancing_from_excel:
@@ -200,7 +203,7 @@ if plot_only_balancing:
 stim_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()    
 
 # %% Flip the space
-flip_space = True
+flip_space = False
 
 if flip_space:
     stim_triplets = (px_min+(px_max-px_min)/2)*2 - stim_triplets
@@ -276,33 +279,67 @@ for iBal in range(n_balance):
 # %% Move around exemplars in the balanced triplet set, if triplets are "bad"
 triplets_good = False
 
-threshold_diff = 8
+# threshold_diff = 8
+
+# threshold_easy = 3*step_sparse
+threshold_hard = 2*step_sparse
+
+perc_hard_min = 50
+perc_hard_max = 60
+# perc_easy = 30
+
+n_hard_min = round(len(bal_triplets)*perc_hard_min/100)
+n_hard_max = round(len(bal_triplets)*perc_hard_max/100)
+# n_easy_wanted = round(len(bal_triplets)*perc_easy/100)
 
 i = 1
 
 while not triplets_good:
     print(i)
+    
     i+=1    
+    
     # Sort each row 
     bal_triplets = np.sort(bal_triplets, axis=1)
     
-    # Take a difference between col 1 and col 2
-    col_diff = abs(bal_triplets[:,0] - bal_triplets[:,1])
+    # Take a difference between the columns
+    col_diff  = abs(bal_triplets[:,0] - bal_triplets[:,1])
+    col_diff2 = abs(bal_triplets[:,1] - bal_triplets[:,2])
+    col_diff3 = abs(bal_triplets[:,0] - bal_triplets[:,2])
     
-    # If its less than threshold, shuffle.
-    if np.min(col_diff) < threshold_diff:
+    all_col_diffs = np.concatenate((col_diff,col_diff2,col_diff3))
+    
+    # How easy are each triplet?
+    diff_of_distances = abs(col_diff - col_diff2)
+    
+    # How many are below our threshold of difference of distances
+    # n_easy = sum(diff_of_distances >= threshold_easy)
+    n_hard = sum(diff_of_distances < threshold_hard)
+    
+    # If not satisfied, shuffle
+    if (n_hard > n_hard_max) | (n_hard < n_hard_min) | sum(all_col_diffs < step_sparse):
         
         # Randomly choose another row
-        row_idx = np.random.randint(0,n_balance)
-        col_idx = np.random.randint(0,3)
+        # row_idx = np.random.randint(0,n_balance)
+        # col_idx = np.random.randint(0,3)
         
-        # Swap the min value
+        # # Swap the min value
         
-        min_idx = np.argmin(col_diff)
+        # min_idx = np.argmin(col_diff)
         
-        bal_triplets[min_idx,0], bal_triplets[row_idx,col_idx] = \
-            bal_triplets[row_idx,col_idx], bal_triplets[min_idx,0], 
-            
+        # bal_triplets[min_idx,0], bal_triplets[row_idx,col_idx] = \
+        #     bal_triplets[row_idx,col_idx], bal_triplets[min_idx,0]
+        
+        # Shuffle the whole array
+        bal_triplets = bal_triplets.flatten()
+        
+        np.random.shuffle(bal_triplets)
+        
+        bal_triplets = bal_triplets.reshape(n_balance,3)
+        
+        print(bal_triplets)
+        print(n_hard)
+        
     else:
         triplets_good = True
 

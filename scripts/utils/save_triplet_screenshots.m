@@ -17,7 +17,7 @@ home = pwd;
 [~,name,~] = fileparts(home);
 
 if ~strcmp('density_2_analysis',name)
-    error('please change working directory to ./con_learn/unified_space/');
+    error('please change working directory to ./density_2_analysis/');
 end
 
 addpath(genpath(home));
@@ -29,10 +29,10 @@ debugMode = 1;
 saveImg      = 1;
 saveImgNames = 0;
 
-flip_space = 1;
+flip_space = 0;
 %% Load the appropriate subject and condition specific files
 
-saveFolder = 'try_5';
+saveFolder = 'try_7';
 
 if flip_space
     saveFolder = [saveFolder '_flipped'];

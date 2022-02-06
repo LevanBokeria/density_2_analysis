@@ -1,0 +1,137 @@
+---
+title: "pilot_analysis_exposure"
+output:
+  html_document:
+    number_sections: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r load-libraries}
+
+# Clean the environment and load libraries ############################
+
+rm(list=ls())
+
+pacman::p_load(pacman,
+               rio,
+               tidyverse,
+               rstatix,
+               DT,
+               kableExtra,
+               readr,
+               writexl,
+               jsonlite,
+               stringr,
+               gridExtra,
+               knitr,
+               magrittr,
+               Hmisc)
+
+```
+
+```{r load-transform-data}
+
+# Some global setup ###########################################################
+
+exp <- import('./results/pilots/preprocessed_data/exposure_task_long_form.csv')
+
+
+exp %<>% 
+        mutate(dist_abs_from_prev = as.factor(dist_abs_from_prev),
+               response = as.factor(response))
+```
+
+```{r n-same-diff-responses, fig.width=10}
+
+
+n_same_resp <- 
+        exp %>%
+        group_by(prolific_id,dist_abs_from_prev,response,.drop=FALSE) %>% 
+        summarise(n = n()) %>%
+        ungroup() %>%
+        filter(response == 'q')
+
+
+n_tot_resp <- 
+        exp %>%
+        group_by(prolific_id,dist_abs_from_prev) %>%
+        summarise(n = n()) %>%
+        ungroup()
+
+same_resp_table <- 
+        merge(n_same_resp,n_tot_resp,by=c('prolific_id','dist_abs_from_prev')) %>%
+        mutate(avg_same_resp = n.x*100/n.y) %>% 
+        ungroup()
+
+same_resp_table %>%
+        filter(!is.na(dist_abs_from_prev)) %>%
+        mutate(dist_abs_from_prev = as.numeric(as.character(dist_abs_from_prev))) %>%
+        ggplot(aes(x=dist_abs_from_prev,y=avg_same_resp)) +
+        geom_point(size=0.5) +
+        geom_line(size=0.5, aes(group=prolific_id,color=prolific_id)) +
+        # geom_point(size=2, aes(group = prolific_id,color = prolific_id)) + 
+        # geom_line(size=1, aes(group = prolific_id,color = prolific_id)) + 
+        geom_smooth() +
+        stat_summary(fun='mean',
+                     geom='line',
+                     size=1.5,
+                     color = 'blue',
+                     linetype = 'dashed') +
+        # geom_line(aes(x=dist_abs_from_prev,y=n.y),color='red') +
+        scale_y_continuous(breaks=seq(0,100,5)) +
+        scale_x_continuous(breaks=seq(0,280,5)) +
+        ylab('% "Same" response') +
+        xlab('Pixel distance from previous') + 
+        theme_classic() +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = '') +
+        geom_hline(yintercept = 100-75,linetype='dashed') +
+        geom_hline(yintercept = 100-50,linetype='dashed') +
+        stat_summary(aes(x=dist_abs_from_prev,y=n.y),
+                     fun='mean',
+                     geom='line',
+                     size=1) + 
+        ggtitle('Exposure psychometric curves, n=15')
+
+same_resp_table %>%
+  group_by(prolific_id,dist_abs_from_prev) %>%
+  summarise(n = n())
+
+
+```
+
+```{r accuracy-same-diff}
+
+exp %>%
+        filter(trial_index != 2) %>% 
+        mutate(correct = as.numeric(correct)) %>%
+        reorder_levels(correct_response,order = c('q','p')) %>% 
+        group_by(prolific_id,
+                 correct_response) %>%
+        get_summary_stats(correct,type='mean_sd') %>% 
+        ggplot(aes(x=correct_response,y=mean)) +
+        geom_violin(width=0.2) +
+        geom_point() +
+        geom_line(aes(group=prolific_id,
+                      color=prolific_id)) +
+        theme(legend.position = '') + 
+        ylab('Accuracy') + 
+        ggtitle('Accuracy by trial type: Same vs Diff')
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+

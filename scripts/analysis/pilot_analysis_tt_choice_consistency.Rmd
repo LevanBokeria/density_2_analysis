@@ -1,0 +1,235 @@
+---
+title: "TT Choice consistency"
+output:
+  html_document:
+    number_sections: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+This file analyzes the second batch of participants, after the mistake with the exposure exemplars was fixed.
+
+```{r load-libraries}
+
+# Clean the environment and load libraries ############################
+
+rm(list=ls())
+
+pacman::p_load(pacman,
+               rio,
+               tidyverse,
+               rstatix,
+               DT,
+               kableExtra,
+               readr,
+               writexl,
+               jsonlite,
+               stringr,
+               gridExtra,
+               knitr,
+               magrittr,
+               Hmisc,
+               psycho)
+
+```
+
+```{r load-transform-tt-data}
+qc_filter = T
+source('./scripts/utils/load_transform_tt_data.R')
+
+
+# load_transform_tt_data(qc_filter)
+
+```
+
+
+# Choice consistency
+
+## Choice consistency by density space
+
+This is the main question that we're interested in! 
+
+```{r chose-consistency-by-density, fig.height=7}
+
+# Calculate participant means first
+tt_long_post_pre_choice_sum %>%
+        group_by(cb_condition,
+                 prolific_id,
+                 triplet_location,
+                 choice_sum_cross_reps_var_type) %>%
+        # summarise(n = n(),
+        #           mean = mean(choice_sum_cross_reps_values),
+        #           sd = sd(choice_sum_cross_reps_values)) %>% View()
+        get_summary_stats(choice_sum_cross_reps_values,type='mean_sd') %>% 
+        ggplot(aes(x=choice_sum_cross_reps_var_type,
+                   y=mean)) +
+        geom_violin() +
+        geom_boxplot(width = 0.3,fatten=4) +
+        # geom_line(aes(group = prolific_id,color = prolific_id)) +
+        # facet_grid(template_distances~triplet_location) +
+        facet_wrap(~triplet_location) +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+        ylab('Choices summed across reps') + 
+        geom_jitter(shape = 21, fill = 'skyblue',width=0.2) + 
+        stat_summary(fun=mean, geom="point", shape=20, size=5, 
+                     color="red", fill="red") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",size=1,width=0.1,color='red') +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        coord_cartesian(ylim = c(-2,4)) +
+        ggtitle('Averaged within participants first') + 
+        xlab('')
+
+```
+```{r}
+
+tt_sum_stat_post_pre_choice_sum <- 
+        tt_long_post_pre_choice_sum %>%
+        group_by(cb_condition,
+                 prolific_id,
+                 template_distances,
+                 triplet_location,
+                 choice_sum_cross_reps_var_type) %>%
+        summarise(mean = mean(choice_sum_cross_reps_values, na.rm = T),
+                  sd   = sd(choice_sum_cross_reps_values, na.rm = T)) %>%
+        ungroup()
+
+```
+
+```{r consistency-by-template-triplet-location, fig.height=30, fig.width=6}
+tt_sum_stat_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff_choice_sum_cross_reps') %>%
+        ggplot(aes(x='',
+                   y=mean)) +
+        geom_violin() +
+        geom_boxplot(width = 0.2,fatten=5,outlier.shape = NA) +
+        geom_jitter(width=0.1,shape = 21, fill = 'skyblue') +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        facet_grid(template_distances~triplet_location) +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+        ylab('Pre - post') + 
+        xlab('') +
+        stat_summary(fun=mean, geom="point", shape=20, size=5, 
+                     color="red", fill="red") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",size=1,width=0.1,color='red')+ 
+        ggtitle('Choice consistency by template and trial stage') + 
+        xlab('')
+
+
+```
+
+## consistency and neck size?
+
+What effect does the neck size have? This is pooling across all the participants, in both counterbalancing conditions.
+
+
+I categorized neck length in the following way:
+
+- Short neck: 30-120px
+- Medium neck: 120-210px
+- Long neck: 210-300px
+
+``` {r neck-size-consistency}
+# Overall consistency by neck_lengths
+tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff_choice_sum_cross_reps') %>% 
+        group_by(cb_condition,
+                 prolific_id,
+                 neck_size) %>%
+        get_summary_stats(choice_sum_cross_reps_values,type='mean_sd') %>% 
+        ggplot(aes(x=neck_size,
+                   y=mean)) + 
+        geom_violin() +
+        geom_dotplot(binaxis='y',
+                     stackdir='centerwhole',
+                     stackratio=1, 
+                     dotsize=0.5, 
+                     fill="black") + 
+        # geom_line(aes(group=prolific_id,
+        #               color=prolific_id)) +
+        ylab('Post-pre variability') + 
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') + 
+        ggtitle('Overall consistency by neck size') + 
+        xlab('') + 
+        theme(legend.position = '') +
+        geom_hline(yintercept = 0, linetype = 'dashed')
+
+# Overall consistency by neck_lengths
+tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff_choice_sum_cross_reps') %>% 
+        group_by(cb_condition,
+                 prolific_id,
+                 neck_size) %>%
+        get_summary_stats(choice_sum_cross_reps_values,type='mean_sd') %>% 
+        ggplot(aes(x=neck_size,
+                   y=mean)) + 
+        geom_violin() +
+        geom_dotplot(binaxis='y',
+                     stackdir='centerwhole',
+                     stackratio=1, 
+                     dotsize=0.5, 
+                     fill="black") + 
+        # geom_line(aes(group=prolific_id,
+        #               color=prolific_id)) +
+        ylab('Post-pre Variability') + 
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') + 
+        ggtitle('Overall consistency by neck size AND CB condition') + 
+        xlab('') + 
+        theme(legend.position = '') +
+        facet_wrap(~cb_condition) +
+        geom_hline(yintercept = 0, linetype = 'dashed')
+
+
+```
+
+
+## Between participant comparison
+
+```{r between-participant-compare-same-triplet, fig.height=20, fig.width=15}
+
+tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff_choice_sum_cross_reps',
+               query_position == 'query_middle') %>%
+        ggplot(aes(x=cb_condition,y=choice_sum_cross_reps_values)) +
+        geom_boxplot() +
+        geom_jitter(width=0.1,alpha=0.2) + 
+        facet_wrap(~triplet_unique_name) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue')        
+
+
+
+```
+

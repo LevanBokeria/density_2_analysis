@@ -72,8 +72,6 @@ exp_long %<>%
 # Compare to null distributions of responses for "ideal observer"
 
 
-
-
 ```{r qc-check-button-sequence-ideal-observer-comparison}
 
 percentile_threshold <- 5
@@ -148,10 +146,18 @@ qc_table <- merge(qc_table,select(qc_table_rt,prolific_id,qc_fail_rt), by = 'pro
 ```
 
 
+```{r qc-table-report}
+
+qc_table
+
+```
+
+
 # Plot a panel per participant
 
+## Triplet task:
 
-```{r per-participant, fig.height=12, fig.width=13, warning=FALSE, message=FALSE}
+```{r per-participant, fig.height=8, fig.width=10, warning=FALSE, message=FALSE}
 
 for (iP in unique(tt_long$prolific_id)){
         print(iP)
@@ -219,6 +225,27 @@ for (iP in unique(tt_long$prolific_id)){
                 facet_grid(~trial_stage+session) + 
                 ggtitle('Triplet task: Patter of responses. P=1, Q=2, 0=Missed')
         
+        
+        grid.arrange(p1,p2,p3,p4,
+                     ncol=1,
+                     top=iP)  
+        
+}
+
+
+
+
+
+
+
+```
+
+## Exposure
+
+```{r per-participant, fig.height=5, fig.width=8:, warning=FALSE, message=FALSE}
+for (iP in unique(tt_long$prolific_id)){
+        print(iP)
+
         p5 <- 
                 exp_long %>%
                 filter(prolific_id == iP) %>%
@@ -238,94 +265,17 @@ for (iP in unique(tt_long$prolific_id)){
                 facet_grid(~session, labeller = label_both) + 
                 ggtitle('Same/Different task: responses') + 
                 theme(legend.position = '')
-
         
-        grid.arrange(p1,p2,p3,p4,p5,p6,
-                     ncol=1,
-                     top=iP)  
+        grid.arrange(p5,p6,
+             ncol=1,
+             top=iP) 
         
 }
 
-
-
-
-
-
+ 
 
 ```
 
-
-
-```{r tt-histograms, fig.width=20, fig.height=70, warning=FALSE, message=FALSE}
-# 
-# p1 <-
-#         tt_long %>%
-#         # filter(prolific_id == 'myself') %>%
-#         ggplot(aes(x=rt,fill=session)) +
-#         geom_histogram(color="#e9ecef", alpha=0.6, position = 'identity') + 
-#         facet_grid(prolific_id~trial_stage+session) + 
-#         geom_vline(xintercept = 1000,color='red',linetype='dashed') + 
-#         ggtitle('Triplet task: RT')
-# 
-# p2 <- 
-#         tt_long %>%
-#         # filter(prolific_id == 'myself') %>%
-#         ggplot(aes(x=response,fill=session)) +
-#         geom_histogram(color="#e9ecef", alpha=0.6, 
-#                        position = 'identity', stat = 'count') + 
-#         facet_grid(prolific_id~trial_stage+session) + 
-#         ggtitle('Triplet task: responses')
-# 
-# grid.arrange(p1,p2,nrow=1)
-
-
-
-```
-
-
-# Exposure task 
-
-
-## Histogram of responses ---------------------------------------------------
-
-```{r fig.width=10, fig.height=13}
-
-
-
-exp_long %>%
-        # filter(prolific_id == 'myself') %>%
-        ggplot(aes(x=rt,fill=session)) +
-        geom_histogram(color="#e9ecef", alpha=0.6, position = 'identity') +
-        facet_grid(prolific_id~session) +
-        geom_vline(xintercept = 500,color='red',linetype='dashed') +
-        ggtitle('Same/different task: RT')
-
-exp_long %>%
-        # filter(prolific_id == 'myself') %>%
-        ggplot(aes(x=response,fill=session)) +
-        geom_histogram(color="#e9ecef", alpha=0.6,
-                       position = 'identity', stat = 'count') +
-        facet_grid(prolific_id~session) +
-        ggtitle('Same/Different task: responses')
-
-```
-
-```{r, fig.height=13, fig.width=10}
-        
-# # Did they just keep hitting q or p?
-# 
-# tt_long %>%
-#         mutate(response_numeric = case_when(
-#                 response == 'p' ~ 1,
-#                 response == 'q' ~ 2,
-#                 TRUE ~ 0
-#         )) %>%
-#         ggplot(aes(x=trial_index,y=response_numeric)) +
-#         geom_line() + 
-#         facet_grid(prolific_id~trial_stage+session) + 
-#         ggtitle('Triplet task: Patter of responses')
-# 
-```
 
 
 ```{r}

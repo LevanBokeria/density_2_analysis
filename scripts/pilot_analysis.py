@@ -355,6 +355,29 @@ for iF in file_list:
             )
         )     
     
+    # %% Where is the triplet in the density space?
+    dense_boundary  = np.array((78,118))
+    sparse_boundary = np.array((30,78))
+    # - But depending on the density condition, swap these
+    if data_decoded['inputData']['cb_condition'] == 'dense_left':
+        
+        flip_val = (118-30)/2 + 30
+        
+        dense_boundary  = np.flip(2*flip_val - dense_boundary)
+        sparse_boundary = np.flip(2*flip_val - sparse_boundary)
+        
+    # Add info about where the triplet is in the psych space: dense, sparse or 
+    # across the regions.
+    tt['triplet_location'] = np.where(
+        (dense_boundary[0] < tt['query_item']) & (tt['query_item'] < dense_boundary[1]),
+        'dense_region',
+        np.where(
+        (sparse_boundary[0] < tt['query_item']) & (tt['query_item'] < sparse_boundary[1]),
+        'sparse_region',
+        'across_density_regions')
+                )
+        
+    
     # %% Add the counterbalancing condition as a column
     tt.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])
     exp.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])

@@ -203,7 +203,7 @@ if plot_only_balancing:
 stim_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()    
 
 # %% Flip the space
-flip_space = False
+flip_space = True
 
 if flip_space:
     stim_triplets = (px_min+(px_max-px_min)/2)*2 - stim_triplets

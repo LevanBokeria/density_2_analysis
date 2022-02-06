@@ -74,15 +74,28 @@ exp_long %<>%
 
 
 
-```{r ideal-observer-comparison}
+```{r qc-check-button-sequence-ideal-observer-comparison}
+
+percentile_threshold <- 5
+
 
 # Load the ideal observer table
 button_press_distr <- import('./results/qc_check_permutations/same_button_press_distributions.RData')
 
 
 # For each participant, count repetitions of certain length
-n_perm <- 100000
-all_lengths <- c(3)
+n_perm <- nrow(button_press_distr)
+all_lengths <- c(4,5,6,7,8,9,10)
+
+qc_table_button_seq <- tt_long %>%
+                filter(trial_stage != 'practice') %>%
+                select(prolific_id,response) %>%
+                mutate(response = as.character(response),
+                       response = replace_na(response,'_')) %>%
+                group_by(prolific_id) %>%
+                mutate(response_str = paste(response, collapse = '')) %>% 
+                select(prolific_id,response_str) %>% unique() %>%
+        ungroup()
 
 for (iL in all_lengths){
         
@@ -91,30 +104,46 @@ for (iL in all_lengths){
         p_rep <- strrep('p',iL)
         q_rep <- strrep('q',iL)
         
-        
-        a <- tt_long %>%
-                filter(trial_stage != 'practice') %>%
-                select(prolific_id,response) %>%
-                mutate(response = as.character(response),
-                       response = replace_na(response,'_')) %>%
+        qc_table_button_seq <- qc_table_button_seq %>%
                 group_by(prolific_id) %>%
-                mutate(response_str = paste(response, collapse = '')) %>% 
-                select(prolific_id,response_str) %>% unique() %>%
                 mutate(total_rep = nrow(str_locate_all(response_str,p_rep)[[1]]) + nrow(str_locate_all(response_str,q_rep)[[1]]),
                        n_perms_larger = sum(button_press_distr[as.character(iL)][[1]] >= total_rep),
-                       perc_perms = n_perms_larger*100/n_perm)
+                       perc_perms = n_perms_larger*100/n_perm) %>%
+                ungroup()
+        
+        # Now rename the column
+        names(qc_table_button_seq)[names(qc_table_button_seq) == "total_rep"]      <- paste0("total_rep_for_",iL)
+        names(qc_table_button_seq)[names(qc_table_button_seq) == "n_perms_larger"] <- paste0("n_perms_larger_for_",iL)
+        names(qc_table_button_seq)[names(qc_table_button_seq) == "perc_perms"]     <- paste0("perc_perms_for_",iL)
 
 }
 
-
-
-
-
-# FOr each ptp, report the percentile they're in
-
 # Classify as pass of fail
+qc_table_button_seq <- qc_table_button_seq %>% 
+        mutate(qc_fail_button_sequence = ifelse(rowSums(select(qc_table_button_seq,starts_with('perc')) < percentile_threshold) > 0,TRUE,FALSE))
+
+# Create a concise qc table
+qc_table <- qc_table_button_seq %>%
+        select(prolific_id,qc_fail_button_sequence)
+```
 
 
+```{r qc-check-rt}
+
+rt_threshold      <- 1000
+rt_perc_threshold <- 40
+
+qc_table_rt <- tt_long %>%
+        filter(trial_stage != 'practice') %>%
+        group_by(prolific_id) %>%
+        summarise(n_rt_less_than_threshold = sum(rt <= rt_threshold, na.rm = T),
+                  perc_rt_less_than_threshold = n_rt_less_than_threshold*100/n(),
+                  n = n()) %>%
+        mutate(qc_fail_rt = perc_rt_less_than_threshold >= rt_perc_threshold) %>%
+        ungroup()
+
+# Combine with the main qc table
+qc_table <- merge(qc_table,select(qc_table_rt,prolific_id,qc_fail_rt), by = 'prolific_id')
 
 ```
 

@@ -191,15 +191,15 @@ for iF in file_list:
     # Whats the query, ref_left, ref_right items? ref_left = ref left
     query_stim_df = tt['query_stimulus'].str.split('object9F0Level',expand=True)
     query_stim_df = query_stim_df[1].str.split('F1Level',expand=True)
-    tt['query_item'] = query_stim_df[0].astype(int)
+    tt['query_item'] = query_stim_df[0].astype(int) + 1
     
     ref_left_stim_df = tt['ref_left_stimulus'].str.split('object9F0Level',expand=True)
     ref_left_stim_df = ref_left_stim_df[1].str.split('F1Level',expand=True)
-    tt['ref_left'] = ref_left_stim_df[0].astype(int)    
+    tt['ref_left'] = ref_left_stim_df[0].astype(int) + 1 
 
     ref_right_stim_df = tt['ref_right_stimulus'].str.split('object9F0Level',expand=True)
     ref_right_stim_df = ref_right_stim_df[1].str.split('F1Level',expand=True)
-    tt['ref_right'] = ref_right_stim_df[0].astype(int)        
+    tt['ref_right'] = ref_right_stim_df[0].astype(int) + 1      
     
     # Distances:
     tt['dist_query_ref_left'] = tt['query_item'] - tt['ref_left']
@@ -377,7 +377,7 @@ for iF in file_list:
     # -- whats the raw px value for each stim?
     stim_df = exp['stimulus'].str.split('object9F0Level',expand=True)
     stim_df = stim_df[1].str.split('F1Level',expand=True)
-    exp['stim_val'] = stim_df[0].astype(int)    
+    exp['stim_val'] = stim_df[0].astype(int) + 1   
     
     # -- whats the distance from the previous one?
     exp['dist_from_prev']     = exp['stim_val'].diff()

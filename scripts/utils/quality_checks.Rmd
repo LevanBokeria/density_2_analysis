@@ -1,0 +1,297 @@
+---
+title: "quality_checks"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+rm(list=ls())
+
+pacman::p_load(pacman,
+               rio,
+               tidyverse,
+               rstatix,
+               DT,
+               kableExtra,
+               readr,
+               writexl,
+               jsonlite,
+               stringr,
+               gridExtra,
+               knitr,
+               magrittr)
+
+# Some global setup ###########################################################
+
+```
+
+```{r import-data}
+# Read the txt file
+
+tt_long <- import('./results/pilots/preprocessed_data/triplet_task_long_form.csv')
+
+tt_long %<>% 
+        mutate(across(c(triplet_easiness,
+                        prolific_id,
+                        counterbalancing,
+                        response,
+                        trial_stage,
+                        session,
+                        correct_response,
+                        query_stimulus,
+                        ref_left_stimulus,
+                        ref_right_stimulus,
+                        triplet_left_right_name,
+                        triplet_unique_name,
+                        template_distances,
+                        template_abs_distances,
+                        query_position,
+                        chosen_ref_left_right,
+                        chosen_ref_lowdim_highdim,
+                        correct_ref_lowdim_highdim,
+                        correct_ref_left_right),as.factor),
+               correct = as.numeric(correct)) %>%
+        reorder_levels(trial_stage,order=c('practice','pre_exposure','post_exposure')) %>% 
+        reorder_levels(response, order = c('q','p'))
+
+
+# Now load the exposure data
+exp_long <- import('./results/pilots/preprocessed_data/exposure_task_long_form.csv')
+
+exp_long %<>%
+        mutate(dist_abs_from_prev = as.factor(dist_abs_from_prev),
+               response = as.factor(response),
+               session = as.factor(session)) %>%
+        reorder_levels(response, order = c('q','p'))
+```
+
+# Plot a panel per participant
+
+
+```{r per-participant, fig.height=12, fig.width=13, warning=FALSE, message=FALSE}
+
+for (iP in unique(tt_long$prolific_id)){
+        print(iP)
+        
+        
+        p1 <-
+                tt_long %>%
+                filter(prolific_id == iP) %>% 
+                ggplot(aes(x=rt,fill=session)) +
+                geom_histogram(color="#e9ecef", alpha=0.6, position = 'identity') + 
+                facet_grid(~trial_stage+session) + 
+                geom_vline(xintercept = 1000,color='red',linetype='dashed') + 
+                ggtitle('Triplet task: RT') + 
+                theme(legend.position = '') + 
+                scale_x_continuous(limits = c(0,5000))
+
+        p2 <- 
+                tt_long %>%
+                filter(prolific_id == iP) %>%
+                ggplot(aes(x=response,fill=session)) +
+                geom_histogram(color="#e9ecef", alpha=0.6, 
+                               position = 'identity', stat = 'count') + 
+                facet_grid(~trial_stage+session) + 
+                ggtitle('Triplet task: responses')   + 
+                theme(legend.position = '')
+                
+        
+        p3 <- 
+                tt_long %>%
+                filter(prolific_id == iP) %>% 
+                mutate(response_numeric = case_when(
+                        response == 'p' ~ 1,
+                        response == 'q' ~ 2,
+                        TRUE ~ 0
+                )) %>%
+                ggplot(aes(x=trial_index,y=response_numeric)) +
+                geom_line() + 
+                facet_grid(~trial_stage+session) + 
+                ggtitle('Triplet task: Patter of responses. P=1, Q=2, 0=Missed')
+        
+        p4 <- 
+                exp_long %>%
+                filter(prolific_id == iP) %>%
+                ggplot(aes(x=rt,fill=session)) +
+                geom_histogram(color="#e9ecef", alpha=0.6, position = 'identity') + 
+                facet_grid(~session, labeller = label_both) + 
+                geom_vline(xintercept = 500,color='red',linetype='dashed') + 
+                ggtitle('Same/different task: RT') + 
+                theme(legend.position = '') + 
+                scale_x_continuous(limits = c(0,3000))
+
+        p5 <- exp_long %>%
+                filter(prolific_id == iP) %>%
+                ggplot(aes(x=response,fill=session)) +
+                geom_histogram(color="#e9ecef", alpha=0.6, 
+                               position = 'identity', stat = 'count') + 
+                facet_grid(~session, labeller = label_both) + 
+                ggtitle('Same/Different task: responses') + 
+                theme(legend.position = '')
+
+        
+        grid.arrange(p1,p2,p3,p4,p5,
+                     ncol=1,
+                     top=iP)  
+        
+}
+
+
+
+
+
+
+
+```
+
+
+
+```{r tt-histograms, fig.width=20, fig.height=70, warning=FALSE, message=FALSE}
+# 
+# p1 <-
+#         tt_long %>%
+#         # filter(prolific_id == 'myself') %>%
+#         ggplot(aes(x=rt,fill=session)) +
+#         geom_histogram(color="#e9ecef", alpha=0.6, position = 'identity') + 
+#         facet_grid(prolific_id~trial_stage+session) + 
+#         geom_vline(xintercept = 1000,color='red',linetype='dashed') + 
+#         ggtitle('Triplet task: RT')
+# 
+# p2 <- 
+#         tt_long %>%
+#         # filter(prolific_id == 'myself') %>%
+#         ggplot(aes(x=response,fill=session)) +
+#         geom_histogram(color="#e9ecef", alpha=0.6, 
+#                        position = 'identity', stat = 'count') + 
+#         facet_grid(prolific_id~trial_stage+session) + 
+#         ggtitle('Triplet task: responses')
+# 
+# grid.arrange(p1,p2,nrow=1)
+
+
+
+```
+
+
+# Exposure task 
+
+
+## Histogram of responses ---------------------------------------------------
+
+```{r fig.width=10, fig.height=13}
+
+
+
+exp_long %>%
+        # filter(prolific_id == 'myself') %>%
+        ggplot(aes(x=rt,fill=session)) +
+        geom_histogram(color="#e9ecef", alpha=0.6, position = 'identity') +
+        facet_grid(prolific_id~session) +
+        geom_vline(xintercept = 500,color='red',linetype='dashed') +
+        ggtitle('Same/different task: RT')
+
+exp_long %>%
+        # filter(prolific_id == 'myself') %>%
+        ggplot(aes(x=response,fill=session)) +
+        geom_histogram(color="#e9ecef", alpha=0.6,
+                       position = 'identity', stat = 'count') +
+        facet_grid(prolific_id~session) +
+        ggtitle('Same/Different task: responses')
+
+```
+
+```{r, fig.height=13, fig.width=10}
+        
+# # Did they just keep hitting q or p?
+# 
+# tt_long %>%
+#         mutate(response_numeric = case_when(
+#                 response == 'p' ~ 1,
+#                 response == 'q' ~ 2,
+#                 TRUE ~ 0
+#         )) %>%
+#         ggplot(aes(x=trial_index,y=response_numeric)) +
+#         geom_line() + 
+#         facet_grid(prolific_id~trial_stage+session) + 
+#         ggtitle('Triplet task: Patter of responses')
+# 
+```
+
+
+```{r}
+## Average accuracy ---------------------------------------------------
+tt_acc <-
+        tt_long %>%
+        filter(correct_response != '') %>%
+        select(prolific_id,correct,trial_stage)
+
+# Plot this
+tt_acc %>%
+        group_by(prolific_id,trial_stage) %>%
+        get_summary_stats(correct,type='mean_sd') %>%
+        ggplot(aes(x=trial_stage,y=mean)) +
+        geom_boxplot() +
+        geom_point() +
+        geom_line(aes(group=prolific_id,color=prolific_id)) +
+        ggtitle('Triplet task accuracy')
+
+exp_acc <-
+        exp_long %>%
+        filter(correct_response != '') %>%
+        filter(!(prolific_id == '5f8f5f747dd9131d4559cab4' & response == '')) %>%
+        select(prolific_id,correct) %>%
+        mutate(correct = as.numeric(correct))
+
+# Plot this
+exp_acc %>%
+        group_by(prolific_id) %>%
+        get_summary_stats(correct,type='mean_sd') %>%
+        ggplot(aes(x='identity',y=mean)) +
+        geom_boxplot(outlier.shape = '') +
+        geom_jitter(width=0.1,aes(color=prolific_id)) +
+        ggtitle('Exposure accuracy')
+
+```
+
+
+
+```{r, fig.height = 13, fig.width = 10}
+## Accuracy by triplet easiness ----------------------------------------------
+# tt_long %>%
+#         filter(correct_response != '') %>%
+#         reorder_levels(triplet_easiness,order = c("0","20","40","80","100","120","130","140","150","210")) %>%
+#         group_by(trial_stage,prolific_id,triplet_easiness) %>%
+#         get_summary_stats(correct,type='mean_sd') %>% 
+#         # mutate(triplet_easiness = as.numeric(
+#         #         as.character(triplet_easiness))
+#         #        ) %>%
+#         # 
+#         ggplot(aes(x=triplet_easiness,y=mean)) +
+#         geom_bar(stat='identity') +
+#         geom_dotplot(mapping = aes(x=triplet_easiness,y=correct),
+#                      data=filter(tt_long,correct_response != ''),
+#                      binaxis='y',
+#                      stackdir='centerwhole',
+#                      stackratio=1, dotsize=0.3, fill="black") + 
+#         facet_grid(prolific_id~trial_stage) + 
+#         ylab('Mean accuracy') + 
+#         ggtitle('Accuracy by triplet easiness')
+
+```
+
+```{r}
+## Overall accuracy for payment ----------------------------------------------
+# overall_acc <- rbind(select(tt_acc,prolific_id,correct),exp_acc)
+# 
+# overall_acc %>%
+#         mutate(correct = as.numeric(correct)) %>%
+#         group_by(prolific_id) %>%
+#         get_summary_stats(correct,type='mean_sd') %>% 
+#         mutate(payment = 2*mean) %>% select(prolific_id,payment) %>% View()
+#         write_csv('payment.csv')
+
+```

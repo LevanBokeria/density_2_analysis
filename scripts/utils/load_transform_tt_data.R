@@ -24,7 +24,7 @@ pacman::p_load(pacman,
 
 # Read the txt file ###########################################################
 
-tt_long <- import('./results/preprocessed_data/triplet_task_long_form.csv')
+tt_long <- import('./results/pilots/preprocessed_data/triplet_task_long_form.csv')
 
 
 # Start various transformations of columns######################################

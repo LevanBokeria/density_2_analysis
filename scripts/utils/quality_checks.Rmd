@@ -280,36 +280,36 @@ for (iP in unique(tt_long$prolific_id)){
 
 ```{r}
 ## Average accuracy ---------------------------------------------------
-tt_acc <-
-        tt_long %>%
-        filter(correct_response != '') %>%
-        select(prolific_id,correct,trial_stage)
-
-# Plot this
-tt_acc %>%
-        group_by(prolific_id,trial_stage) %>%
-        get_summary_stats(correct,type='mean_sd') %>%
-        ggplot(aes(x=trial_stage,y=mean)) +
-        geom_boxplot() +
-        geom_point() +
-        geom_line(aes(group=prolific_id,color=prolific_id)) +
-        ggtitle('Triplet task accuracy')
-
-exp_acc <-
-        exp_long %>%
-        filter(correct_response != '') %>%
-        filter(!(prolific_id == '5f8f5f747dd9131d4559cab4' & response == '')) %>%
-        select(prolific_id,correct) %>%
-        mutate(correct = as.numeric(correct))
-
-# Plot this
-exp_acc %>%
-        group_by(prolific_id) %>%
-        get_summary_stats(correct,type='mean_sd') %>%
-        ggplot(aes(x='identity',y=mean)) +
-        geom_boxplot(outlier.shape = '') +
-        geom_jitter(width=0.1,aes(color=prolific_id)) +
-        ggtitle('Exposure accuracy')
+# tt_acc <-
+#         tt_long %>%
+#         filter(correct_response != '') %>%
+#         select(prolific_id,correct,trial_stage)
+# 
+# # Plot this
+# tt_acc %>%
+#         group_by(prolific_id,trial_stage) %>%
+#         get_summary_stats(correct,type='mean_sd') %>%
+#         ggplot(aes(x=trial_stage,y=mean)) +
+#         geom_boxplot() +
+#         geom_point() +
+#         geom_line(aes(group=prolific_id,color=prolific_id)) +
+#         ggtitle('Triplet task accuracy')
+# 
+# exp_acc <-
+#         exp_long %>%
+#         filter(correct_response != '') %>%
+#         filter(!(prolific_id == '5f8f5f747dd9131d4559cab4' & response == '')) %>%
+#         select(prolific_id,correct) %>%
+#         mutate(correct = as.numeric(correct))
+# 
+# # Plot this
+# exp_acc %>%
+#         group_by(prolific_id) %>%
+#         get_summary_stats(correct,type='mean_sd') %>%
+#         ggplot(aes(x='identity',y=mean)) +
+#         geom_boxplot(outlier.shape = '') +
+#         geom_jitter(width=0.1,aes(color=prolific_id)) +
+#         ggtitle('Exposure accuracy')
 
 ```
 

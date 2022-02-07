@@ -45,8 +45,8 @@ tt_long %<>%
                         template_distances,
                         template_abs_distances,
                         query_position,
-                        chosen_ref,
-                        correct_ref_low_high,
+                        chosen_ref_value,
+                        correct_ref_lowdim_highdim,
                         correct_ref_left_right,
                         correct_ref_towards_dense_sparse,
                         triplet_location),as.factor)) %>%
@@ -54,7 +54,7 @@ tt_long %<>%
         reorder_levels(triplet_location,order=c('sparse_region',
                                                 'across_density_regions',
                                                 'dense_region')) %>%
-        reorder_levels(correct_ref_low_high,order = c('ref_low','ref_high'))
+        reorder_levels(correct_ref_lowdim_highdim,order = c('ref_low','ref_high'))
 
 
 # Do a QC filtering
@@ -110,7 +110,7 @@ tt_wide_reps <- tt_long %>%
                             'triplet_location',
                             'query_position',
                             'triplet_easiness',
-                            'correct_ref_low_high',
+                            'correct_ref_lowdim_highdim',
                             'correct_ref_towards_dense_sparse',
                             'neck_size'),
                 names_from = 'triplet_rep',
@@ -161,7 +161,7 @@ tt_wide_reps_wide_trial_stage <-
                                 triplet_location,
                                 query_position,
                                 triplet_easiness,
-                                correct_ref_low_high,
+                                correct_ref_lowdim_highdim,
                                 correct_ref_towards_dense_sparse,
                                 neck_size),
                     names_from = trial_stage,
@@ -202,7 +202,7 @@ tt_wide_trial_stage_chose_towards_sparse_and_correct <-
                                 template_abs_distances,
                                 triplet_easiness,triplet_location,
                                 query_position,triplet_rep,
-                                correct_ref_low_high,
+                                correct_ref_lowdim_highdim,
                                 correct_ref_towards_dense_sparse),
                     names_from = trial_stage,
                     values_from = c(chose_towards_sparse,correct),

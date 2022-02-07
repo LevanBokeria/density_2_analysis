@@ -376,11 +376,33 @@ for iF in file_list:
         'sparse_region',
         'across_density_regions')
                 )
-        
-    
+
     # %% Add the counterbalancing condition as a column
     tt.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])
-    exp.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])
+    exp.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])        
+    
+    # %% Classify the triplet as being slanted towards the dense or sparse part of the space
+    
+    tt['correct_ref_towards_dense_sparse'] = np.where(
+        tt['triplet_easiness']==0,float('nan'),
+        np.where(
+            (tt['correct_ref_lowdim_highdim'] == 'ref_lowdim') & (tt['counterbalancing'] == 'dense_right'),
+            'ref_towards_sparse',
+            np.where(
+                (tt['correct_ref_lowdim_highdim'] == 'ref_lowdim') & (tt['counterbalancing'] == 'dense_left'),
+                'ref_towards_dense',
+                np.where(
+                    (tt['correct_ref_lowdim_highdim'] == 'ref_highdim') & (tt['counterbalancing'] == 'dense_left'),
+                    'ref_towards_sparse',
+                    np.where(
+                        (tt['correct_ref_lowdim_highdim'] == 'ref_highdim') & (tt['counterbalancing'] == 'dense_right'),
+                        'ref_towards_dense',
+                        'error'
+                        )
+                    )
+                )
+            )
+        )
 
     # %% Add the prolific ID as a column
     tt.insert(loc=0, column='prolific_id', value=data_decoded['prolific_ID'])

@@ -34,7 +34,6 @@ tt_long %<>%
                         template_distances,
                         template_abs_distances,
                         query_position,
-                        chosen_ref_left_right,
                         chosen_ref_lowdim_highdim,
                         correct_ref_lowdim_highdim,
                         correct_ref_left_right),as.factor),

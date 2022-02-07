@@ -30,6 +30,8 @@ tt_long <- import('./results/pilots/preprocessed_data/triplet_task_long_form.csv
 # Start various transformations of columns######################################
 
 tt_long %<>% 
+        filter(trial_stage != 'practice') %>%
+        droplevels() %>%
         mutate(across(c(triplet_easiness,
                         prolific_id,
                         counterbalancing,
@@ -114,9 +116,10 @@ tt_wide_reps <- tt_long %>%
                 names_from = 'triplet_rep',
                 values_from = c(response,
                                 correct,
+                                correct_numeric,
                                 correct_response,
-                                chosen_ref,
                                 chosen_ref_value,
+                                chosen_ref_lowdim_highdim,
                                 chose_towards_sparse),
                 names_prefix = 'rep')
 
@@ -126,16 +129,16 @@ tt_wide_reps <- tt_wide_reps %>%
                 tt_wide_reps[,c('correct_rep1','correct_rep2')],na.rm=T
         ),
         change_across_rep = as.numeric(
-                chosen_ref_rep1 != chosen_ref_rep2),
+                chosen_ref_lowdim_highdim_rep1 != chosen_ref_lowdim_highdim_rep2),
         chosen_ref_rep1_numeric = case_when(
-                chosen_ref_rep1 == 'ref_lowdim' ~ 1,
-                chosen_ref_rep1 == 'ref_highdim' ~ 2,
-                chosen_ref_rep1 == 'nan' ~ 0
+                chosen_ref_lowdim_highdim_rep1 == 'ref_lowdim' ~ 1,
+                chosen_ref_lowdim_highdim_rep1 == 'ref_highdim' ~ 2,
+                chosen_ref_lowdim_highdim_rep1 == 'nan' ~ 0
         ),
         chosen_ref_rep2_numeric = case_when(
-                chosen_ref_rep2 == 'ref_lowdim' ~ 1,
-                chosen_ref_rep2 == 'ref_highdim' ~ 2,
-                chosen_ref_rep2 == 'nan' ~ 0
+                chosen_ref_lowdim_highdim_rep2 == 'ref_lowdim' ~ 1,
+                chosen_ref_lowdim_highdim_rep2 == 'ref_highdim' ~ 2,
+                chosen_ref_lowdim_highdim_rep2 == 'nan' ~ 0
         ),
         choice_sum_cross_reps = 
                 chosen_ref_rep1_numeric + 
@@ -194,12 +197,17 @@ tt_wide_trial_stage_chose_towards_sparse_and_correct <-
                                 query_item,
                                 curve_type,
                                 ref_lowdim,ref_highdim,
-                                dist_query_ref_lowdim,dist_query_ref_highdim,
-                                dist_abs_query_ref_lowdim,dist_abs_query_ref_highdim,
-                                triplet_unique_name,template_distances,
+                                dist_query_ref_lowdim,
+                                dist_query_ref_highdim,
+                                dist_abs_query_ref_lowdim,
+                                dist_abs_query_ref_highdim,
+                                triplet_unique_name,
+                                template_distances,
                                 template_abs_distances,
-                                triplet_easiness,triplet_location,
-                                query_position,triplet_rep,
+                                triplet_easiness,
+                                triplet_location,
+                                query_position,
+                                triplet_rep,
                                 correct_ref_lowdim_highdim,
                                 correct_ref_towards_dense_sparse),
                     names_from = trial_stage,

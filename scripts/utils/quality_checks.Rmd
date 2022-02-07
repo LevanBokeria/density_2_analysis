@@ -50,7 +50,6 @@ tt_long %<>%
                         template_distances,
                         template_abs_distances,
                         query_position,
-                        chosen_ref_left_right,
                         chosen_ref_lowdim_highdim,
                         correct_ref_lowdim_highdim,
                         correct_ref_left_right),as.factor),
@@ -342,6 +341,33 @@ tt_acc %>%
 
 ```
 
+```{r plot-accuracy-triplet-task-separate-priolific-id, fig.width=12, fig.height=3}
+
+tt_acc %>%
+        filter(trial_stage != 'practice') %>%
+        group_by(prolific_id,trial_stage) %>%
+        summarise(mean_acc = mean(correct,na.rm=F)) %>%
+        ggplot(aes(x=trial_stage,y=mean_acc)) +
+        geom_point() +
+        geom_line(aes(group=prolific_id,color=prolific_id)) +
+        facet_wrap(~prolific_id, nrow = 1) +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+        ggtitle('Triplet task accuracy')
+
+tt_acc %>%
+        filter(trial_stage != 'practice') %>%
+        group_by(prolific_id) %>%
+        summarise(mean_acc = mean(correct,na.rm=F)) %>%
+        ggplot(aes(x=prolific_id,y=mean_acc)) +
+        geom_bar(stat = "identity", show.legend = FALSE, alpha = 0.5) +
+        geom_point() +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+        coord_cartesian(ylim = c(0.5,1)) +
+        ggtitle('Triplet task accuracy')
+
+```
+
+
 ## Triplet task: by triplet easiness
 
 Red dots are mean accuracy. Black dots are individual trials, either correct or incorrect.
@@ -371,7 +397,31 @@ tt_long %>%
         ggtitle('Accuracy by triplet easiness')
 
 ```
+## Triplet task: only QC fail participants
 
+```{r plot-accuracy-triplet-task}
+
+# Qc fail participants
+qc_fail_ptp <- qc_table %>% 
+        filter(qc_fail_button_sequence == TRUE | qc_fail_rt == TRUE) %>% 
+        droplevels() %>%
+        select(prolific_id) %>% .[[1]]
+        
+
+## Average accuracy ---------------------------------------------------
+tt_long %>%
+        filter(correct_response != '',
+               prolific_id %in% qc_fail_ptp) %>%
+        select(prolific_id,correct,trial_stage) %>%
+        group_by(prolific_id,trial_stage) %>%
+        summarise(mean_acc = mean(correct,na.rm=F)) %>%
+        ggplot(aes(x=trial_stage,y=mean_acc)) +
+        geom_boxplot() +
+        geom_point() +
+        geom_line(aes(group=prolific_id,color=prolific_id)) +
+        ggtitle('Triplet task accuracy')
+
+```
 
 ## Exposure task:
 

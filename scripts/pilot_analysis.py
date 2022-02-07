@@ -289,7 +289,7 @@ for iF in file_list:
     # %% Which ref was chosen? ref_lowdim and ref_highdim
     
     # - identify which ref was chosen
-    tt['chosen_ref_left_right'] = np.where(
+    tt['chosen_ref_value'] = np.where(
         np.isnan(tt['rt']),float('nan'),
         np.where(
             tt['response'] == 'q',
@@ -300,9 +300,9 @@ for iF in file_list:
     
     # - was the chosen one ref_lowdim or ref_highdim
     tt['chosen_ref_lowdim_highdim'] = np.where(
-        np.isnan(tt['chosen_ref_left_right']),float('nan'),
+        np.isnan(tt['chosen_ref_value']),float('nan'),
         np.where(    
-            tt['chosen_ref_left_right'] == tt['ref_lowdim'],
+            tt['chosen_ref_value'] == tt['ref_lowdim'],
             'ref_lowdim','ref_highdim'
             )
         )

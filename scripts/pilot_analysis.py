@@ -256,7 +256,7 @@ for iF in file_list:
         '_' + tt['dist_abs_ref_lowdim_ref_highdim'].astype(str)    
         
     # Label each repetition of the unique triplet
-    tt['triplet_unique_name_rep'] = tt.groupby(['trial_stage','triplet_unique_name']).cumcount()+1    
+    tt['triplet_rep'] = tt.groupby(['trial_stage','triplet_unique_name']).cumcount()+1    
     
     # Label each repetition of the template_distances
     tt['template_distances_rep'] = tt.groupby(['trial_stage','template_distances']).cumcount()+1        

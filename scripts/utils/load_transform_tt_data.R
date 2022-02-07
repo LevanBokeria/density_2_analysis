@@ -45,7 +45,6 @@ tt_long %<>%
                         template_distances,
                         template_abs_distances,
                         query_position,
-                        chosen_ref_value,
                         correct_ref_lowdim_highdim,
                         correct_ref_left_right,
                         correct_ref_towards_dense_sparse,
@@ -54,40 +53,39 @@ tt_long %<>%
         reorder_levels(triplet_location,order=c('sparse_region',
                                                 'across_density_regions',
                                                 'dense_region')) %>%
-        reorder_levels(correct_ref_lowdim_highdim,order = c('ref_low','ref_high'))
+        reorder_levels(correct_ref_lowdim_highdim,order = c('ref_lowdim','ref_highdim'))
 
 
 # Do a QC filtering
-if (qc_filter){
-        tt_long <-
-                tt_long %>%
-                filter(qc_pass == 1) %>%
-                droplevels()
-}
+# if (qc_filter){
+#         tt_long <-
+#                 tt_long %>%
+#                 filter(qc_pass == 1) %>%
+#                 droplevels()
+# }
 
 # Create the "choice towards sparse" variable
 tt_long %<>%
         mutate(chose_towards_sparse = case_when(
-                cb_condition == 'dense_left' ~ as.numeric(
+                counterbalancing == 'dense_left' ~ as.numeric(
                         chosen_ref_value > query_item),
-                cb_condition == 'dense_right'~ as.numeric(
+                counterbalancing == 'dense_right'~ as.numeric(
                         chosen_ref_value < query_item)
-        )
+                )
         )
 
-# Discretize the space into long-neck medium-neck short-neck space
+# Discretize the space into concave vs convex
+boundary_val <- 70
+
 tt_long %<>%
-        mutate(neck_size = as.factor(
+        mutate(curve_type = as.factor(
                 case_when(
-                        query_item <= 120 & ref_left <= 120 & ref_right <= 120 ~ 'short-neck',
-                        query_item > 120 & query_item < 210 & 
-                                ref_left > 120 & ref_left < 210 &
-                                ref_right > 120 & ref_right < 210 ~ 'medium-neck',
-                        query_item >= 210 & ref_left >= 210 & ref_right >= 210 ~ 'long-neck',
-                        TRUE ~ 'across_neck_lengths'
+                        query_item <= boundary_val & ref_left <= boundary_val & ref_right <= boundary_val ~ 'concave',
+                        query_item >= boundary_val & ref_left >= boundary_val & ref_right >= boundary_val ~ 'convex',
+                        TRUE ~ 'across_convexity'
                 ))) %>%
-        reorder_levels(neck_size, order = c('short-neck','medium-neck',
-                                            'long-neck','across_neck_lengths'))
+        reorder_levels(curve_type, order = c('concave','convex',
+                                            'across_convexity'))
 
 # Various long-to-wide-to-long form transformations ##########################
 
@@ -97,13 +95,13 @@ tt_wide_reps <- tt_long %>%
         pivot_wider(
                 id_cols = c('prolific_id',
                             'trial_stage',
-                            'cb_condition',
+                            'counterbalancing',
                             'query_item',
-                            'ref_low',
-                            'ref_high',
-                            'dist_query_ref_low',
-                            'dist_query_ref_high',
-                            'dist_ref_low_ref_high',
+                            'ref_lowdim',
+                            'ref_highdim',
+                            'dist_query_ref_lowdim',
+                            'dist_query_ref_highdim',
+                            'dist_ref_lowdim_ref_highdim',
                             'triplet_unique_name',
                             'template_distances',
                             'template_abs_distances',
@@ -112,7 +110,7 @@ tt_wide_reps <- tt_long %>%
                             'triplet_easiness',
                             'correct_ref_lowdim_highdim',
                             'correct_ref_towards_dense_sparse',
-                            'neck_size'),
+                            'curve_type'),
                 names_from = 'triplet_rep',
                 values_from = c(response,
                                 correct,
@@ -130,13 +128,13 @@ tt_wide_reps <- tt_wide_reps %>%
         change_across_rep = as.numeric(
                 chosen_ref_rep1 != chosen_ref_rep2),
         chosen_ref_rep1_numeric = case_when(
-                chosen_ref_rep1 == 'ref_low' ~ 1,
-                chosen_ref_rep1 == 'ref_high' ~ 2,
+                chosen_ref_rep1 == 'ref_lowdim' ~ 1,
+                chosen_ref_rep1 == 'ref_highdim' ~ 2,
                 chosen_ref_rep1 == 'nan' ~ 0
         ),
         chosen_ref_rep2_numeric = case_when(
-                chosen_ref_rep2 == 'ref_low' ~ 1,
-                chosen_ref_rep2 == 'ref_high' ~ 2,
+                chosen_ref_rep2 == 'ref_lowdim' ~ 1,
+                chosen_ref_rep2 == 'ref_highdim' ~ 2,
                 chosen_ref_rep2 == 'nan' ~ 0
         ),
         choice_sum_cross_reps = 
@@ -148,13 +146,13 @@ tt_wide_reps <- tt_wide_reps %>%
 tt_wide_reps_wide_trial_stage <- 
         tt_wide_reps %>%
         pivot_wider(id_cols = c(prolific_id,
-                                cb_condition,
+                                counterbalancing,
                                 query_item,
-                                ref_low,
-                                ref_high,
-                                dist_query_ref_low,
-                                dist_query_ref_high,
-                                dist_ref_low_ref_high,
+                                ref_lowdim,
+                                ref_highdim,
+                                dist_query_ref_lowdim,
+                                dist_query_ref_highdim,
+                                dist_ref_lowdim_ref_highdim,
                                 triplet_unique_name,
                                 template_distances,
                                 template_abs_distances,
@@ -163,7 +161,7 @@ tt_wide_reps_wide_trial_stage <-
                                 triplet_easiness,
                                 correct_ref_lowdim_highdim,
                                 correct_ref_towards_dense_sparse,
-                                neck_size),
+                                curve_type),
                     names_from = trial_stage,
                     values_from = c(choice_sum_cross_reps,
                                     change_across_rep),
@@ -192,12 +190,12 @@ tt_long_post_pre_choice_sum <-
 tt_wide_trial_stage_chose_towards_sparse_and_correct <-
         tt_long %>%
         pivot_wider(id_cols = c(prolific_id,
-                                cb_condition,
+                                counterbalancing,
                                 query_item,
-                                neck_size,
-                                ref_low,ref_high,
-                                dist_query_ref_low,dist_query_ref_high,
-                                dist_abs_query_ref_low,dist_abs_query_ref_high,
+                                curve_type,
+                                ref_lowdim,ref_highdim,
+                                dist_query_ref_lowdim,dist_query_ref_highdim,
+                                dist_abs_query_ref_lowdim,dist_abs_query_ref_highdim,
                                 triplet_unique_name,template_distances,
                                 template_abs_distances,
                                 triplet_easiness,triplet_location,

@@ -27,6 +27,11 @@ pacman::p_load(pacman,
 
 # Some global setup ###########################################################
 
+# flags
+
+save_qc_table <- T
+
+
 ```
 
 ```{r import-data}
@@ -184,9 +189,22 @@ qc_table <- merge(qc_table,select(qc_table_rt,prolific_id,qc_fail_rt), by = 'pro
 
 ```{r qc-table-report}
 
+# Which failed?
+qc_table <- qc_table %>%
+        rowwise() %>%
+        mutate(qc_fail_overall = sum(qc_fail_button_sequence,qc_fail_rt) > 0)
+
 qc_table  %>%
         knitr::kable() %>%
         kable_styling(bootstrap_options = "striped")
+
+# Save qc_table
+if (save_qc_table){
+
+        export(qc_table,file = './results/pilots/preprocessed_data/qc_table.csv')
+
+
+}
 
 ```
 

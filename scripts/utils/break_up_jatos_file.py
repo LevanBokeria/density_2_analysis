@@ -35,7 +35,7 @@ pid_mapping = pd.read_excel('C:\\Users\\lb08\\Desktop\\density_pid_map.xlsx')
 
 # %% Import the files
 
-file_name = 'jatos_results_batch1.txt'
+file_name = 'jatos_results_batch2.txt'
 
 f = open('./data/pilots/gui_downloads/' + file_name,'r')    
 

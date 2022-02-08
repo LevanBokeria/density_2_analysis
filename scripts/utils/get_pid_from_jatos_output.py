@@ -32,7 +32,7 @@ saveData = True
 
 # %% Import the files
 
-file_name = 'jatos_results_batch2.txt'
+file_name = 'jatos_results_batch3.txt'
 
 f = open('./data/pilots/gui_downloads/' + file_name,'r')    
 

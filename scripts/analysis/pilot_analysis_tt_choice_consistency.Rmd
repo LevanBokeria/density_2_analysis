@@ -51,73 +51,259 @@ source('./scripts/utils/load_transform_tt_data.R')
 
 This is the main question that we're interested in! 
 
-```{r chose-consistency-by-density, fig.height=7}
+```{r choice-consistency-by-density, fig.height=5}
 
 # Calculate participant means first
 tt_long_post_pre_choice_sum %>%
-        group_by(counterbalancing,
-                 prolific_id,
+        group_by(prolific_id,
                  triplet_location,
                  choice_sum_cross_reps_var_type) %>%
-        # summarise(n = n(),
-        #           mean = mean(choice_sum_cross_reps_values),
-        #           sd = sd(choice_sum_cross_reps_values)) %>% View()
-        get_summary_stats(choice_sum_cross_reps_values,type='mean_sd') %>% 
+        summarise(n = n(),
+                  mean = mean(choice_sum_cross_reps_values),
+                  sd = sd(choice_sum_cross_reps_values)) %>%
         ggplot(aes(x=choice_sum_cross_reps_var_type,
                    y=mean)) +
         geom_violin() +
-        geom_boxplot(width = 0.2,fatten=4) +
-        # geom_line(aes(group = prolific_id,color = prolific_id)) +
-        # facet_grid(template_distances~triplet_location) +
+        geom_boxplot(width = 0.2,
+                     fatten=4,
+                     outlier.shape = '') +
+        geom_jitter(shape = 21, 
+                    fill = 'skyblue',
+                    width=0.2,
+                    height = 0) + 
+        stat_summary(fun=mean, 
+                     geom="point", 
+                     shape=20,
+                     size=5, 
+                     color="red", 
+                     fill="red") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='red') +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
         facet_wrap(~triplet_location) +
+        
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
         ylab('Choices summed across reps') + 
-        geom_jitter(shape = 21, fill = 'skyblue',width=0.2) + 
-        stat_summary(fun=mean, geom="point", shape=20, size=5, 
-                     color="red", fill="red") + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",size=1,width=0.1,color='red') +
-        geom_hline(yintercept = 0, linetype = 'dashed') +
         coord_cartesian(ylim = c(-2,4)) +
-        ggtitle('Averaged within participants first') + 
+        ggtitle('Choice Consistency Pre, Post and Post-Pre') + 
         xlab('')
 
 ```
 
-```{r}
+Plot only the difference values
 
-tt_sum_stat_post_pre_choice_sum <- 
-        tt_long_post_pre_choice_sum %>%
-        group_by(counterbalancing,
-                 prolific_id,
-                 template_distances,
+```{r choice-consistency-by-density-only-diff}
+
+# Calculate participant means first
+tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff') %>%
+        group_by(prolific_id,
                  triplet_location,
                  choice_sum_cross_reps_var_type) %>%
-        summarise(mean = mean(choice_sum_cross_reps_values, na.rm = T),
-                  sd   = sd(choice_sum_cross_reps_values, na.rm = T)) %>%
-        ungroup()
+        summarise(n = n(),
+                  mean = mean(choice_sum_cross_reps_values),
+                  sd = sd(choice_sum_cross_reps_values)) %>%
+        ggplot(aes(x=triplet_location,
+                   y=mean)) +
+        geom_violin() +
+        geom_boxplot(width = 0.2,
+                     fatten=4,
+                     outlier.shape = '') +
+        # geom_jitter(shape = 21, fill = 'skyblue',width=0.2) + 
+        geom_point() +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +
+        stat_summary(fun=mean, 
+                     geom="point", 
+                     shape=20,
+                     size=5, 
+                     color="red", 
+                     fill="red") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='red') +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+        ylab('Choices summed across reps') + 
+        ggtitle('Choice Consistency Post-Pre') + 
+        xlab('')
 
 ```
 
-```{r consistency-by-template-triplet-location, fig.height=30, fig.width=6}
-tt_sum_stat_post_pre_choice_sum %>%
-        filter(choice_sum_cross_reps_var_type == 'post_pre_diff_choice_sum_cross_reps') %>%
-        ggplot(aes(x='',
+
+Does this depend on counterbalancing?
+
+```{r choice-consistency-by-density-split-cb, fig.height=5, fig.width=10}
+
+tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff') %>%
+        group_by(counterbalancing,
+                 prolific_id,
+                 triplet_location,
+                 choice_sum_cross_reps_var_type) %>%
+        summarise(n = n(),
+                  mean = mean(choice_sum_cross_reps_values),
+                  sd = sd(choice_sum_cross_reps_values)) %>%
+        ggplot(aes(x=triplet_location,
                    y=mean)) +
         geom_violin() +
-        geom_boxplot(width = 0.2,fatten=5,outlier.shape = NA) +
-        geom_jitter(width=0.1,shape = 21, fill = 'skyblue') +
+        geom_boxplot(width = 0.2,
+                     fatten=4,
+                     outlier.shape = '') +
+        # geom_jitter(shape = 21, fill = 'skyblue',width=0.2) + 
+        geom_point() +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +
+        stat_summary(fun=mean, 
+                     geom="point", 
+                     shape=20,
+                     size=5, 
+                     color="red", 
+                     fill="red") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='red') +
         geom_hline(yintercept = 0, linetype = 'dashed') +
-        facet_grid(template_distances~triplet_location) +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+        ylab('Choices summed across reps') + 
+        ggtitle('Choice Consistency Post-Pre') + 
+        xlab('') +
+        facet_wrap(~counterbalancing)
+
+```
+
+```{r consistency-by-template-triplet-location, fig.height=10, fig.width=8}
+
+# Triplet easiness = 0
+
+fig1 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_easiness == 0) %>%
+        ggplot(aes(x=triplet_location,
+                   y=choice_sum_cross_reps_values)) +
+        geom_violin() +
+        geom_boxplot(width = 0.2,
+                     fatten=5,
+                     outlier.shape = NA) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    shape = 21,
+                    fill = 'skyblue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        facet_wrap(~template_distances) +
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+        theme(axis.text.x = element_blank()) +        
         ylab('Pre - post') + 
         xlab('') +
-        stat_summary(fun=mean, geom="point", shape=20, size=5, 
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
                      color="red", fill="red") + 
         stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",size=1,width=0.1,color='red')+ 
-        ggtitle('Choice consistency by template and trial stage') + 
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='red')+ 
+        ggtitle('Symmetric trials') + 
         xlab('')
+
+fig2 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_easiness == 8) %>%
+        ggplot(aes(x=triplet_location,
+                   y=choice_sum_cross_reps_values)) +
+        geom_violin() +
+        geom_boxplot(width = 0.2,
+                     fatten=5,
+                     outlier.shape = NA) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    shape = 21,
+                    fill = 'skyblue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        facet_wrap(~template_distances, nrow = 1) +
+        # theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+        theme(axis.text.x = element_blank()) +      
+        ylab('Pre - post') + 
+        xlab('') +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="red", fill="red") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='red')+ 
+        ggtitle('Triplet easiness = 8') + 
+        xlab('')
+
+fig3 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_easiness == 16) %>%
+        ggplot(aes(x=triplet_location,
+                   y=choice_sum_cross_reps_values)) +
+        geom_violin() +
+        geom_boxplot(width = 0.2,
+                     fatten=5,
+                     outlier.shape = NA) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    shape = 21,
+                    fill = 'skyblue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        facet_wrap(~template_distances, nrow = 1) +
+        # theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+        ylab('Pre - post') + 
+        xlab('') +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="red", fill="red") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='red')+ 
+        ggtitle('Triplet easiness = 16') + 
+        xlab('')
+        
+        grid.arrange(fig1,fig2,fig3,
+                     ncol = 1,
+                     top='Choice consistency')
+
+# 
+# tt_sum_stat_post_pre_choice_sum %>%
+#         filter(choice_sum_cross_reps_var_type == 'post_pre_diff_choice_sum_cross_reps') %>%
+#         ggplot(aes(x='',
+#                    y=mean)) +
+#         geom_violin() +
+#         geom_boxplot(width = 0.2,fatten=5,outlier.shape = NA) +
+#         geom_jitter(width=0.1,shape = 21, fill = 'skyblue') +
+#         geom_hline(yintercept = 0, linetype = 'dashed') +
+#         facet_grid(template_distances~triplet_location) +
+#         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+#         ylab('Pre - post') + 
+#         xlab('') +
+#         stat_summary(fun=mean, geom="point", shape=20, size=5, 
+#                      color="red", fill="red") + 
+#         stat_summary(fun.data = mean_cl_normal,
+#                      geom = "errorbar",size=1,width=0.1,color='red')+ 
+#         ggtitle('Choice consistency by template and trial stage') + 
+#         xlab('')
 
 
 ```
@@ -127,29 +313,32 @@ tt_sum_stat_post_pre_choice_sum %>%
 What effect does convexity have? This is pooling across all the participants, in both counterbalancing conditions.
 
 
-I categorized neck length in the following way:
+I categorized curvature in the following way:
 
 - Convex: 30-70
 - Concave: 70-118
 
-``` {r neck-size-consistency}
-# Overall consistency by neck_lengths
+``` {r curvature-consistency}
+
+# Overall consistency by curvature
 tt_long_post_pre_choice_sum %>%
-        filter(choice_sum_cross_reps_var_type == 'post_pre_diff_choice_sum_cross_reps') %>% 
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff') %>% 
         group_by(counterbalancing,
                  prolific_id,
                  curve_type) %>%
-        get_summary_stats(choice_sum_cross_reps_values,type='mean_sd') %>% 
+        summarise(mean = mean(choice_sum_cross_reps_values),
+                  n = n()) %>%
         ggplot(aes(x=curve_type,
                    y=mean)) + 
         geom_violin() +
         geom_dotplot(binaxis='y',
-                     stackdir='centerwhole',
-                     stackratio=1, 
-                     dotsize=0.5, 
-                     fill="black") + 
-        # geom_line(aes(group=prolific_id,
-        #               color=prolific_id)) +
+                     stackdir='center',
+                     stackratio=1,
+                     dotsize=0.5,
+                     fill="black") +
+        # geom_point() + 
+        geom_line(aes(group=prolific_id,
+                      color=prolific_id)) +
         ylab('Post-pre variability') + 
         stat_summary(fun=mean, 
                      geom="point",
@@ -162,18 +351,19 @@ tt_long_post_pre_choice_sum %>%
                      size=1,
                      width=0.1,
                      color='blue') + 
-        ggtitle('Overall consistency by neck size') + 
+        ggtitle('Overall consistency by curvature') + 
         xlab('') + 
         theme(legend.position = '') +
         geom_hline(yintercept = 0, linetype = 'dashed')
 
-# Overall consistency by neck_lengths
+# Overall consistency by curvature
 tt_long_post_pre_choice_sum %>%
-        filter(choice_sum_cross_reps_var_type == 'post_pre_diff_choice_sum_cross_reps') %>% 
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff') %>% 
         group_by(counterbalancing,
                  prolific_id,
                  curve_type) %>%
-        get_summary_stats(choice_sum_cross_reps_values,type='mean_sd') %>% 
+        summarise(mean = mean(choice_sum_cross_reps_values),
+                  n = n()) %>%
         ggplot(aes(x=curve_type,
                    y=mean)) + 
         geom_violin() +
@@ -182,8 +372,8 @@ tt_long_post_pre_choice_sum %>%
                      stackratio=1, 
                      dotsize=0.5, 
                      fill="black") + 
-        # geom_line(aes(group=prolific_id,
-        #               color=prolific_id)) +
+        geom_line(aes(group=prolific_id,
+                      color=prolific_id)) +
         ylab('Post-pre Variability') + 
         stat_summary(fun=mean, 
                      geom="point",
@@ -196,7 +386,7 @@ tt_long_post_pre_choice_sum %>%
                      size=1,
                      width=0.1,
                      color='blue') + 
-        ggtitle('Overall consistency by neck size AND CB condition') + 
+        ggtitle('Overall consistency by curvature AND CB condition') + 
         xlab('') + 
         theme(legend.position = '') +
         facet_wrap(~counterbalancing) +
@@ -208,15 +398,25 @@ tt_long_post_pre_choice_sum %>%
 
 ## Between participant comparison
 
-```{r between-participant-compare-same-triplet, fig.height=20, fig.width=15}
+```{r between-participant-compare-same-triplet1}
 
-tt_long_post_pre_choice_sum %>%
-        filter(choice_sum_cross_reps_var_type == 'post_pre_diff_choice_sum_cross_reps',
-               query_position == 'query_middle') %>%
-        ggplot(aes(x=counterbalancing,y=choice_sum_cross_reps_values)) +
-        geom_boxplot() +
-        geom_jitter(width=0.1,alpha=0.2) + 
+easiness <- 0
+
+fig1 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_location != 'across_density_regions',
+               curve_type == 'concave',
+               triplet_easiness == easiness) %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
         facet_wrap(~triplet_unique_name) +
+        # facet_grid(~triplet_uniqu) +
         stat_summary(fun=mean, 
                      geom="point",
                      shape=20, 
@@ -227,9 +427,340 @@ tt_long_post_pre_choice_sum %>%
                      geom = "errorbar",
                      size=1,
                      width=0.1,
-                     color='blue')        
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle('Consistency: Concave, symmetric triplets')
+
+print(fig1)
+
+fig2 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_location != 'across_density_regions',
+               curve_type == 'convex',
+               triplet_easiness == easiness) %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
+        facet_wrap(~triplet_unique_name) +
+        # facet_grid(~triplet_uniqu) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle('Consistency: Convex, symmetric triplets')
+
+print(fig2)
+
+fig3 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_location != 'across_density_regions',
+               curve_type == 'convex',
+               triplet_easiness == easiness) %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
+        facet_wrap(~template_distances) +
+        # facet_grid(~triplet_uniqu) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle('Consistency: Convex, symmetric templates')
+
+print(fig3)
+
+fig4 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_location != 'across_density_regions',
+               curve_type == 'concave',
+               triplet_easiness == easiness) %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
+        facet_wrap(~template_distances) +
+        # facet_grid(~triplet_uniqu) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle('Consistency: Concave, symmetric templates')
+
+print(fig4)
+
+fig5 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_easiness == easiness) %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
+        facet_wrap(~template_distances) +
+        # facet_grid(~triplet_uniqu) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle('Consistency: Whole space, symmetric templates')
+
+print(fig5)
+
+```
+
+```{r between-participant-compare-same-triplet2}
+
+easiness <- 16
+
+fig1 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_location != 'across_density_regions',
+               curve_type == 'concave',
+               triplet_easiness == easiness) %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
+        facet_wrap(~triplet_unique_name) +
+        # facet_grid(~triplet_uniqu) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle(paste0('Consistency: Concave, triplet easiness = ',easiness))
+
+print(fig1)
+
+fig2 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_location != 'across_density_regions',
+               curve_type == 'convex',
+               triplet_easiness == easiness) %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
+        facet_wrap(~triplet_unique_name) +
+        # facet_grid(~triplet_uniqu) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle(paste0('Consistency: convex, triplet easiness = ',easiness))
+
+print(fig2)
+
+fig3 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_location != 'across_density_regions',
+               curve_type == 'convex',
+               triplet_easiness == easiness) %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
+        facet_wrap(~template_distances) +
+        # facet_grid(~triplet_uniqu) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle(paste0('Consistency: convex, triplet easiness = ',easiness))
+
+print(fig3)
+
+fig4 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_location != 'across_density_regions',
+               curve_type == 'concave',
+               triplet_easiness == easiness) %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
+        facet_wrap(~template_distances) +
+        # facet_grid(~triplet_uniqu) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle(paste0('Consistency: concave, triplet easiness = ',easiness))
+
+print(fig4)
+
+fig5 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_easiness == easiness) %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
+        facet_wrap(~template_distances) +
+        # facet_grid(~triplet_uniqu) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle(paste0('Consistency: whole space, triplet easiness = ',easiness))
+
+print(fig5)
+
+```
 
 
+```{r between-participant-compare-same-triplet3}
+
+easiness <- 8
+
+fig1 <- tt_long_post_pre_choice_sum %>%
+        filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
+               triplet_easiness == easiness,
+               triplet_location == 'across_density_regions') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=choice_sum_cross_reps_values)) +
+        geom_boxplot(outlier.shape = '',
+                     width = 0.3,
+                     fatten = 4) +
+        geom_jitter(width=0.1,
+                    height = 0,
+                    alpha=0.3) + 
+        # facet_wrap(~template_distances) +
+        # facet_grid(~triplet_uniqu) +
+        stat_summary(fun=mean, 
+                     geom="point",
+                     shape=20, 
+                     size=5, 
+                     color="blue",
+                     fill="blue") + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='blue') +
+        geom_hline(yintercept = 0,
+                   linetype = 'dashed') +
+        ggtitle(paste0('Consistency: across-density-location, triplet easiness = ',easiness))
+
+print(fig1)
 
 ```
 

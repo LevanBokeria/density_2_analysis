@@ -4,6 +4,12 @@
 # transform all the variables any way necessary.
 # Also, create various long form and wide form versions of the data
 
+# If qc_filter variable doesnt exist, create it
+if (!exists('qc_filter')){
+        rm(list=ls())
+        qc_filter <- F
+               
+}
 
 # Load the libraries ###########################################################
 pacman::p_load(pacman,
@@ -25,6 +31,7 @@ pacman::p_load(pacman,
 # Read the txt file ###########################################################
 
 tt_long <- import('./results/pilots/preprocessed_data/triplet_task_long_form.csv')
+
 
 
 # Start various transformations of columns######################################
@@ -190,12 +197,13 @@ tt_long_post_pre_choice_sum <-
                               post_exposure_choice_sum_cross_reps,
                               post_pre_diff_choice_sum_cross_reps),
                      names_to = 'choice_sum_cross_reps_var_type',
-                     values_to = 'choice_sum_cross_reps_values') %>%
+                     values_to = 'choice_sum_cross_reps_values',
+                     names_pattern = "(.*)_choice_sum_cross_reps") %>%
         mutate(choice_sum_cross_reps_var_type = as.factor(choice_sum_cross_reps_var_type)) %>%
         reorder_levels(choice_sum_cross_reps_var_type, order = c(
-                'pre_exposure_choice_sum_cross_reps',
-                'post_exposure_choice_sum_cross_reps',
-                'post_pre_diff_choice_sum_cross_reps'))
+                'pre_exposure',
+                'post_exposure',
+                'post_pre_diff'))
 
 # Plot the difference value, somehow... go wide then back to long
 tt_wide_trial_stage_chose_towards_sparse_and_correct <-

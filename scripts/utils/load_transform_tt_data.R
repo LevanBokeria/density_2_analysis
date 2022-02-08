@@ -59,12 +59,20 @@ tt_long %<>%
 
 
 # Do a QC filtering
-# if (qc_filter){
-#         tt_long <-
-#                 tt_long %>%
-#                 filter(qc_pass == 1) %>%
-#                 droplevels()
-# }
+if (qc_filter){
+        
+        # Load the qc table
+        qc_table <- import('./results/pilots/preprocessed_data/qc_table.csv')
+        
+        qc_fail_ptps <- qc_table %>% 
+                filter(qc_fail_overall) %>% 
+                select(prolific_id) %>% .[[1]]
+        
+        tt_long <-
+                tt_long %>%
+                filter(!prolific_id %in% qc_fail_ptps) %>%
+                droplevels()
+}
 
 # Create the "choice towards sparse" variable
 tt_long %<>%

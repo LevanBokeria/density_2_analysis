@@ -184,9 +184,10 @@ tt_wide_reps_wide_trial_stage <-
                     values_from = c(choice_sum_cross_reps,
                                     change_across_rep),
                     names_glue = "{trial_stage}_{.value}") %>%
-        mutate(post_pre_diff_choice_sum_cross_reps = 
-                       post_exposure_choice_sum_cross_reps - 
-                       pre_exposure_choice_sum_cross_reps)
+        mutate(post_pre_diff_choice_sum_cross_reps = abs(
+                post_exposure_choice_sum_cross_reps - 
+                pre_exposure_choice_sum_cross_reps)
+               )
 
 # Create a long-form df, where pre/post/pre-post difference is one column, and the 
 # dependent variable is the choice_sum_cross_reps. 

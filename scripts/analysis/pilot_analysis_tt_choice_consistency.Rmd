@@ -9,8 +9,6 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-This file analyzes the second batch of participants, after the mistake with the exposure exemplars was fixed.
-
 ```{r load-libraries}
 
 # Clean the environment and load libraries ############################
@@ -36,7 +34,9 @@ pacman::p_load(pacman,
 ```
 
 ```{r load-transform-tt-data}
-qc_filter = F
+
+qc_filter = T
+
 source('./scripts/utils/load_transform_tt_data.R')
 
 
@@ -49,7 +49,7 @@ source('./scripts/utils/load_transform_tt_data.R')
 
 ## Choice consistency by density space
 
-This is the main question that we're interested in! 
+This is the main question that we're interested in! If choices do not change pre-post, then other dependent variables won't change either.
 
 ```{r choice-consistency-by-density, fig.height=5}
 
@@ -93,7 +93,11 @@ tt_long_post_pre_choice_sum %>%
 
 ```
 
-Plot only the difference values
+Plot only the difference values:
+
+We see that when averaging everything, all counterbalancing conditions and all template types, there is potentially an effect. The triplets that are in the middle of the space, i.e. cut across the density boundary.
+
+A negative value on the Y axis means that post-exposure they chose the high-dimension stimuli more often than pre-exposure. But why would both counterbalancing groups choose 
 
 ```{r choice-consistency-by-density-only-diff}
 
@@ -136,7 +140,7 @@ tt_long_post_pre_choice_sum %>%
 ```
 
 
-Does this depend on counterbalancing?
+Does this depend on counterbalancing? Seems like it does!
 
 ```{r choice-consistency-by-density-split-cb, fig.height=5, fig.width=10}
 
@@ -564,7 +568,7 @@ print(fig5)
 
 ```{r between-participant-compare-same-triplet2}
 
-easiness <- 16
+easiness <- 8
 
 fig1 <- tt_long_post_pre_choice_sum %>%
         filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
@@ -733,17 +737,18 @@ easiness <- 8
 
 fig1 <- tt_long_post_pre_choice_sum %>%
         filter(choice_sum_cross_reps_var_type == 'post_pre_diff',
-               triplet_easiness == easiness,
+               # triplet_easiness == easiness,
                triplet_location == 'across_density_regions') %>%
         ggplot(aes(x=counterbalancing,
                    y=choice_sum_cross_reps_values)) +
+        geom_violin() +
         geom_boxplot(outlier.shape = '',
-                     width = 0.3,
+                     width = 0.25,
                      fatten = 4) +
         geom_jitter(width=0.1,
                     height = 0,
                     alpha=0.3) + 
-        # facet_wrap(~template_distances) +
+        facet_wrap(~triplet_easiness) +
         # facet_grid(~triplet_uniqu) +
         stat_summary(fun=mean, 
                      geom="point",

@@ -57,7 +57,13 @@ tt_long %<>%
                         correct_ref_lowdim_highdim,
                         correct_ref_left_right,
                         correct_ref_towards_dense_sparse,
-                        triplet_location),as.factor)) %>%
+                        triplet_location),as.factor),
+               chosen_ref_numeric = case_when(
+                       chosen_ref_lowdim_highdim == 'ref_highdim' ~ 2,
+                       chosen_ref_lowdim_highdim == 'ref_highdim' ~ 1,
+                       TRUE ~ 0
+                       )
+               ) %>%
         reorder_levels(trial_stage,order=c('pre_exposure','post_exposure')) %>%
         reorder_levels(triplet_location,order=c('sparse_region',
                                                 'across_density_regions',
@@ -81,15 +87,15 @@ if (qc_filter){
                 droplevels()
 }
 
-# Create the "choice towards sparse" variable
+# Create the "choice towards sparse" and "chose_towards_highdim" variables
 tt_long %<>%
         mutate(chose_towards_sparse = case_when(
                 counterbalancing == 'dense_left' ~ as.numeric(
                         chosen_ref_value > query_item),
                 counterbalancing == 'dense_right'~ as.numeric(
-                        chosen_ref_value < query_item)
-                )
-        )
+                        chosen_ref_value < query_item)),
+                chose_towards_highdim = as.numeric(chosen_ref_value > query_item)
+               )
 
 # Discretize the space into concave vs convex
 boundary_val <- 70
@@ -97,8 +103,10 @@ boundary_val <- 70
 tt_long %<>%
         mutate(curve_type = as.factor(
                 case_when(
-                        query_item <= boundary_val & ref_left <= boundary_val & ref_right <= boundary_val ~ 'concave',
-                        query_item >= boundary_val & ref_left >= boundary_val & ref_right >= boundary_val ~ 'convex',
+                        query_item <= boundary_val & ref_left <= boundary_val & 
+                                ref_right <= boundary_val ~ 'concave',
+                        query_item >= boundary_val & ref_left >= boundary_val & 
+                                ref_right >= boundary_val ~ 'convex',
                         TRUE ~ 'across_convexity'
                 ))) %>%
         reorder_levels(curve_type, order = c('concave','convex',
@@ -135,30 +143,28 @@ tt_wide_reps <- tt_long %>%
                                 correct_response,
                                 chosen_ref_value,
                                 chosen_ref_lowdim_highdim,
-                                chose_towards_sparse),
+                                chosen_ref_numeric,
+                                chose_towards_sparse,
+                                chose_towards_highdim),
                 names_prefix = 'rep')
 
 # Add new columns:
 tt_wide_reps <- tt_wide_reps %>%
         mutate(avg_correct_cross_reps = rowMeans(
                 tt_wide_reps[,c('correct_rep1','correct_rep2')],na.rm=T
-        ),
-        change_across_rep = as.numeric(
-                chosen_ref_lowdim_highdim_rep1 != chosen_ref_lowdim_highdim_rep2),
-        chosen_ref_rep1_numeric = case_when(
-                chosen_ref_lowdim_highdim_rep1 == 'ref_lowdim' ~ 1,
-                chosen_ref_lowdim_highdim_rep1 == 'ref_highdim' ~ 2,
-                chosen_ref_lowdim_highdim_rep1 == 'nan' ~ 0
-        ),
-        chosen_ref_rep2_numeric = case_when(
-                chosen_ref_lowdim_highdim_rep2 == 'ref_lowdim' ~ 1,
-                chosen_ref_lowdim_highdim_rep2 == 'ref_highdim' ~ 2,
-                chosen_ref_lowdim_highdim_rep2 == 'nan' ~ 0
-        ),
-        choice_sum_cross_reps = 
-                chosen_ref_rep1_numeric + 
-                chosen_ref_rep2_numeric
-        ) %>%
+                ),
+               avg_chose_towards_sparse_cross_reps = rowMeans(
+                       tt_wide_reps[,c('chose_towards_sparse_rep1','chose_towards_sparse_rep2')],na.rm=T
+               ),
+               avg_chose_towards_highdim_cross_reps = rowMeans(
+                       tt_wide_reps[,c('chose_towards_highdim_rep1','chose_towards_highdim_rep2')],na.rm=T
+               ),               
+               change_across_rep = as.numeric(
+                       chosen_ref_lowdim_highdim_rep1 != chosen_ref_lowdim_highdim_rep2),
+               choice_sum_cross_reps = 
+                       chosen_ref_numeric_rep1 + 
+                       chosen_ref_numeric_rep2
+               ) %>%
         reorder_levels(trial_stage,order=c('pre_exposure','post_exposure'))
 
 tt_wide_reps_wide_trial_stage <- 
@@ -182,7 +188,10 @@ tt_wide_reps_wide_trial_stage <-
                                 curve_type),
                     names_from = trial_stage,
                     values_from = c(choice_sum_cross_reps,
-                                    change_across_rep),
+                                    change_across_rep,
+                                    avg_correct_cross_reps,
+                                    avg_chose_towards_sparse_cross_reps,
+                                    avg_chose_towards_highdim_cross_reps),
                     names_glue = "{trial_stage}_{.value}") %>%
         mutate(post_pre_diff_choice_sum_cross_reps = abs(
                 post_exposure_choice_sum_cross_reps - 
@@ -228,13 +237,32 @@ tt_wide_trial_stage_chose_towards_sparse_and_correct <-
                                 correct_ref_lowdim_highdim,
                                 correct_ref_towards_dense_sparse),
                     names_from = trial_stage,
-                    values_from = c(chose_towards_sparse,correct),
-                    names_glue = "{trial_stage}_{.value}") %>%
-        mutate(post_pre_diff_chose_towards_sparse = 
-                       post_exposure_chose_towards_sparse - 
-                       pre_exposure_chose_towards_sparse,
-               post_pre_diff_correct = 
-                       post_exposure_correct - pre_exposure_correct)
+                    values_from = c(chose_towards_sparse,chose_towards_highdim,correct),
+                    names_glue = "{trial_stage}__{.value}") %>%
+        mutate(post_pre_diff__chose_towards_sparse = 
+                       post_exposure__chose_towards_sparse - 
+                       pre_exposure__chose_towards_sparse,
+               post_pre_diff__chose_towards_highdim = 
+                       post_exposure__chose_towards_highdim - 
+                       pre_exposure__chose_towards_highdim,
+               post_pre_diff__correct = 
+                       post_exposure__correct - pre_exposure__correct)
+
+a <-
+        tt_wide_trial_stage_chose_towards_sparse_and_correct %>%
+        pivot_longer(cols = c(pre_exposure__chose_towards_sparse,
+                              post_exposure__chose_towards_sparse,
+                              post_pre_diff__chose_towards_sparse,
+                              post_pre_diff__chose_towards_highdim,
+                              post_exposure__chose_towards_highdim,
+                              pre_exposure__chose_towards_highdim,
+                              post_pre_diff__correct,
+                              post_exposure__correct,
+                              pre_exposure__correct),
+                     names_to = c('set','.value'),
+                     names_pattern = '(.+)__(.+)')
+
+
 
 tt_long_post_pre_chose_towards_sparse <- 
         tt_wide_trial_stage_chose_towards_sparse_and_correct %>%

@@ -109,8 +109,9 @@ tt_long %<>%
                                 ref_right >= boundary_val ~ 'convex',
                         TRUE ~ 'across_convexity'
                 ))) %>%
-        reorder_levels(curve_type, order = c('concave','convex',
-                                            'across_convexity'))
+        reorder_levels(curve_type, order = c('concave',
+                                             'across_convexity',
+                                             'convex'))
 
 # Various long-to-wide-to-long form transformations ##########################
 
@@ -118,24 +119,24 @@ tt_long %<>%
 # Transform to wide for the repetitions
 tt_wide_reps <- tt_long %>%
         pivot_wider(
-                id_cols = c('prolific_id',
-                            'trial_stage',
-                            'counterbalancing',
-                            'query_item',
-                            'ref_lowdim',
-                            'ref_highdim',
-                            'dist_query_ref_lowdim',
-                            'dist_query_ref_highdim',
-                            'dist_ref_lowdim_ref_highdim',
-                            'triplet_unique_name',
-                            'template_distances',
-                            'template_abs_distances',
-                            'triplet_location',
-                            'query_position',
-                            'triplet_easiness',
-                            'correct_ref_lowdim_highdim',
-                            'correct_ref_towards_dense_sparse',
-                            'curve_type'),
+                id_cols = c(prolific_id,
+                            trial_stage,
+                            counterbalancing,
+                            query_item,
+                            ref_lowdim,
+                            ref_highdim,
+                            dist_query_ref_lowdim,
+                            dist_query_ref_highdim,
+                            dist_ref_lowdim_ref_highdim,
+                            triplet_unique_name,
+                            template_distances,
+                            template_abs_distances,
+                            triplet_location,
+                            query_position,
+                            triplet_easiness,
+                            correct_ref_lowdim_highdim,
+                            correct_ref_towards_dense_sparse,
+                            curve_type),
                 names_from = 'triplet_rep',
                 values_from = c(response,
                                 correct,
@@ -148,20 +149,20 @@ tt_wide_reps <- tt_long %>%
                                 chose_towards_highdim),
                 names_prefix = 'rep')
 
-# Add new columns:
+# Add new columns of variables that average across the two repetitions:
 tt_wide_reps <- tt_wide_reps %>%
-        mutate(avg_correct_cross_reps = rowMeans(
+        mutate(correct_avg_across_reps = rowMeans(
                 tt_wide_reps[,c('correct_rep1','correct_rep2')],na.rm=T
                 ),
-               avg_chose_towards_sparse_cross_reps = rowMeans(
+               chose_towards_sparse_avg_across_reps = rowMeans(
                        tt_wide_reps[,c('chose_towards_sparse_rep1','chose_towards_sparse_rep2')],na.rm=T
                ),
-               avg_chose_towards_highdim_cross_reps = rowMeans(
+               chose_towards_highdim_avg_across_reps = rowMeans(
                        tt_wide_reps[,c('chose_towards_highdim_rep1','chose_towards_highdim_rep2')],na.rm=T
                ),               
                change_across_rep = as.numeric(
                        chosen_ref_lowdim_highdim_rep1 != chosen_ref_lowdim_highdim_rep2),
-               choice_sum_cross_reps = 
+               choice_numeric_sum_across_reps = 
                        chosen_ref_numeric_rep1 + 
                        chosen_ref_numeric_rep2
                ) %>%
@@ -187,114 +188,142 @@ tt_wide_reps_wide_trial_stage <-
                                 correct_ref_towards_dense_sparse,
                                 curve_type),
                     names_from = trial_stage,
-                    values_from = c(choice_sum_cross_reps,
+                    values_from = c(choice_numeric_sum_across_reps,
                                     change_across_rep,
-                                    avg_correct_cross_reps,
-                                    avg_chose_towards_sparse_cross_reps,
-                                    avg_chose_towards_highdim_cross_reps),
-                    names_glue = "{trial_stage}_{.value}") %>%
-        mutate(post_pre_diff_choice_sum_cross_reps = abs(
-                post_exposure_choice_sum_cross_reps - 
-                pre_exposure_choice_sum_cross_reps)
+                                    correct_avg_across_reps,
+                                    chose_towards_sparse_avg_across_reps,
+                                    chose_towards_highdim_avg_across_reps),
+                    names_glue = "{trial_stage}__{.value}") %>%
+        mutate(post_pre_diff__choice_numeric_sum_across_reps = abs(
+                post_exposure__choice_numeric_sum_across_reps - 
+                pre_exposure__choice_numeric_sum_across_reps),
+               post_pre_diff__correct_avg_across_reps = 
+                       post_exposure__correct_avg_across_reps - 
+                       pre_exposure__correct_avg_across_reps,
+               post_pre_diff__chose_towards_sparse_avg_across_reps = 
+                       post_exposure__chose_towards_sparse_avg_across_reps - 
+                       pre_exposure__chose_towards_sparse_avg_across_reps,
+               post_pre_diff__chose_towards_highdim_avg_across_reps = 
+                       post_exposure__chose_towards_highdim_avg_across_reps - 
+                       pre_exposure__chose_towards_highdim_avg_across_reps,               
                )
 
-# Create a long-form df, where pre/post/pre-post difference is one column, and the 
-# dependent variable is the choice_sum_cross_reps. 
+tt_long_post_pre_and_diff <- tt_wide_reps_wide_trial_stage %>%
+        pivot_longer(cols = c(pre_exposure__chose_towards_sparse_avg_across_reps,
+                      post_exposure__chose_towards_sparse_avg_across_reps,
+                      post_pre_diff__chose_towards_sparse_avg_across_reps,
+                      
+                      post_exposure__chose_towards_highdim_avg_across_reps,
+                      pre_exposure__chose_towards_highdim_avg_across_reps,
+                      post_pre_diff__chose_towards_highdim_avg_across_reps,                      
+                      
+                      post_exposure__correct_avg_across_reps,
+                      pre_exposure__correct_avg_across_reps,
+                      post_pre_diff__correct_avg_across_reps,
+                      
+                      post_exposure__choice_numeric_sum_across_reps,
+                      pre_exposure__choice_numeric_sum_across_reps,
+                      post_pre_diff__choice_numeric_sum_across_reps),
+             names_to = c('dep_var_type','.value'),
+             names_pattern = '(.+)__(.+)')
+
+
+# Create a long-form df, where pre/post/pre-post difference is one column, and all the dependent variables are in their columns
 # Used for efficient plotting later
-tt_long_post_pre_choice_sum <- 
-        tt_wide_reps_wide_trial_stage %>%
-        pivot_longer(cols = c(pre_exposure_choice_sum_cross_reps,
-                              post_exposure_choice_sum_cross_reps,
-                              post_pre_diff_choice_sum_cross_reps),
-                     names_to = 'choice_sum_cross_reps_var_type',
-                     values_to = 'choice_sum_cross_reps_values',
-                     names_pattern = "(.*)_choice_sum_cross_reps") %>%
-        mutate(choice_sum_cross_reps_var_type = as.factor(choice_sum_cross_reps_var_type)) %>%
-        reorder_levels(choice_sum_cross_reps_var_type, order = c(
-                'pre_exposure',
-                'post_exposure',
-                'post_pre_diff'))
-
-# Plot the difference value, somehow... go wide then back to long
-tt_wide_trial_stage_chose_towards_sparse_and_correct <-
-        tt_long %>%
-        pivot_wider(id_cols = c(prolific_id,
-                                counterbalancing,
-                                query_item,
-                                curve_type,
-                                ref_lowdim,ref_highdim,
-                                dist_query_ref_lowdim,
-                                dist_query_ref_highdim,
-                                dist_abs_query_ref_lowdim,
-                                dist_abs_query_ref_highdim,
-                                triplet_unique_name,
-                                template_distances,
-                                template_abs_distances,
-                                triplet_easiness,
-                                triplet_location,
-                                query_position,
-                                triplet_rep,
-                                correct_ref_lowdim_highdim,
-                                correct_ref_towards_dense_sparse),
-                    names_from = trial_stage,
-                    values_from = c(chose_towards_sparse,chose_towards_highdim,correct),
-                    names_glue = "{trial_stage}__{.value}") %>%
-        mutate(post_pre_diff__chose_towards_sparse = 
-                       post_exposure__chose_towards_sparse - 
-                       pre_exposure__chose_towards_sparse,
-               post_pre_diff__chose_towards_highdim = 
-                       post_exposure__chose_towards_highdim - 
-                       pre_exposure__chose_towards_highdim,
-               post_pre_diff__correct = 
-                       post_exposure__correct - pre_exposure__correct)
-
-a <-
-        tt_wide_trial_stage_chose_towards_sparse_and_correct %>%
-        pivot_longer(cols = c(pre_exposure__chose_towards_sparse,
-                              post_exposure__chose_towards_sparse,
-                              post_pre_diff__chose_towards_sparse,
-                              post_pre_diff__chose_towards_highdim,
-                              post_exposure__chose_towards_highdim,
-                              pre_exposure__chose_towards_highdim,
-                              post_pre_diff__correct,
-                              post_exposure__correct,
-                              pre_exposure__correct),
-                     names_to = c('set','.value'),
-                     names_pattern = '(.+)__(.+)')
-
-
-
-tt_long_post_pre_chose_towards_sparse <- 
-        tt_wide_trial_stage_chose_towards_sparse_and_correct %>%
-        pivot_longer(cols = c(pre_exposure_chose_towards_sparse,
-                              post_exposure_chose_towards_sparse,
-                              post_pre_diff_chose_towards_sparse),
-                     names_to = 'trial_stage',
-                     values_to = 'chose_towards_sparse') %>%
-        mutate(trial_stage = substr(
-                trial_stage,
-                1,
-                nchar(trial_stage)-nchar('_chose_towards_sparse'))) %>%
-        reorder_levels(trial_stage,order=c('pre_exposure',
-                                           'post_exposure',
-                                           'post_pre_diff'))
-
-## Accuracy long wide form ----------------------------------------------------
-# Go long pre post pre-post-diff
-tt_long_post_pre_correct <- 
-        tt_wide_trial_stage_chose_towards_sparse_and_correct %>%
-        pivot_longer(cols = c(pre_exposure_correct,
-                              post_exposure_correct,
-                              post_pre_diff_correct),
-                     names_to = 'trial_stage',
-                     values_to = 'correct')
-
-# Add columns
-tt_long_post_pre_correct <- tt_long_post_pre_correct %>%
-        mutate(trial_stage = substr(
-                trial_stage,
-                1,
-                nchar(trial_stage)-nchar('_correct'))) %>%
-        reorder_levels(trial_stage,order=c('pre_exposure',
-                                           'post_exposure',
-                                           'post_pre_diff'))
+# tt_long_post_pre_and_diff <- 
+#         tt_wide_reps_wide_trial_stage %>%
+#         pivot_longer(cols = c(pre_exposure_choice_numeric_sum_across_reps,
+#                               post_exposure_choice_numeric_sum_across_reps,
+#                               post_pre_abs_diff_choice_numeric_sum_across_reps),
+#                      names_to = 'choice_numeric_sum_across_reps_var_type',
+#                      values_to = 'choice_numeric_sum_across_reps_values',
+#                      names_pattern = "(.*)_choice_numeric_sum_across_reps") %>%
+#         mutate(choice_numeric_sum_across_reps_var_type = as.factor(choice_numeric_sum_across_reps_var_type)) %>%
+#         reorder_levels(choice_numeric_sum_across_reps_var_type, order = c(
+#                 'pre_exposure',
+#                 'post_exposure',
+#                 'post_pre_diff'))
+# 
+# # Plot the difference value, somehow... go wide then back to long
+# tt_wide_trial_stage_chose_towards_sparse_and_correct <-
+#         tt_long %>%
+#         pivot_wider(id_cols = c(prolific_id,
+#                                 counterbalancing,
+#                                 query_item,
+#                                 curve_type,
+#                                 ref_lowdim,ref_highdim,
+#                                 dist_query_ref_lowdim,
+#                                 dist_query_ref_highdim,
+#                                 dist_abs_query_ref_lowdim,
+#                                 dist_abs_query_ref_highdim,
+#                                 triplet_unique_name,
+#                                 template_distances,
+#                                 template_abs_distances,
+#                                 triplet_easiness,
+#                                 triplet_location,
+#                                 query_position,
+#                                 triplet_rep,
+#                                 correct_ref_lowdim_highdim,
+#                                 correct_ref_towards_dense_sparse),
+#                     names_from = trial_stage,
+#                     values_from = c(chose_towards_sparse,chose_towards_highdim,correct),
+#                     names_glue = "{trial_stage}__{.value}") %>%
+#         mutate(post_pre_diff__chose_towards_sparse = 
+#                        post_exposure__chose_towards_sparse - 
+#                        pre_exposure__chose_towards_sparse,
+#                post_pre_diff__chose_towards_highdim = 
+#                        post_exposure__chose_towards_highdim - 
+#                        pre_exposure__chose_towards_highdim,
+#                post_pre_diff__correct = 
+#                        post_exposure__correct - pre_exposure__correct)
+# 
+# a <-
+#         tt_wide_trial_stage_chose_towards_sparse_and_correct %>%
+#         pivot_longer(cols = c(pre_exposure__chose_towards_sparse,
+#                               post_exposure__chose_towards_sparse,
+#                               post_pre_diff__chose_towards_sparse,
+#                               post_pre_diff__chose_towards_highdim,
+#                               post_exposure__chose_towards_highdim,
+#                               pre_exposure__chose_towards_highdim,
+#                               post_pre_diff__correct,
+#                               post_exposure__correct,
+#                               pre_exposure__correct),
+#                      names_to = c('set','.value'),
+#                      names_pattern = '(.+)__(.+)')
+# 
+# 
+# 
+# tt_long_post_pre_chose_towards_sparse <- 
+#         tt_wide_trial_stage_chose_towards_sparse_and_correct %>%
+#         pivot_longer(cols = c(pre_exposure_chose_towards_sparse,
+#                               post_exposure_chose_towards_sparse,
+#                               post_pre_diff_chose_towards_sparse),
+#                      names_to = 'trial_stage',
+#                      values_to = 'chose_towards_sparse') %>%
+#         mutate(trial_stage = substr(
+#                 trial_stage,
+#                 1,
+#                 nchar(trial_stage)-nchar('_chose_towards_sparse'))) %>%
+#         reorder_levels(trial_stage,order=c('pre_exposure',
+#                                            'post_exposure',
+#                                            'post_pre_diff'))
+# 
+# ## Accuracy long wide form ----------------------------------------------------
+# # Go long pre post pre-post-diff
+# tt_long_post_pre_correct <- 
+#         tt_wide_trial_stage_chose_towards_sparse_and_correct %>%
+#         pivot_longer(cols = c(pre_exposure_correct,
+#                               post_exposure_correct,
+#                               post_pre_diff_correct),
+#                      names_to = 'trial_stage',
+#                      values_to = 'correct')
+# 
+# # Add columns
+# tt_long_post_pre_correct <- tt_long_post_pre_correct %>%
+#         mutate(trial_stage = substr(
+#                 trial_stage,
+#                 1,
+#                 nchar(trial_stage)-nchar('_correct'))) %>%
+#         reorder_levels(trial_stage,order=c('pre_exposure',
+#                                            'post_exposure',
+#                                            'post_pre_diff'))

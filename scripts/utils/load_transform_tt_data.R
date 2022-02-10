@@ -194,9 +194,9 @@ tt_wide_reps_wide_trial_stage <-
                                     chose_towards_sparse_avg_across_reps,
                                     chose_towards_highdim_avg_across_reps),
                     names_glue = "{trial_stage}__{.value}") %>%
-        mutate(post_pre_diff__choice_numeric_sum_across_reps = abs(
+        mutate(post_pre_diff__choice_numeric_sum_across_reps = 
                 post_exposure__choice_numeric_sum_across_reps - 
-                pre_exposure__choice_numeric_sum_across_reps),
+                pre_exposure__choice_numeric_sum_across_reps,
                post_pre_diff__correct_avg_across_reps = 
                        post_exposure__correct_avg_across_reps - 
                        pre_exposure__correct_avg_across_reps,
@@ -225,7 +225,10 @@ tt_long_post_pre_and_diff <- tt_wide_reps_wide_trial_stage %>%
                       pre_exposure__choice_numeric_sum_across_reps,
                       post_pre_diff__choice_numeric_sum_across_reps),
              names_to = c('dep_var_type','.value'),
-             names_pattern = '(.+)__(.+)')
+             names_pattern = '(.+)__(.+)') %>%
+        reorder_levels(dep_var_type,order = c('pre_exposure',
+                                               'post_exposure',
+                                               'post_pre_diff'))
 
 
 # Create a long-form df, where pre/post/pre-post difference is one column, and all the dependent variables are in their columns

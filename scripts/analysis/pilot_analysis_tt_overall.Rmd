@@ -90,7 +90,7 @@ fig2 <- tt_participant_summary_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_choice_sum)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -107,7 +107,7 @@ fig3 <- tt_participant_summary_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_chose_towards_sparse)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -123,7 +123,7 @@ fig4 <- tt_participant_summary_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_chose_towards_sparse)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -140,7 +140,7 @@ fig5 <- tt_participant_summary_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_chose_towards_highdim)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -156,7 +156,7 @@ fig6 <- tt_participant_summary_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_chose_towards_highdim)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -173,7 +173,7 @@ fig7 <- tt_participant_summary_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_correct)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -189,7 +189,7 @@ fig8 <- tt_participant_summary_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_correct)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -240,7 +240,7 @@ fig1 <- tt_participant_summary_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_choice_sum)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -256,7 +256,7 @@ fig2 <- tt_participant_summary_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_choice_sum)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -273,7 +273,7 @@ fig3 <- tt_participant_summary_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_sparse)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -289,7 +289,7 @@ fig4 <- tt_participant_summary_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_sparse)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -306,7 +306,7 @@ fig5 <- tt_participant_summary_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_highdim)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -322,7 +322,7 @@ fig6 <- tt_participant_summary_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_highdim)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -339,7 +339,7 @@ fig7 <- tt_participant_summary_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_correct)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -355,7 +355,7 @@ fig8 <- tt_participant_summary_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_correct)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -406,7 +406,7 @@ fig1 <- tt_participant_summary_stats_curve_type %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=curve_type,
                    y=mean_choice_sum)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -422,7 +422,7 @@ fig2 <- tt_participant_summary_stats_curve_type %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=curve_type,
                    y=mean_choice_sum)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -439,7 +439,7 @@ fig3 <- tt_participant_summary_stats_curve_type %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=curve_type,
                    y=mean_chose_towards_sparse)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -455,7 +455,7 @@ fig4 <- tt_participant_summary_stats_curve_type %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=curve_type,
                    y=mean_chose_towards_sparse)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -472,7 +472,7 @@ fig5 <- tt_participant_summary_stats_curve_type %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=curve_type,
                    y=mean_chose_towards_highdim)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -488,7 +488,7 @@ fig6 <- tt_participant_summary_stats_curve_type %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=curve_type,
                    y=mean_chose_towards_highdim)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -505,7 +505,7 @@ fig7 <- tt_participant_summary_stats_curve_type %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=curve_type,
                    y=mean_correct)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -521,7 +521,7 @@ fig8 <- tt_participant_summary_stats_curve_type %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=curve_type,
                    y=mean_correct)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -574,7 +574,7 @@ fig1 <- tt_participant_summary_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_choice_sum)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -591,7 +591,7 @@ fig2 <- tt_participant_summary_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_choice_sum)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -608,7 +608,7 @@ fig3 <- tt_participant_summary_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_sparse)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -625,7 +625,7 @@ fig4 <- tt_participant_summary_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_sparse)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -642,7 +642,7 @@ fig5 <- tt_participant_summary_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_highdim)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -659,7 +659,7 @@ fig6 <- tt_participant_summary_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_highdim)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -676,7 +676,7 @@ fig7 <- tt_participant_summary_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_correct)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -693,7 +693,7 @@ fig8 <- tt_participant_summary_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_correct)) +
-        geom_violin() +
+        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -749,7 +749,7 @@ for (iE in levels(tt_participant_summary_stats_template_triplet_location_easines
                 filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%
                 ggplot(aes(x=triplet_location,
                            y=mean_choice_sum)) +
-                geom_violin() +
+                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
                 geom_boxplot(width=0.2,
                              outlier.shape = '', fatten = 4) +
                 geom_jitter(width = 0.05,
@@ -766,7 +766,7 @@ for (iE in levels(tt_participant_summary_stats_template_triplet_location_easines
                 filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>% 
                 ggplot(aes(x=triplet_location,
                            y=mean_choice_sum)) +
-                geom_violin() +
+                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
                 geom_boxplot(width=0.15,
                              outlier.shape = '', fatten = 4) +
                 geom_jitter(width = 0.05,
@@ -783,7 +783,7 @@ for (iE in levels(tt_participant_summary_stats_template_triplet_location_easines
                 filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
                 ggplot(aes(x=triplet_location,
                            y=mean_chose_towards_sparse)) +
-                geom_violin() +
+                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
                 geom_boxplot(width=0.2,
                              outlier.shape = '', fatten = 4) +
                 geom_jitter(width = 0.05,
@@ -800,7 +800,7 @@ for (iE in levels(tt_participant_summary_stats_template_triplet_location_easines
                 filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
                 ggplot(aes(x=triplet_location,
                            y=mean_chose_towards_sparse)) +
-                geom_violin() +
+                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
                 geom_boxplot(width=0.15,
                              outlier.shape = '', fatten = 4) +
                 geom_jitter(width = 0.05,
@@ -817,7 +817,7 @@ for (iE in levels(tt_participant_summary_stats_template_triplet_location_easines
                 filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
                 ggplot(aes(x=triplet_location,
                            y=mean_chose_towards_highdim)) +
-                geom_violin() +
+                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
                 geom_boxplot(width=0.2,
                              outlier.shape = '', fatten = 4) +
                 geom_jitter(width = 0.05,
@@ -834,7 +834,7 @@ for (iE in levels(tt_participant_summary_stats_template_triplet_location_easines
                 filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
                 ggplot(aes(x=triplet_location,
                            y=mean_chose_towards_highdim)) +
-                geom_violin() +
+                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
                 geom_boxplot(width=0.15,
                              outlier.shape = '', fatten = 4) +
                 geom_jitter(width = 0.05,
@@ -852,7 +852,7 @@ for (iE in levels(tt_participant_summary_stats_template_triplet_location_easines
                         filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%
                         ggplot(aes(x=triplet_location,
                                    y=mean_correct)) +
-                        geom_violin() +
+                        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
                         geom_boxplot(width=0.2,
                                      outlier.shape = '', fatten = 4) +
                         geom_jitter(width = 0.05,
@@ -869,7 +869,7 @@ for (iE in levels(tt_participant_summary_stats_template_triplet_location_easines
                         filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%
                         ggplot(aes(x=triplet_location,
                                    y=mean_correct)) +
-                        geom_violin() +
+                        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
                         geom_boxplot(width=0.15,
                                      outlier.shape = '', fatten = 4) +
                         geom_jitter(width = 0.05,
@@ -1147,9 +1147,183 @@ grid.arrange(fig1,fig2,fig3,
 
 ```
 
+```{r part-specific-summary-stats-curve-type-template}
+
+# Create participant summary stats
+tt_participant_summary_stats_curve_type_template <- tt_long_post_pre_and_diff %>%
+        group_by(prolific_id,
+                 counterbalancing,
+                 curve_type,
+                 template_distances,
+                 dep_var_type) %>%
+        summarise(n_datapoints = n(),
+                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
+                  mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
+                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
+                  mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
+        ungroup()
+
+```
 
 
+```{r between-subj-curve-type-template, fig.width=10, fig.height=30}
 
+ylimits <- c(-1,1)
+
+fig1 <- tt_participant_summary_stats_curve_type_template %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,
+                    alpha = 0.1) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        facet_grid(template_distances~curve_type) +
+        ggtitle('Chose towards sparse')
+
+fig2 <- tt_participant_summary_stats_curve_type_template %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,
+                    alpha = 0.1) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        facet_grid(template_distances~curve_type) +
+        ggtitle('Chose towards high dimension')
+
+# fig3 <- tt_participant_summary_stats_curve_type_template %>%
+#         filter(dep_var_type == 'post_pre_diff') %>%
+#         ggplot(aes(x=counterbalancing,
+#                    y=mean_correct)) +
+#         geom_violin(fill = accuracy_color,
+#                     alpha = 0.1) +
+#         geom_boxplot(width=0.15,
+#                      outlier.shape = '', 
+#                      fatten = 4) +
+#         geom_jitter(width = 0.05,
+#                     height = 0,
+#                     alpha = 0.3) +
+#         stat_summary(fun = mean,
+#                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+#         stat_summary(fun.data = mean_cl_normal,
+#                      geom = "errorbar",
+#                      size=1,
+#                      width=0.1,
+#                      color='red') + 
+#         coord_cartesian(ylim = ylimits) + 
+#         facet_grid(template_distances~curve_type) +
+#         ggtitle('Accuracy')
+
+
+grid.arrange(fig1,fig2,
+             # fig4,fig5,fig6,
+             ncol = 1,
+             top = 'Post minus pre')
+
+```
+
+
+```{r part-specific-summary-stats-triplet-location-template}
+
+# Create participant summary stats
+tt_participant_summary_stats_triplet_location_template <- tt_long_post_pre_and_diff %>%
+        group_by(prolific_id,
+                 counterbalancing,
+                 triplet_location,
+                 template_distances,
+                 dep_var_type) %>%
+        summarise(n_datapoints = n(),
+                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
+                  mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
+                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
+                  mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
+        ungroup()
+
+```
+
+
+```{r between-subj-triplet-location-template, fig.width=10, fig.height=30}
+
+ylimits <- c(-1,1)
+
+fig1 <- tt_participant_summary_stats_triplet_location_template %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,
+                    alpha = 0.1) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        facet_grid(template_distances~triplet_location) +
+        ggtitle('Chose towards sparse')
+
+fig2 <- tt_participant_summary_stats_triplet_location_template %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,
+                    alpha = 0.1) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=1,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        facet_grid(template_distances~triplet_location) +
+        ggtitle('Chose towards high dimension')
+
+
+grid.arrange(fig1,fig2,
+             # fig4,fig5,fig6,
+             ncol = 1,
+             top = 'Post minus pre')
+
+```
 
 
 

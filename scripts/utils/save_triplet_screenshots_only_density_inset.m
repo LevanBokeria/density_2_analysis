@@ -43,7 +43,7 @@ if flip_space
 end
 
 % Make save folders
-saveLoc = fullfile(home,'docs','triplet_screenshots',saveFolder);
+saveLoc = fullfile(home,'docs','triplet_screenshots_inset_only',saveFolder);
 
 if ~exist(saveLoc)
     mkdir(saveLoc);
@@ -310,7 +310,10 @@ for iTriplet = 1:nTriplets
     %% Save a screenshot of the trials
         
     % GetImage call. Alter the rect argument to change the location of the screen shot
-    rect_to_save = [1,1,screenXpixels-1,screenYpixels-1];
+    rect_to_save = [screenXpixels/2+50 - inset_width/2,...
+        85,...
+        screenXpixels/2+50 + inset_width/2,...
+        inset_y_center + inset_height/2];
     
     imageArray = Screen('GetImage', ptb_window, rect_to_save, 'backBuffer');
     

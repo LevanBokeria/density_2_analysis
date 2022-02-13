@@ -7,6 +7,10 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
+# Suppress summarise info
+options(dplyr.summarise.inform = FALSE)
+
 ```
 
 ```{r load-libraries}
@@ -36,18 +40,31 @@ pacman::p_load(pacman,
 ```{r load-transform-tt-data}
 
 qc_filter = T
+print(paste0('QC filter? ', qc_filter))
 
 source('./scripts/utils/load_transform_tt_data.R')
 
 # Flags and settings
 
-chose_sparse_color <- 'blue'
+chose_sparse_color  <- 'blue'
 chose_highdim_color <- 'green'
-accuracy_color <- 'yellow'
+accuracy_color      <- 'yellow'
+
+# Show the basic table
+tt_long %>%
+        filter(trial_index == 1,session == 1,trial_stage == 'pre_exposure') %>%
+        group_by(counterbalancing,
+                 prolific_id) %>%
+        summarise(n = n()) %>%
+        knitr::kable(caption = 'Participants and counterbalancing') %>%
+        kable_styling(bootstrap_options = "striped")
 
 ```
 
-# Summary stats over all trials
+# Summary stats for various combinations of factors.
+
+(Code hidden)
+Calculates some tables for plotting them below.
 
 ```{r part-specific-summary-stats}
 
@@ -63,160 +80,6 @@ tt_participant_summary_stats <- tt_long_post_pre_and_diff %>%
                   mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
         ungroup()
 
-```
-
-# Plots over all trials, all dependent variables
-
-```{r all-dep-var-overall-plots, fig.width=12, fig.height=15, warning=F}
-
-# Choice sum
-fig1 <- tt_participant_summary_stats %>%
-        #filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=dep_var_type,
-                   y=mean_choice_sum)) +
-        geom_violin() +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        ggtitle('Choice consistency')
-
-fig2 <- tt_participant_summary_stats %>%
-        #filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=dep_var_type,
-                   y=mean_choice_sum)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +  
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing)
-
-# Choice towards sparse
-fig3 <- tt_participant_summary_stats %>%
-        #filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=dep_var_type,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +  
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('chose towards sparse')
-
-fig4 <- tt_participant_summary_stats %>%
-        #filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=dep_var_type,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +        
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing) 
-
-# Choice sum
-fig5 <- tt_participant_summary_stats %>%
-        #filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=dep_var_type,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +     
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('chose towards high dimension')
-
-fig6 <- tt_participant_summary_stats %>%
-        #filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=dep_var_type,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +    
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing)
-
-# Choice sum
-fig7 <- tt_participant_summary_stats %>%
-        #filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=dep_var_type,
-                   y=mean_correct)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +     
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('accuracy')
-
-fig8 <- tt_participant_summary_stats %>%
-        #filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=dep_var_type,
-                   y=mean_correct)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +    
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing)
-        
-grid.arrange(fig1,fig2,
-             fig3,fig4,
-             fig5,fig6,
-             fig7,fig8,
-             nrow = 4,
-             widths = 1:2)
-             
-
-
-```
-
-# Summary stats over triplet locations
-
-```{r part-specific-summary-stats-triplet-location}
-
-# Create participant summary stats
 tt_participant_summary_stats_triplet_location <- tt_long_post_pre_and_diff %>%
         group_by(prolific_id,
                  counterbalancing,
@@ -229,160 +92,6 @@ tt_participant_summary_stats_triplet_location <- tt_long_post_pre_and_diff %>%
                   mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
         ungroup()
 
-```
-
-# Plots over triplet location, all dependent variables
-
-```{r all-dep-var-triplet-location-plots, fig.width=12, fig.height=15, warning=F}
-
-# Choice sum
-fig1 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_choice_sum)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        ggtitle('Post-pre Choice consistency')
-
-fig2 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_choice_sum)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +  
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing)
-
-# Choice towards sparse
-fig3 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +  
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('Post-pre chose towards sparse')
-
-fig4 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +        
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing) 
-
-# Choice sum
-fig5 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +     
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('Post-pre chose towards high dimension')
-
-fig6 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +    
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing)
-
-# Choice sum
-fig7 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_correct)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +     
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('Post-pre accuracy')
-
-fig8 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_correct)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +    
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing)
-        
-grid.arrange(fig1,fig2,
-             fig3,fig4,
-             fig5,fig6,
-             fig7,fig8,
-             nrow = 4,
-             widths = 1:2)
-             
-
-
-```
-
-# Summary stats over curve type
-
-```{r part-specific-summary-stats-curve-type}
-
-# Create participant summary stats
 tt_participant_summary_stats_curve_type <- tt_long_post_pre_and_diff %>%
         group_by(prolific_id,
                  counterbalancing,
@@ -395,161 +104,6 @@ tt_participant_summary_stats_curve_type <- tt_long_post_pre_and_diff %>%
                   mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
         ungroup()
 
-```
-
-# Plots over curve type, all dependent variables
-
-```{r all-dep-var-curve-type-plots, fig.width=12, fig.height=15, warning=F}
-
-# Choice sum
-fig1 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=curve_type,
-                   y=mean_choice_sum)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        ggtitle('Post-pre Choice consistency')
-
-fig2 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=curve_type,
-                   y=mean_choice_sum)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +  
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing)
-
-# Choice towards sparse
-fig3 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=curve_type,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +  
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('Post-pre chose towards sparse')
-
-fig4 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=curve_type,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +        
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing) 
-
-# Choice sum
-fig5 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=curve_type,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +     
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('Post-pre chose towards high dimension')
-
-fig6 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=curve_type,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +    
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing)
-
-# Choice sum
-fig7 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=curve_type,
-                   y=mean_correct)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +     
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('Post-pre accuracy')
-
-fig8 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=curve_type,
-                   y=mean_correct)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +    
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing)
-        
-grid.arrange(fig1,fig2,
-             fig3,fig4,
-             fig5,fig6,
-             fig7,fig8,
-             nrow = 4,
-             widths = 1:2)
-             
-
-
-```
-
-
-# Summary stats over triplet location by easiness
-
-```{r part-specific-summary-stats-triplet-location-easiness}
-
-# Create participant summary stats
 tt_participant_summary_stats_triplet_location_easiness <- tt_long_post_pre_and_diff %>%
         group_by(prolific_id,
                  counterbalancing,
@@ -563,165 +117,6 @@ tt_participant_summary_stats_triplet_location_easiness <- tt_long_post_pre_and_d
                   mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
         ungroup()
 
-```
-
-# Plots over curve type, all dependent variables
-
-```{r all-dep-var-curve-type-plots, fig.width=12, fig.height=23, warning=F}
-
-# Choice sum
-fig1 <- tt_participant_summary_stats_triplet_location_easiness %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_choice_sum)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        facet_wrap(~triplet_easiness, ncol = 1, strip.position = 'right') +
-        ggtitle('Post-pre Choice consistency')
-
-fig2 <- tt_participant_summary_stats_triplet_location_easiness %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_choice_sum)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +  
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_grid(triplet_easiness~counterbalancing)
-
-# Choice towards sparse
-fig3 <- tt_participant_summary_stats_triplet_location_easiness %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +  
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +   
-        facet_wrap(~triplet_easiness, ncol = 1, strip.position = 'right') +
-        ggtitle('Post-pre chose towards sparse')
-
-fig4 <- tt_participant_summary_stats_triplet_location_easiness %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +        
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_grid(triplet_easiness~counterbalancing)
-
-# Choice sum
-fig5 <- tt_participant_summary_stats_triplet_location_easiness %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +     
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +     
-        facet_wrap(~triplet_easiness, ncol = 1, strip.position = 'right') +
-        ggtitle('Post-pre chose towards high dimension')
-
-fig6 <- tt_participant_summary_stats_triplet_location_easiness %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +    
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_grid(triplet_easiness~counterbalancing)
-
-# Choice sum
-fig7 <- tt_participant_summary_stats_triplet_location_easiness %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_correct)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) + 
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +     
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +   
-        facet_wrap(~triplet_easiness, ncol = 1, strip.position = 'right') +
-        ggtitle('Post-pre accuracy')
-
-fig8 <- tt_participant_summary_stats_triplet_location_easiness %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=triplet_location,
-                   y=mean_correct)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +    
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_grid(triplet_easiness~counterbalancing)
-        
-grid.arrange(fig1,fig2,
-             fig3,fig4,
-             fig5,fig6,
-             fig7,fig8,
-             nrow = 4,
-             widths = 1:2)
-             
-
-
-```
-
-
-# For each easiness, triplet location by template
-
-```{r part-specific-summary-stats-triplet-location-template-easiness-0}
-
-# Create participant summary stats
 tt_participant_summary_stats_template_triplet_location_easiness <- tt_long_post_pre_and_diff %>%
         group_by(prolific_id,
                  counterbalancing,
@@ -736,420 +131,6 @@ tt_participant_summary_stats_template_triplet_location_easiness <- tt_long_post_
                   mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
         ungroup()
 
-```
-
-# Plots for each easiness level: triplet location by template
-
-```{r all-dep-var-curve-type-plots, fig.width=12, fig.height=23, warning=F}
-
-for (iE in levels(tt_participant_summary_stats_template_triplet_location_easiness$triplet_easiness)){
-        print(iE)
-        # Choice sum
-        fig1 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
-                filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%
-                ggplot(aes(x=triplet_location,
-                           y=mean_choice_sum)) +
-                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-                geom_boxplot(width=0.2,
-                             outlier.shape = '', fatten = 4) +
-                geom_jitter(width = 0.05,
-                            height = 0,
-                            alpha = 0.3) + 
-                geom_line(aes(group=prolific_id),
-                          alpha = 0.2) +
-                stat_summary(fun = mean,
-                             color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-                facet_wrap(template_distances~triplet_easiness, ncol = 1, strip.position = 'right') +
-                ggtitle('Post-pre Choice consistency')
-        
-        fig2 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
-                filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>% 
-                ggplot(aes(x=triplet_location,
-                           y=mean_choice_sum)) +
-                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-                geom_boxplot(width=0.15,
-                             outlier.shape = '', fatten = 4) +
-                geom_jitter(width = 0.05,
-                            height = 0,
-                            alpha = 0.3) +
-                geom_line(aes(group=prolific_id),
-                          alpha = 0.2) +  
-                stat_summary(fun = mean,
-                             color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-                facet_grid(triplet_easiness+template_distances~counterbalancing)
-        
-        # Choice towards sparse
-        fig3 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
-                filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
-                ggplot(aes(x=triplet_location,
-                           y=mean_chose_towards_sparse)) +
-                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-                geom_boxplot(width=0.2,
-                             outlier.shape = '', fatten = 4) +
-                geom_jitter(width = 0.05,
-                            height = 0,
-                            alpha = 0.3) + 
-                geom_line(aes(group=prolific_id),
-                          alpha = 0.2) +  
-                stat_summary(fun = mean,
-                             color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +   
-                facet_wrap(template_distances~triplet_easiness, ncol = 1, strip.position = 'right') +
-                ggtitle('Post-pre chose towards sparse')
-        
-        fig4 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
-                filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
-                ggplot(aes(x=triplet_location,
-                           y=mean_chose_towards_sparse)) +
-                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-                geom_boxplot(width=0.15,
-                             outlier.shape = '', fatten = 4) +
-                geom_jitter(width = 0.05,
-                            height = 0,
-                            alpha = 0.3) +
-                geom_line(aes(group=prolific_id),
-                          alpha = 0.2) +        
-                stat_summary(fun = mean,
-                             color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-                facet_grid(triplet_easiness+template_distances~counterbalancing)
-        
-        # Choice sum
-        fig5 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
-                filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
-                ggplot(aes(x=triplet_location,
-                           y=mean_chose_towards_highdim)) +
-                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-                geom_boxplot(width=0.2,
-                             outlier.shape = '', fatten = 4) +
-                geom_jitter(width = 0.05,
-                            height = 0,
-                            alpha = 0.3) + 
-                geom_line(aes(group=prolific_id),
-                          alpha = 0.2) +     
-                stat_summary(fun = mean,
-                             color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +     
-                facet_wrap(template_distances~triplet_easiness, ncol = 1, strip.position = 'right') +
-                ggtitle('Post-pre chose towards high dimension')
-        
-        fig6 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
-                filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
-                ggplot(aes(x=triplet_location,
-                           y=mean_chose_towards_highdim)) +
-                geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-                geom_boxplot(width=0.15,
-                             outlier.shape = '', fatten = 4) +
-                geom_jitter(width = 0.05,
-                            height = 0,
-                            alpha = 0.3) +
-                geom_line(aes(group=prolific_id),
-                          alpha = 0.2) +    
-                stat_summary(fun = mean,
-                             color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-                facet_grid(triplet_easiness+template_distances~counterbalancing)
-        
-        if (iE > 0){
-        # Choice sum
-                fig7 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
-                        filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%
-                        ggplot(aes(x=triplet_location,
-                                   y=mean_correct)) +
-                        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-                        geom_boxplot(width=0.2,
-                                     outlier.shape = '', fatten = 4) +
-                        geom_jitter(width = 0.05,
-                                    height = 0,
-                                    alpha = 0.3) +
-                        geom_line(aes(group=prolific_id),
-                                  alpha = 0.2) +
-                        stat_summary(fun = mean,
-                                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +
-                        facet_wrap(template_distances~triplet_easiness, ncol = 1, strip.position = 'right') +
-                        ggtitle('Post-pre accuracy')
-        
-                fig8 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
-                        filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%
-                        ggplot(aes(x=triplet_location,
-                                   y=mean_correct)) +
-                        geom_violin(fill = chose_sparse_color,alpha = 0.1) +
-                        geom_boxplot(width=0.15,
-                                     outlier.shape = '', fatten = 4) +
-                        geom_jitter(width = 0.05,
-                                    height = 0,
-                                    alpha = 0.3) +
-                        geom_line(aes(group=prolific_id),
-                                  alpha = 0.2) +
-                        stat_summary(fun = mean,
-                                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +
-                        facet_grid(triplet_easiness+template_distances~counterbalancing)
-                grid.arrange(fig1,fig2,
-                             fig3,fig4,
-                             fig5,fig6,
-                             fig7,fig8,
-                             nrow = 4,
-                             widths = 1:2)
-                
-        } else {
-                grid.arrange(fig1,fig2,
-                             fig3,fig4,
-                             fig5,fig6,
-                             # fig7,fig8,
-                             nrow = 3,
-                             widths = 1:2)                
-        }
-
-                     
-}
-
-```
-
-# Between participant comparisons:
-
-We've already seen these in sections above, where I break it down by dense_left vs dense_right
-But its useful to plot these next to each other.
-
-
-```{r between-subj-overall, fig.width=10, fig.height=4}
-
-ylimits <- c(-0.2,0.2)
-
-fig1 <- tt_participant_summary_stats %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        ggtitle('Chose towards sparse')
-
-fig2 <- tt_participant_summary_stats %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_highdim_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        ggtitle('Chose towards high dimension')
-
-fig3 <- tt_participant_summary_stats %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_correct)) +
-        geom_violin(fill = accuracy_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        ggtitle('Accuracy')
-        
-
-grid.arrange(fig1,fig2,fig3,
-             nrow = 1,
-             top = 'Post minus pre')
-
-```
-
-
-```{r between-subj-triplet-location, fig.width=10, fig.height=10}
-
-ylimits <- c(-0.4,0.4)
-
-fig1 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        facet_wrap(~triplet_location) +
-        ggtitle('Chose towards sparse')
-
-fig2 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_highdim_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        facet_wrap(~triplet_location) + 
-        ggtitle('Chose towards high dimension')
-
-fig3 <- tt_participant_summary_stats_triplet_location %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_correct)) +
-        geom_violin(fill = accuracy_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        facet_wrap(~triplet_location) + 
-        ggtitle('Accuracy')
-
-
-grid.arrange(fig1,fig2,fig3,
-             # fig4,fig5,fig6,
-             ncol = 1,
-             top = 'Post minus pre')
-
-```
-
-```{r between-subj-curve-type, fig.width=10, fig.height=10}
-
-ylimits <- c(-0.4,0.4)
-
-fig1 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        facet_wrap(~curve_type) +
-        ggtitle('Chose towards sparse')
-
-fig2 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_highdim_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        facet_wrap(~curve_type) + 
-        ggtitle('Chose towards high dimension')
-
-fig3 <- tt_participant_summary_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_correct)) +
-        geom_violin(fill = accuracy_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        facet_wrap(~curve_type) + 
-        ggtitle('Accuracy')
-
-
-grid.arrange(fig1,fig2,fig3,
-             # fig4,fig5,fig6,
-             ncol = 1,
-             top = 'Post minus pre')
-
-```
-
-```{r part-specific-summary-stats-curve-type-template}
-
-# Create participant summary stats
 tt_participant_summary_stats_curve_type_template <- tt_long_post_pre_and_diff %>%
         group_by(prolific_id,
                  counterbalancing,
@@ -1163,94 +144,6 @@ tt_participant_summary_stats_curve_type_template <- tt_long_post_pre_and_diff %>
                   mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
         ungroup()
 
-```
-
-
-```{r between-subj-curve-type-template, fig.width=10, fig.height=30}
-
-ylimits <- c(-1,1)
-
-fig1 <- tt_participant_summary_stats_curve_type_template %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        facet_grid(template_distances~curve_type) +
-        ggtitle('Chose towards sparse')
-
-fig2 <- tt_participant_summary_stats_curve_type_template %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_highdim_color,
-                    alpha = 0.1) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=1,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        facet_grid(template_distances~curve_type) +
-        ggtitle('Chose towards high dimension')
-
-# fig3 <- tt_participant_summary_stats_curve_type_template %>%
-#         filter(dep_var_type == 'post_pre_diff') %>%
-#         ggplot(aes(x=counterbalancing,
-#                    y=mean_correct)) +
-#         geom_violin(fill = accuracy_color,
-#                     alpha = 0.1) +
-#         geom_boxplot(width=0.15,
-#                      outlier.shape = '', 
-#                      fatten = 4) +
-#         geom_jitter(width = 0.05,
-#                     height = 0,
-#                     alpha = 0.3) +
-#         stat_summary(fun = mean,
-#                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-#         stat_summary(fun.data = mean_cl_normal,
-#                      geom = "errorbar",
-#                      size=1,
-#                      width=0.1,
-#                      color='red') + 
-#         coord_cartesian(ylim = ylimits) + 
-#         facet_grid(template_distances~curve_type) +
-#         ggtitle('Accuracy')
-
-
-grid.arrange(fig1,fig2,
-             # fig4,fig5,fig6,
-             ncol = 1,
-             top = 'Post minus pre')
-
-```
-
-
-```{r part-specific-summary-stats-triplet-location-template}
-
-# Create participant summary stats
 tt_participant_summary_stats_triplet_location_template <- tt_long_post_pre_and_diff %>%
         group_by(prolific_id,
                  counterbalancing,
@@ -1266,17 +159,673 @@ tt_participant_summary_stats_triplet_location_template <- tt_long_post_pre_and_d
 
 ```
 
+# Plots over all trials
 
-```{r between-subj-triplet-location-template, fig.width=10, fig.height=30}
+Show data for Pre, post, and post-minus-pre difference. 
+Also, show combined data and broken down by the two counterbalancing conditions (dense_left and dense_right).
 
-ylimits <- c(-1,1)
+These plots do not address the questions we're interested in, because they average over all types of triplets from all templates located anywhere along the dimension.
 
-fig1 <- tt_participant_summary_stats_triplet_location_template %>%
+But its good to see that accuracy is alright: around 75% pre and post.
+
+```{r all-dep-var-overall-plots, fig.width=12, fig.height=10, warning=F}
+
+# Choice towards sparse
+fig1 <- tt_participant_summary_stats %>%
+        #filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=dep_var_type,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +  
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        ggtitle('chose towards sparse')
+
+fig2 <- tt_participant_summary_stats %>%
+        #filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=dep_var_type,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +        
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        facet_wrap(~counterbalancing) 
+
+#  
+fig3 <- tt_participant_summary_stats %>%
+        #filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=dep_var_type,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +     
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        ggtitle('chose towards high dimension')
+
+fig4 <- tt_participant_summary_stats %>%
+        #filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=dep_var_type,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +    
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        facet_wrap(~counterbalancing)
+
+#  
+fig5 <- tt_participant_summary_stats %>%
+        #filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=dep_var_type,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +     
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        ggtitle('accuracy')
+
+fig6 <- tt_participant_summary_stats %>%
+        #filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=dep_var_type,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +    
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        facet_wrap(~counterbalancing)
+        
+grid.arrange(fig1,fig2,
+             fig3,fig4,
+             fig5,fig6,
+             nrow = 3,
+             widths = 1:2)
+             
+```
+
+# Plots over triplet location
+
+Below, we are already examining our crucial contrast: did the "behavior change post vs pre" differ for triplets in the sparse/dense/middle areas? 
+
+If we look at the left column of plots, averaging over the 2 counterbalancing conditions, we see that in the middle regions, the probability to "choose towards sparse" increases post vs pre-exposure. This increase is larger for the middle regions than the outer ones. 
+But looking at the counterbalancing groups, this effect might be driven by the dense_right subgroup.
+
+Looking at the green plots of the probability to choose referent towards the high dimension values:
+we see that most data points are above 0, meaning that there is an overall bias post-exposure to choose referents in the high dimension. This bias is counteracted in the dense_right subgroup for the triplets in the "across_density_region" location.
+
+```{r all-dep-var-triplet-location-plots, fig.width=12, fig.height=10, warning=F}
+
+x_font_size <- 10
+
+# Choice towards sparse
+fig1 <- tt_participant_summary_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +  
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +      
+        theme(text = element_text(size=x_font_size)) + 
+        ggtitle('Post-pre chose towards sparse')
+
+fig2 <- tt_participant_summary_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +        
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +       
+        theme(text = element_text(size=x_font_size)) + 
+        facet_wrap(~counterbalancing) 
+
+#  
+fig3 <- tt_participant_summary_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +     
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +   
+        theme(text = element_text(size=x_font_size)) + 
+        ggtitle('Post-pre chose towards high dimension')
+
+fig4 <- tt_participant_summary_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +    
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +      
+        theme(text = element_text(size=x_font_size)) + 
+        facet_wrap(~counterbalancing)
+
+#  
+fig5 <- tt_participant_summary_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +     
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +  
+        theme(text = element_text(size=x_font_size)) + 
+        ggtitle('Post-pre accuracy')
+
+fig6 <- tt_participant_summary_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +    
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +  
+        theme(text = element_text(size=x_font_size)) + 
+        facet_wrap(~counterbalancing)
+        
+grid.arrange(fig1,fig2,
+             fig3,fig4,
+             fig5,fig6,
+             nrow = 3,
+             widths = 1:2)
+             
+
+
+```
+
+# Plots over curve type
+
+I categorize triplets as being either in the concave region, convex region, or in the middle.
+
+The plots below show data largely similar to the above panel. But its more intuitive that for both counterbalancing groups, on the x axis going from left-to-right corresponds to going from left-to-right on the actual dimension axis of the stimuli.
+
+```{r all-dep-var-curve-type-plots, fig.width=12, fig.height=10, warning=F}
+
+# Choice towards sparse
+fig1 <- tt_participant_summary_stats_curve_type %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=curve_type,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +  
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        ggtitle('Post-pre chose towards sparse')
+
+fig2 <- tt_participant_summary_stats_curve_type %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=curve_type,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +        
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        facet_wrap(~counterbalancing) 
+
+#  
+fig3 <- tt_participant_summary_stats_curve_type %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=curve_type,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +     
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        ggtitle('Post-pre chose towards high dimension')
+
+fig4 <- tt_participant_summary_stats_curve_type %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=curve_type,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +    
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        facet_wrap(~counterbalancing)
+
+#  
+fig5 <- tt_participant_summary_stats_curve_type %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=curve_type,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +     
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        ggtitle('Post-pre accuracy')
+
+fig6 <- tt_participant_summary_stats_curve_type %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=curve_type,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +    
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        facet_wrap(~counterbalancing)
+        
+grid.arrange(fig1,fig2,
+             fig3,fig4,
+             fig5,fig6,
+             nrow = 3,
+             widths = 1:2)
+             
+
+
+```
+
+# Plots over curve type and easiness
+
+We have 3 levels of "easiness" in our TEMPlates.
+
+- Easiness = 0: these are symmetric templates, where both referents are equally distant from the query.
+- Easiness = 8: here, the distance(query,ref1) is 8 units larger than distance(query,ref2). So its easier to see which refs is closer
+- Easiness = 16: here, its even more easy to see which ref is closer to query.
+
+So, its useful to check which of these templates are driving the overall effects we see above.
+
+It seems like its the templates wiht easiness=0 and easiness=8. For easiness=16, the post-pre difference is essentially 0.
+
+```{r all-dep-var-curve-type-easiness-plots, fig.width=12, fig.height=18, warning=F}
+
+x_font_size <- 10
+
+# Choice towards sparse
+fig1 <- tt_participant_summary_stats_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +  
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +   
+        facet_wrap(~triplet_easiness, ncol = 1, strip.position = 'right') +
+        theme(text = element_text(size=x_font_size)) + 
+        ggtitle('Post-pre chose towards sparse')
+
+fig2 <- tt_participant_summary_stats_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +        
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +  
+        theme(text = element_text(size=x_font_size)) + 
+        facet_grid(triplet_easiness~counterbalancing)
+
+#  
+fig3 <- tt_participant_summary_stats_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +     
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +     
+        facet_wrap(~triplet_easiness, ncol = 1, strip.position = 'right') +
+        theme(text = element_text(size=x_font_size)) + 
+        ggtitle('Post-pre chose towards high dimension')
+
+fig4 <- tt_participant_summary_stats_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +    
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        theme(text = element_text(size=x_font_size)) + 
+        facet_grid(triplet_easiness~counterbalancing)
+
+#  
+fig5 <- tt_participant_summary_stats_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +     
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        theme(text = element_text(size=x_font_size)) + 
+        facet_wrap(~triplet_easiness, ncol = 1, strip.position = 'right') +
+        ggtitle('Post-pre accuracy')
+
+fig6 <- tt_participant_summary_stats_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=triplet_location,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +    
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +      
+        theme(text = element_text(size=x_font_size)) + 
+        facet_grid(triplet_easiness~counterbalancing)
+        
+grid.arrange(fig1,fig2,
+             fig3,fig4,
+             fig5,fig6,
+             nrow = 3,
+             widths = 1:2)
+             
+
+
+```
+
+# Plots for each easiness level: triplet location by template
+
+For each easiness level, we have several types of templates. 
+So the plots below simply further break down the plots from the previous panel, plotting data for each template separately. 
+
+This is just in case there is a really strong signal showing us that one of the templates is really great while others not.
+
+I think the data is too noisy here.
+
+
+```{r all-dep-var-triplet-location-template-easiness-plots, fig.width=12, fig.height=23, warning=F}
+
+x_font_size <- 10
+
+for (iE in levels(tt_participant_summary_stats_template_triplet_location_easiness$triplet_easiness)){
+        print(iE)
+        
+        # Choice towards sparse
+        fig1 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
+                filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
+                ggplot(aes(x=triplet_location,
+                           y=mean_chose_towards_sparse)) +
+                geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+                geom_boxplot(width=0.2,
+                             outlier.shape = '', fatten = 4) +
+                geom_jitter(width = 0.05,
+                            height = 0,
+                            alpha = 0.3) + 
+                geom_line(aes(group=prolific_id),
+                          alpha = 0.2) +  
+                stat_summary(fun = mean,
+                             color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +   
+                facet_wrap(template_distances~triplet_easiness, ncol = 1, strip.position = 'right') +
+                theme(text = element_text(size=x_font_size)) +
+                ggtitle('Post-pre chose towards sparse')
+        
+        fig2 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
+                filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
+                ggplot(aes(x=triplet_location,
+                           y=mean_chose_towards_sparse)) +
+                geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+                geom_boxplot(width=0.15,
+                             outlier.shape = '', fatten = 4) +
+                geom_jitter(width = 0.05,
+                            height = 0,
+                            alpha = 0.3) +
+                geom_line(aes(group=prolific_id),
+                          alpha = 0.2) +        
+                stat_summary(fun = mean,
+                             color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +   
+                theme(text = element_text(size=x_font_size)) +
+                facet_grid(triplet_easiness+template_distances~counterbalancing)
+        
+        #  
+        fig3 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
+                filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
+                ggplot(aes(x=triplet_location,
+                           y=mean_chose_towards_highdim)) +
+                geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+                geom_boxplot(width=0.2,
+                             outlier.shape = '', fatten = 4) +
+                geom_jitter(width = 0.05,
+                            height = 0,
+                            alpha = 0.3) + 
+                geom_line(aes(group=prolific_id),
+                          alpha = 0.2) +     
+                stat_summary(fun = mean,
+                             color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +     
+                facet_wrap(template_distances~triplet_easiness, ncol = 1, strip.position = 'right') +
+                theme(text = element_text(size=x_font_size)) +
+                ggtitle('Post-pre chose towards high dimension')
+        
+        fig4 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
+                filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
+                ggplot(aes(x=triplet_location,
+                           y=mean_chose_towards_highdim)) +
+                geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+                geom_boxplot(width=0.15,
+                             outlier.shape = '', fatten = 4) +
+                geom_jitter(width = 0.05,
+                            height = 0,
+                            alpha = 0.3) +
+                geom_line(aes(group=prolific_id),
+                          alpha = 0.2) +    
+                stat_summary(fun = mean,
+                             color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +      
+                theme(text = element_text(size=x_font_size)) +
+                facet_grid(triplet_easiness+template_distances~counterbalancing)
+        
+        if (iE > 0){
+        #  
+                fig5 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
+                        filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%
+                        ggplot(aes(x=triplet_location,
+                                   y=mean_correct)) +
+                        geom_violin(fill = accuracy_color,alpha = 0.2) +
+                        geom_boxplot(width=0.2,
+                                     outlier.shape = '', fatten = 4) +
+                        geom_jitter(width = 0.05,
+                                    height = 0,
+                                    alpha = 0.3) +
+                        geom_line(aes(group=prolific_id),
+                                  alpha = 0.2) +
+                        stat_summary(fun = mean,
+                                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +
+                        facet_wrap(template_distances~triplet_easiness, ncol = 1, strip.position = 'right') +
+                        theme(text = element_text(size=x_font_size)) +
+                        ggtitle('Post-pre accuracy')
+        
+                fig6 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
+                        filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%
+                        ggplot(aes(x=triplet_location,
+                                   y=mean_correct)) +
+                        geom_violin(fill = accuracy_color,alpha = 0.2) +
+                        geom_boxplot(width=0.15,
+                                     outlier.shape = '', fatten = 4) +
+                        geom_jitter(width = 0.05,
+                                    height = 0,
+                                    alpha = 0.3) +
+                        geom_line(aes(group=prolific_id),
+                                  alpha = 0.2) +
+                        stat_summary(fun = mean,
+                                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +
+                        theme(text = element_text(size=x_font_size)) +
+                        facet_grid(triplet_easiness+template_distances~counterbalancing)
+                grid.arrange(fig1,fig2,
+                             fig3,fig4,
+                             fig5,fig6,
+                             nrow = 3,
+                             widths = 1:2,
+                             top = paste0('Easiness = ', iE))
+                
+        } else {
+                grid.arrange(fig1,fig2,
+                             fig3,fig4,
+                             nrow = 2,
+                             widths = 1:2,
+                             top = paste0('Easiness = ', iE))                
+        }
+
+                     
+}
+
+```
+
+# Between participant comparisons:
+
+We've already seen these in sections above, where I break it down by dense_left vs dense_right.
+
+But its useful to plot the data from the two counterbalancing groups next to each other, along with 95% confidence intervals for a quick eye-balling of stats.
+
+## Averaging over all triplets:
+
+```{r between-subj-overall, fig.width=10, fig.height=4, warning=F}
+
+ylimits <- c(-0.2,0.2)
+
+fig1 <- tt_participant_summary_stats %>%
         filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_chose_towards_sparse)) +
         geom_violin(fill = chose_sparse_color,
-                    alpha = 0.1) +
+                    alpha = 0.2) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', 
                      fatten = 4) +
@@ -1287,7 +836,265 @@ fig1 <- tt_participant_summary_stats_triplet_location_template %>%
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
         stat_summary(fun.data = mean_cl_normal,
                      geom = "errorbar",
-                     size=1,
+                     size=0.5,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        ggtitle('Chose towards sparse')
+
+fig2 <- tt_participant_summary_stats %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        ggtitle('Chose towards high dimension')
+
+fig3 <- tt_participant_summary_stats %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        ggtitle('Accuracy')
+        
+
+grid.arrange(fig1,fig2,fig3,
+             nrow = 1,
+             top = 'Post minus pre')
+
+```
+
+## Curve type breakdown:
+
+If density stretches the psychological space then what we want to see below is the following:
+
+- The probability of choosing towards sparse should increase for both counterbalancing groups.
+- The prob of choosing highdimensional referent should increase for dense_left and decrease for dense_right.
+
+We see the above pattern but only for the triplets located across the density boundary!
+
+```{r between-subj-curve-type, fig.width=7, fig.height=8, warning=F}
+
+ylimits <- c(-0.4,0.4)
+
+fig1 <- tt_participant_summary_stats_curve_type %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        facet_wrap(~curve_type) +
+        ggtitle('Chose towards sparse')
+
+fig2 <- tt_participant_summary_stats_curve_type %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        facet_wrap(~curve_type) + 
+        ggtitle('Chose towards high dimension')
+
+fig3 <- tt_participant_summary_stats_curve_type %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        facet_wrap(~curve_type) + 
+        ggtitle('Accuracy')
+
+
+grid.arrange(fig1,fig2,fig3,
+             # fig4,fig5,fig6,
+             ncol = 1,
+             top = 'Post minus pre')
+
+```
+
+## Triplet location
+
+Similar to the breakdown by curve type in the previous panel.
+
+```{r between-subj-triplet-location, fig.width=7, fig.height=8, warning=F}
+
+ylimits <- c(-0.4,0.4)
+
+fig1 <- tt_participant_summary_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        facet_wrap(~triplet_location) +
+        ggtitle('Chose towards sparse')
+
+fig2 <- tt_participant_summary_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        facet_wrap(~triplet_location) + 
+        ggtitle('Chose towards high dimension')
+
+fig3 <- tt_participant_summary_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') + 
+        coord_cartesian(ylim = ylimits) + 
+        facet_wrap(~triplet_location) + 
+        ggtitle('Accuracy')
+
+
+grid.arrange(fig1,fig2,fig3,
+             # fig4,fig5,fig6,
+             ncol = 1,
+             top = 'Post minus pre')
+
+```
+
+## Triplet location by template breakdown:
+
+Now here, its interesting to see which of the templates are driving the effect in the "across_density_regions" plots. 
+
+It seems to be again the ones that are either symmetric, or easiness=8
+
+```{r between-subj-triplet-location-template, fig.width=8, fig.height=30, warning=F}
+
+ylimits <- c(-1,1)
+
+fig1 <- tt_participant_summary_stats_triplet_location_template %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', 
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
                      width=0.1,
                      color='red') + 
         coord_cartesian(ylim = ylimits) + 
@@ -1299,7 +1106,7 @@ fig2 <- tt_participant_summary_stats_triplet_location_template %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_chose_towards_highdim)) +
         geom_violin(fill = chose_highdim_color,
-                    alpha = 0.1) +
+                    alpha = 0.2) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', 
                      fatten = 4) +
@@ -1310,7 +1117,7 @@ fig2 <- tt_participant_summary_stats_triplet_location_template %>%
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
         stat_summary(fun.data = mean_cl_normal,
                      geom = "errorbar",
-                     size=1,
+                     size=0.5,
                      width=0.1,
                      color='red') + 
         coord_cartesian(ylim = ylimits) + 
@@ -1324,6 +1131,93 @@ grid.arrange(fig1,fig2,
              top = 'Post minus pre')
 
 ```
+
+
+<!-- ## Curve type by template breakdown: -->
+
+<!-- ```{r between-subj-curve-type-template, fig.width=8, fig.height=30, warning=F} -->
+
+<!-- ylimits <- c(-1,1) -->
+
+<!-- fig1 <- tt_participant_summary_stats_curve_type_template %>% -->
+<!--         filter(dep_var_type == 'post_pre_diff') %>% -->
+<!--         ggplot(aes(x=counterbalancing, -->
+<!--                    y=mean_chose_towards_sparse)) + -->
+<!--         geom_violin(fill = chose_sparse_color, -->
+<!--                     alpha = 0.2) + -->
+<!--         geom_boxplot(width=0.15, -->
+<!--                      outlier.shape = '',  -->
+<!--                      fatten = 4) + -->
+<!--         geom_jitter(width = 0.05, -->
+<!--                     height = 0, -->
+<!--                     alpha = 0.3) + -->
+<!--         stat_summary(fun = mean, -->
+<!--                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +  -->
+<!--         stat_summary(fun.data = mean_cl_normal, -->
+<!--                      geom = "errorbar", -->
+<!--                      size=0.5, -->
+<!--                      width=0.1, -->
+<!--                      color='red') +  -->
+<!--         coord_cartesian(ylim = ylimits) +  -->
+<!--         facet_grid(template_distances~curve_type) + -->
+<!--         ggtitle('Chose towards sparse') -->
+
+<!-- fig2 <- tt_participant_summary_stats_curve_type_template %>% -->
+<!--         filter(dep_var_type == 'post_pre_diff') %>% -->
+<!--         ggplot(aes(x=counterbalancing, -->
+<!--                    y=mean_chose_towards_highdim)) + -->
+<!--         geom_violin(fill = chose_highdim_color, -->
+<!--                     alpha = 0.2) + -->
+<!--         geom_boxplot(width=0.15, -->
+<!--                      outlier.shape = '',  -->
+<!--                      fatten = 4) + -->
+<!--         geom_jitter(width = 0.05, -->
+<!--                     height = 0, -->
+<!--                     alpha = 0.3) + -->
+<!--         stat_summary(fun = mean, -->
+<!--                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +  -->
+<!--         stat_summary(fun.data = mean_cl_normal, -->
+<!--                      geom = "errorbar", -->
+<!--                      size=0.5, -->
+<!--                      width=0.1, -->
+<!--                      color='red') +  -->
+<!--         coord_cartesian(ylim = ylimits) +  -->
+<!--         facet_grid(template_distances~curve_type) + -->
+<!--         ggtitle('Chose towards high dimension') -->
+
+<!-- # fig3 <- tt_participant_summary_stats_curve_type_template %>% -->
+<!-- #         filter(dep_var_type == 'post_pre_diff') %>% -->
+<!-- #         ggplot(aes(x=counterbalancing, -->
+<!-- #                    y=mean_correct)) + -->
+<!-- #         geom_violin(fill = accuracy_color, -->
+<!-- #                     alpha = 0.2) + -->
+<!-- #         geom_boxplot(width=0.15, -->
+<!-- #                      outlier.shape = '',  -->
+<!-- #                      fatten = 4) + -->
+<!-- #         geom_jitter(width = 0.05, -->
+<!-- #                     height = 0, -->
+<!-- #                     alpha = 0.3) + -->
+<!-- #         stat_summary(fun = mean, -->
+<!-- #                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +  -->
+<!-- #         stat_summary(fun.data = mean_cl_normal, -->
+<!-- #                      geom = "errorbar", -->
+<!-- #                      size=0.5, -->
+<!-- #                      width=0.1, -->
+<!-- #                      color='red') +  -->
+<!-- #         coord_cartesian(ylim = ylimits) +  -->
+<!-- #         facet_grid(template_distances~curve_type) + -->
+<!-- #         ggtitle('Accuracy') -->
+
+
+<!-- grid.arrange(fig1,fig2, -->
+<!--              # fig4,fig5,fig6, -->
+<!--              ncol = 1, -->
+<!--              top = 'Post minus pre') -->
+
+<!-- ``` -->
+
+
+
 
 
 

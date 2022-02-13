@@ -24,15 +24,14 @@ pacman::p_load(pacman,
 
 # Read the txt file ###########################################################
 
-exp_long <- import('./results/preprocessed_data/exposure_task_long_form.csv')
+exp_long <- import('./results/pilots/preprocessed_data/exposure_task_long_form.csv')
 
 
 # Start various transformations of columns######################################
 exp_long %<>%
         mutate(dist_abs_from_prev = as.factor(dist_abs_from_prev),
                response = as.factor(response),
-               session = as.factor(session)) %>%
-        filter(prolific_id != 'myself')
+               session = as.factor(session))
 
 # Do a QC filtering
 # exp_long <- 

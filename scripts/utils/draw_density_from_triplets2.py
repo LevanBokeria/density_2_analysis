@@ -163,7 +163,7 @@ expose_low_density = False
 
 # all possible stimuli (to set the density map, index stimuli, etc.)
 px_min = 30
-px_max = 118
+px_max = 110
 all_stim = np.arange(px_min, px_max+1, dtype=float)  # assumning stimuli start from 10-300 pixels
 
 # input stimuli (exposure phase)
@@ -173,7 +173,7 @@ step_dense  = 2
 step_sparse = 8
 
 # - make the dense and sparse sections
-section_1 = np.arange(px_min,px_min+(px_max-px_min)/2+1,step_sparse, dtype=int)
+section_1 = np.arange(px_min,px_min+(px_max-px_min)/2,step_sparse, dtype=int)
 
 section_2 = np.arange(section_1[-1]+step_sparse,px_max+1,step_dense, dtype=int)
 # Drop the ones less than mid point
@@ -185,7 +185,7 @@ else:
     stim_exposure = section_2
 
 # %% Load the manually selected triplets
-chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets.xlsx')
+chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_2.xlsx')
 
 skip_balancing_from_excel = True
 plot_only_balancing = False
@@ -203,7 +203,7 @@ if plot_only_balancing:
 stim_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()    
 
 # %% Flip the space
-flip_space = True
+flip_space = False
 
 if flip_space:
     stim_triplets = (px_min+(px_max-px_min)/2)*2 - stim_triplets
@@ -260,7 +260,7 @@ for iBal in range(n_balance):
             min_idx = np.where(model.density_map == min_val)
         
         # Whats the exemplar index here?
-        exemplar_to_add = all_stim[min_idx]
+        exemplar_to_add = all_stim[min_idx[0][0]]
                 
         # Retrain the model
         res = model.train(exemplar_to_add, test_upd_density=upd_dns)
@@ -284,7 +284,7 @@ triplets_good = False
 # threshold_easy = 3*step_sparse
 threshold_hard = 2*step_sparse
 
-perc_hard_min = 50
+perc_hard_min = 40
 perc_hard_max = 60
 # perc_easy = 30
 

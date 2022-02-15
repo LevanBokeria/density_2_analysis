@@ -164,6 +164,7 @@ expose_low_density = False
 # all possible stimuli (to set the density map, index stimuli, etc.)
 px_min = 30
 px_max = 110
+mid_point = (px_max - px_min)/2 + px_min
 all_stim = np.arange(px_min, px_max+1, dtype=float)  # assumning stimuli start from 10-300 pixels
 
 # input stimuli (exposure phase)
@@ -173,11 +174,11 @@ step_dense  = 2
 step_sparse = 8
 
 # - make the dense and sparse sections
-section_1 = np.arange(px_min,px_min+(px_max-px_min)/2,step_sparse, dtype=int)
+section_1 = np.arange(px_min,mid_point,step_sparse, dtype=int)
 
 section_2 = np.arange(section_1[-1]+step_sparse,px_max+1,step_dense, dtype=int)
 # Drop the ones less than mid point
-section_2 = np.delete(section_2,np.where(section_2 < px_min + (px_max-px_min)/2))
+section_2 = np.delete(section_2,np.where(section_2 < mid_point))
 
 if expose_low_density:
     stim_exposure = np.concatenate((section_1,section_2))    
@@ -188,7 +189,7 @@ else:
 chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets.xlsx')
 
 skip_balancing_from_excel = True
-plot_only_balancing = False
+plot_only_balancing       = False
 
 if skip_balancing_from_excel:
     chosen_triplets_df = chosen_triplets_df.loc[
@@ -206,10 +207,10 @@ stim_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()
 flip_space = False
 
 if flip_space:
-    stim_triplets = (px_min+(px_max-px_min)/2)*2 - stim_triplets
-    section_1 = (px_min+(px_max-px_min)/2)*2 - section_1
-    section_2 = (px_min+(px_max-px_min)/2)*2 - section_2
-    stim_exposure = (px_min+(px_max-px_min)/2)*2 - stim_exposure
+    stim_triplets = (mid_point)*2 - stim_triplets
+    section_1 = (mid_point)*2 - section_1
+    section_2 = (mid_point)*2 - section_2
+    stim_exposure = (mid_point)*2 - stim_exposure
 
 # %% initialize model
 model = DensityModel(model_type, params, all_stim)
@@ -221,7 +222,7 @@ res = model.train(stim_triplets, test_upd_density=upd_dns)
 # %% plot results
 
 # Flags
-plot_initial_density = True
+plot_initial_density = False
 plot_average_density = True
 
 # Get y lims of the existing density space
@@ -385,16 +386,15 @@ if plot_average_density:
         
     x_pos = np.arange(len(materials))
     
-    mid_point = 78
     mid_point_idx = np.where(all_stim == mid_point)[0][0]
         
     # %% Density at each possible exemplar
     sparse_sum  = model_after_bal.density_map[range(0,mid_point_idx)].sum()
     sparse_mean = model_after_bal.density_map[range(0,mid_point_idx)].mean()
     sparse_std  = model_after_bal.density_map[range(0,mid_point_idx)].std()
-    dense_sum   = model_after_bal.density_map[range(mid_point_idx,len(model_after_bal.density_map))].sum()
-    dense_mean  = model_after_bal.density_map[range(mid_point_idx,len(model_after_bal.density_map))].mean()
-    dense_std   = model_after_bal.density_map[range(mid_point_idx,len(model_after_bal.density_map))].std()
+    dense_sum   = model_after_bal.density_map[range(mid_point_idx+1,len(model_after_bal.density_map))].sum()
+    dense_mean  = model_after_bal.density_map[range(mid_point_idx+1,len(model_after_bal.density_map))].mean()
+    dense_std   = model_after_bal.density_map[range(mid_point_idx+1,len(model_after_bal.density_map))].std()
     
     CTEs_each_possible  = [sparse_mean,dense_mean]
     error_each_possible = [sparse_std,dense_std]
@@ -403,12 +403,12 @@ if plot_average_density:
     
     # %% Density at allowed exemplars
     sparse_allowed = np.unique(stim_seq)
-    sparse_allowed = np.delete(sparse_allowed,np.where(sparse_allowed >= px_min + (px_max-px_min)/2))
+    sparse_allowed = np.delete(sparse_allowed,np.where(sparse_allowed >= mid_point))
     sparse_allowed_idx = sparse_allowed - px_min
     sparse_allowed_idx = sparse_allowed_idx.astype(int)
     
     dense_allowed = np.unique(stim_seq)
-    dense_allowed = np.delete(dense_allowed,np.where(dense_allowed < px_min + (px_max-px_min)/2))    
+    dense_allowed = np.delete(dense_allowed,np.where(dense_allowed <= mid_point))    
     dense_allowed_idx = dense_allowed - px_min
     dense_allowed_idx = dense_allowed_idx.astype(int)
     
@@ -423,10 +423,10 @@ if plot_average_density:
     error_allowed = [sparse_std,dense_std]    
     
     # %% Get count of exemplars at each location
-    count_sparse = np.delete(stim_seq,np.where(stim_seq >= px_min + (px_max-px_min)/2)).astype(int)
+    count_sparse = np.delete(stim_seq,np.where(stim_seq >= mid_point)).astype(int)
     count_sparse = np.bincount(count_sparse)[np.unique(count_sparse)]
     
-    count_dense = np.delete(stim_seq,np.where(stim_seq < px_min + (px_max-px_min)/2)).astype(int)
+    count_dense = np.delete(stim_seq,np.where(stim_seq <= mid_point)).astype(int)
     count_dense = np.bincount(count_dense)[np.unique(count_dense)]    
     
     sparse_sum  = count_sparse.sum()

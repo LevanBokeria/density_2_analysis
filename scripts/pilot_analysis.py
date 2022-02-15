@@ -112,6 +112,27 @@ for iF in file_list:
     if 'prolific_ID' in data_decoded['inputData']:
         data_decoded['prolific_ID'] = data_decoded['inputData']['prolific_ID']        
     
+    # Is this the first pilot paradigm or second? Below sub_16 is the first
+    # - get the subject number
+    sub_numeric = [int(s) for s in data_decoded['prolific_ID'].split('_') if s.isdigit()]
+    
+    pilot_1_subjects = np.arange(1,17)
+    
+    if sub_numeric in pilot_1_subjects:
+        exemplar_min = 30
+        exemplar_max = 118
+        
+        pilot_paradigm = 1
+        
+    else:
+        exemplar_min = 30
+        exemplar_max = 110
+        
+        pilot_paradigm = 2    
+    
+    # Whats the mid point in the stimulus space?
+    mid_point = (exemplar_max - exemplar_min)/2 + exemplar_min
+    
     # %% Pre and post exposure trials 
     pre_exp_output  = pd.DataFrame(data_decoded['outputData']['pre_exposure'])
     post_exp_output = pd.DataFrame(data_decoded['outputData']['post_exposure'])
@@ -360,12 +381,12 @@ for iF in file_list:
         )     
     
     # %% Where is the triplet in the density space?
-    dense_boundary  = np.array((78,118))
-    sparse_boundary = np.array((30,78))
+    dense_boundary  = np.array((mid_point,exemplar_max))
+    sparse_boundary = np.array((exemplar_min,mid_point))
     # - But depending on the density condition, swap these
     if data_decoded['inputData']['cb_condition'] == 'dense_left':
         
-        flip_val = (118-30)/2 + 30
+        flip_val = (exemplar_max-exemplar_min)/2 + exemplar_min
         
         dense_boundary  = np.flip(2*flip_val - dense_boundary)
         sparse_boundary = np.flip(2*flip_val - sparse_boundary)
@@ -381,9 +402,11 @@ for iF in file_list:
         'across_density_regions')
                 )
 
-    # %% Add the counterbalancing condition as a column
+    # %% Add the counterbalancing and pilot_paradigm conditions as a columns
     tt.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])
+    tt.insert(loc=0, column='pilot_paradigm', value=pilot_paradigm)
     exp.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])        
+    exp.insert(loc=0, column='pilot_paradigm', value=pilot_paradigm)        
     
     # %% Classify the triplet as being slanted towards the dense or sparse part of the space
     
@@ -449,11 +472,11 @@ for iF in file_list:
 
     ind_exp.append(exp)
 
-large_tt  = pd.concat(ind_tt, ignore_index=True)
+large_tt     = pd.concat(ind_tt, ignore_index=True)
 large_instr  = pd.concat(ind_instr, ignore_index=True)
 large_debri  = pd.concat(ind_debri, ignore_index=True)
 large_breaks = pd.concat(ind_breaks, ignore_index=True)
-large_exp = pd.concat(ind_exp, ignore_index=True)
+large_exp    = pd.concat(ind_exp, ignore_index=True)
 
 # %% Save data files
 if save_tt_data:

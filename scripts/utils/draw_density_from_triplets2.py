@@ -185,7 +185,7 @@ else:
     stim_exposure = section_2
 
 # %% Load the manually selected triplets
-chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_2.xlsx')
+chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets.xlsx')
 
 skip_balancing_from_excel = True
 plot_only_balancing = False

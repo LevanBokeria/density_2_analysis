@@ -73,6 +73,9 @@ tt_long %<>%
         reorder_levels(triplet_location,order=c('sparse_region',
                                                 'across_density_regions',
                                                 'dense_region')) %>%
+        reorder_levels(curve_type,order=c('concave',
+                                          'across_convexity',
+                                          'convex')) %>%        
         reorder_levels(response, order = c('q','p')) %>%
         reorder_levels(correct_ref_lowdim_highdim,order = c('ref_lowdim','ref_highdim'))
 

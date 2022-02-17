@@ -48,6 +48,6 @@ overall_acc %>%
         mutate(correct = as.numeric(correct)) %>%
         group_by(prolific_id) %>%
         get_summary_stats(correct,type='mean_sd') %>% 
-        mutate(payment = round(2.5*mean,2)) %>% select(prolific_id,payment) %>% 
+        mutate(payment = round(2*mean,2)) %>% select(prolific_id,payment) %>% 
         write_csv('./docs/miscellaneous/payment.csv')
 

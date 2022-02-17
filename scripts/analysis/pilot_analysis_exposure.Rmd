@@ -34,8 +34,11 @@ pacman::p_load(pacman,
 
 ```{r load-transform-data}
 
-qc_filter = T
+qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
+
+which_paradigm <- c(1,2)
+print(paste0('Which paradigm? ', which_paradigm))
 
 source('./scripts/utils/load_transform_exp_data.R')
 

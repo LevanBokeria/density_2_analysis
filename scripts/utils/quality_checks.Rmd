@@ -31,7 +31,7 @@ pacman::p_load(pacman,
 
 save_qc_table  <- T
 qc_filter      <- F
-which_paradigm <- c(2)
+which_paradigm <- c(1,2)
 
 
 ```

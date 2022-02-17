@@ -32,7 +32,7 @@ save_breaks       = True
 save_exposure     = True
 
 # A quick flag
-save_nothing = False
+save_nothing = True
 
 if save_nothing:
     save_tt_data      = False

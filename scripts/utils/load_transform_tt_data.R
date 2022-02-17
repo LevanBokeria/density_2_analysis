@@ -209,8 +209,8 @@ tt_long_post_pre_and_diff <- tt_wide_reps_wide_trial_stage %>%
                       post_exposure__choice_numeric_sum_across_reps,
                       pre_exposure__choice_numeric_sum_across_reps,
                       post_pre_diff__choice_numeric_sum_across_reps),
-             names_to = c('dep_var_type','.value'),
-             names_pattern = '(.+)__(.+)') %>%
+                     names_to = c('dep_var_type','.value'),
+                     names_pattern = '(.+)__(.+)') %>%
         reorder_levels(dep_var_type,order = c('pre_exposure',
                                                'post_exposure',
                                                'post_pre_diff'))

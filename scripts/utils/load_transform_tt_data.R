@@ -69,6 +69,7 @@ tt_long %<>%
         reorder_levels(triplet_location,order=c('sparse_region',
                                                 'across_density_regions',
                                                 'dense_region')) %>%
+        reorder_levels(response, order = c('q','p')) %>%
         reorder_levels(correct_ref_lowdim_highdim,order = c('ref_lowdim','ref_highdim'))
 
 
@@ -133,6 +134,7 @@ tt_long %<>%
 tt_wide_reps <- tt_long %>%
         pivot_wider(
                 id_cols = c(prolific_id,
+                            pilot_paradigm,
                             trial_stage,
                             counterbalancing,
                             query_item,
@@ -184,6 +186,7 @@ tt_wide_reps <- tt_wide_reps %>%
 tt_wide_reps_wide_trial_stage <- 
         tt_wide_reps %>%
         pivot_wider(id_cols = c(prolific_id,
+                                pilot_paradigm,
                                 counterbalancing,
                                 query_item,
                                 ref_lowdim,

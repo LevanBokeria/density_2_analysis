@@ -29,7 +29,9 @@ pacman::p_load(pacman,
 
 # flags
 
-save_qc_table <- T
+save_qc_table  <- T
+qc_filter      <- F
+which_paradigm <- c(1,2)
 
 
 ```
@@ -37,43 +39,27 @@ save_qc_table <- T
 ```{r import-data}
 # Read the txt file
 
-tt_long <- import('./results/pilots/preprocessed_data/triplet_task_long_form.csv')
+source('./scripts/utils/load_transform_tt_data.R')
+source('./scripts/utils/load_transform_exp_data.R')
 
-tt_long %<>% 
-        mutate(across(c(triplet_easiness,
-                        prolific_id,
-                        counterbalancing,
-                        response,
-                        trial_stage,
-                        session,
-                        correct_response,
-                        query_stimulus,
-                        ref_left_stimulus,
-                        ref_right_stimulus,
-                        triplet_left_right_name,
-                        triplet_unique_name,
-                        template_distances,
-                        template_abs_distances,
-                        query_position,
-                        chosen_ref_lowdim_highdim,
-                        correct_ref_lowdim_highdim,
-                        correct_ref_left_right),as.factor),
-               correct = as.numeric(correct)) %>%
-        reorder_levels(trial_stage,order=c('practice','pre_exposure','post_exposure')) %>% 
-        reorder_levels(response, order = c('q','p'))
+# Filter to only have that pilot paradigm data which we specified above
+exp_long <- exp_long %>%
+        filter(pilot_paradigm %in% which_paradigm) %>%
+        droplevels()
+tt_long <- tt_long %>%
+        filter(pilot_paradigm %in% which_paradigm) %>%
+        droplevels()
+tt_long_post_pre_and_diff <- tt_long_post_pre_and_diff %>%
+        filter(pilot_paradigm %in% which_paradigm) %>%
+        droplevels()
+tt_wide_reps <- tt_wide_reps %>%
+        filter(pilot_paradigm %in% which_paradigm) %>%
+        droplevels()
+tt_wide_reps_wide_trial_stage <- tt_wide_reps_wide_trial_stage %>%
+        filter(pilot_paradigm %in% which_paradigm) %>%
+        droplevels()
 
-
-# Now load the exposure data
-exp_long <- import('./results/pilots/preprocessed_data/exposure_task_long_form.csv')
-
-exp_long %<>%
-        mutate(dist_abs_from_prev = as.factor(dist_abs_from_prev),
-               response = as.factor(response),
-               session = as.factor(session)) %>%
-        reorder_levels(response, order = c('q','p'))
 ```
-
-Quality checks for initial 10 participants acquired on Feb 3-4, 2022
 
 Will create a table called qc_table, listing which participants failed which of the checks.
 
@@ -368,7 +354,7 @@ tt_acc %>%
         ggplot(aes(x=trial_stage,y=mean_acc)) +
         geom_point() +
         geom_line(aes(group=prolific_id,color=prolific_id)) +
-        facet_wrap(~prolific_id, nrow = 1) +
+        facet_wrap(~prolific_id, nrow = 2) +
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
         ggtitle('Triplet task accuracy')
 
@@ -392,22 +378,22 @@ Red dots are mean accuracy. Black dots are individual trials, either correct or 
 
 Triplet easiness of 8 means that the absolute difference between the dist(query,ref1) and dist(query,ref2) is 8. The higher this difference, the easier it is for participants to spot which of the refs is more similar to the query.
 
-```{r, fig.height = 4, fig.width = 11}
+```{r, fig.height = 4, fig.width = 15}
 ## Accuracy by triplet easiness ----------------------------------------------
 tt_long %>%
         filter(correct_response != '',
                trial_stage != 'practice') %>%
         droplevels() %>%
-        reorder_levels(triplet_easiness,order = c("0",'8','16',"24",'48',"56","64")) %>%
+        reorder_levels(triplet_easiness,order = c("0",'8','16')) %>%
         group_by(prolific_id,trial_stage,triplet_easiness) %>%
         summarise(mean_acc = mean(correct,na.rm=F)) %>%
         ggplot(aes(x=triplet_easiness,y=mean_acc)) +
         # geom_bar(stat='identity') +
-        geom_dotplot(mapping = aes(x=triplet_easiness,y=correct),
-                     data=filter(tt_long,correct_response != '',trial_stage != 'practice'),
-                     binaxis='y',
-                     stackdir='centerwhole',
-                     stackratio=1, dotsize=0.5, fill="black") +
+        # geom_dotplot(mapping = aes(x=triplet_easiness,y=correct),
+        #              data=filter(tt_long,correct_response != '',trial_stage != 'practice'),
+        #              binaxis='y',
+        #              stackdir='centerwhole',
+        #              stackratio=1, dotsize=0.5, fill="black") +
         geom_point(color='red') +     
         geom_line(group='prolific_id') +
         facet_grid(trial_stage~prolific_id) +
@@ -485,6 +471,15 @@ exp_acc_by_type %>%
         ggtitle('Exposure accuracy: by trial type')
 
 ```
+
+# Table of counterbalancing conditions
+
+```{r counterbalancing-table}
+
+
+
+```
+
 
 
 ```{r}

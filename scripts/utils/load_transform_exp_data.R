@@ -31,7 +31,8 @@ exp_long <- import('./results/pilots/preprocessed_data/exposure_task_long_form.c
 exp_long %<>%
         mutate(dist_abs_from_prev = as.factor(dist_abs_from_prev),
                response = as.factor(response),
-               session = as.factor(session))
+               session = as.factor(session)) %>%
+        reorder_levels(response, order = c('q','p'))
 
 # Do a QC filtering
 if (qc_filter){

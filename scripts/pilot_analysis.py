@@ -124,11 +124,16 @@ for iF in file_list:
         
         pilot_paradigm = 1
         
+        # density boundary
+        density_boundary = 78
+        
     else:
         exemplar_min = 30
         exemplar_max = 110
         
-        pilot_paradigm = 2    
+        pilot_paradigm = 2   
+        
+        density_boundary = 70
     
     # Whats the mid point in the stimulus space?
     mid_point = (exemplar_max - exemplar_min)/2 + exemplar_min
@@ -381,8 +386,8 @@ for iF in file_list:
         )     
     
     # %% Where is the triplet in the density space?
-    dense_boundary  = np.array((mid_point,exemplar_max))
-    sparse_boundary = np.array((exemplar_min,mid_point))
+    dense_boundary  = np.array((density_boundary,exemplar_max))
+    sparse_boundary = np.array((exemplar_min,density_boundary))
     # - But depending on the density condition, swap these
     if data_decoded['inputData']['cb_condition'] == 'dense_left':
         

@@ -6,10 +6,17 @@
 
 # If qc_filter variable doesnt exist, create it
 if (!exists('qc_filter')){
-        rm(list=ls())
+
         qc_filter <- F
                
 }
+
+if (!exists('which_paradigm')){
+
+        which_paradigm <- c(1,2)
+        
+}
+
 
 # Load the libraries ###########################################################
 pacman::p_load(pacman,
@@ -37,7 +44,8 @@ tt_long <- import('./results/pilots/preprocessed_data/triplet_task_long_form.csv
 # Start various transformations of columns######################################
 
 tt_long %<>% 
-        filter(trial_stage != 'practice') %>%
+        filter(trial_stage != 'practice',
+               pilot_paradigm %in% which_paradigm) %>%
         droplevels() %>%
         mutate(across(c(triplet_easiness,
                         prolific_id,
@@ -55,15 +63,11 @@ tt_long %<>%
                         template_distances,
                         template_abs_distances,
                         query_position,
+                        curve_type,
                         correct_ref_lowdim_highdim,
                         correct_ref_left_right,
                         correct_ref_towards_dense_sparse,
-                        triplet_location),as.factor),
-               chosen_ref_numeric = case_when(
-                       chosen_ref_lowdim_highdim == 'ref_highdim' ~ 2,
-                       chosen_ref_lowdim_highdim == 'ref_highdim' ~ 1,
-                       TRUE ~ 0
-                       )
+                        triplet_location),as.factor)
                ) %>%
         reorder_levels(trial_stage,order=c('pre_exposure','post_exposure')) %>%
         reorder_levels(triplet_location,order=c('sparse_region',
@@ -88,44 +92,6 @@ if (qc_filter){
                 filter(!prolific_id %in% qc_fail_ptps) %>%
                 droplevels()
 }
-
-# Create the "choice towards sparse" and "chose_towards_highdim" variables
-tt_long %<>%
-        mutate(chose_towards_sparse = case_when(
-                counterbalancing == 'dense_left' ~ as.numeric(
-                        chosen_ref_value > query_item),
-                counterbalancing == 'dense_right'~ as.numeric(
-                        chosen_ref_value < query_item)),
-                chose_towards_highdim = as.numeric(chosen_ref_value > query_item)
-               )
-
-# Discretize the space into concave vs convex
-boundary_val <- 70
-
-# tt_long %<>%
-#         mutate(curve_type = as.factor(
-#                 case_when(
-#                         query_item <= boundary_val & ref_left <= boundary_val & 
-#                                 ref_right <= boundary_val ~ 'concave',
-#                         query_item >= boundary_val & ref_left >= boundary_val & 
-#                                 ref_right >= boundary_val ~ 'convex',
-#                         TRUE ~ 'across_convexity'
-#                 ))) %>%
-#         reorder_levels(curve_type, order = c('concave',
-#                                              'across_convexity',
-#                                              'convex'))
-
-tt_long %<>%
-        mutate(curve_type = as.factor(
-                case_when(
-                        query_item < boundary_val ~ 'concave',
-                        query_item > boundary_val & ref_left >= boundary_val & 
-                                ref_right >= boundary_val ~ 'convex',
-                        TRUE ~ 'across_convexity'
-                ))) %>%
-        reorder_levels(curve_type, order = c('concave',
-                                             'across_convexity',
-                                             'convex'))
 
 # Various long-to-wide-to-long form transformations ##########################
 

@@ -46,18 +46,6 @@ source('./scripts/utils/load_transform_exp_data.R')
 exp_long <- exp_long %>%
         filter(pilot_paradigm %in% which_paradigm) %>%
         droplevels()
-tt_long <- tt_long %>%
-        filter(pilot_paradigm %in% which_paradigm) %>%
-        droplevels()
-tt_long_post_pre_and_diff <- tt_long_post_pre_and_diff %>%
-        filter(pilot_paradigm %in% which_paradigm) %>%
-        droplevels()
-tt_wide_reps <- tt_wide_reps %>%
-        filter(pilot_paradigm %in% which_paradigm) %>%
-        droplevels()
-tt_wide_reps_wide_trial_stage <- tt_wide_reps_wide_trial_stage %>%
-        filter(pilot_paradigm %in% which_paradigm) %>%
-        droplevels()
 
 ```
 

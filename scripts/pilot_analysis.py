@@ -138,6 +138,9 @@ for iF in file_list:
     # Whats the mid point in the stimulus space?
     mid_point = (exemplar_max - exemplar_min)/2 + exemplar_min
     
+    # Convexity boundary?
+    convexity_boundary = 70
+    
     # %% Pre and post exposure trials 
     pre_exp_output  = pd.DataFrame(data_decoded['outputData']['pre_exposure'])
     post_exp_output = pd.DataFrame(data_decoded['outputData']['post_exposure'])
@@ -316,6 +319,16 @@ for iF in file_list:
         'query_middle')
         )
     
+    # %% Location of the query in the convexity space
+    tt['curve_type'] = np.where(
+        tt['query_item'] < convexity_boundary,'concave',
+        np.where(
+            tt['query_item'] > convexity_boundary,'convex',
+            'across_convexity'
+            )
+        )
+             
+             
     # %% Which ref was chosen? ref_lowdim and ref_highdim
     
     # - identify which ref was chosen
@@ -334,6 +347,33 @@ for iF in file_list:
         np.where(    
             tt['chosen_ref_value'] == tt['ref_lowdim'],
             'ref_lowdim','ref_highdim'
+            )
+        )
+    
+    # %% Did they choose the referent thats towards the sparse section of the space?
+    tt['chose_towards_sparse'] = np.where(
+        np.isnan(tt['chosen_ref_value']),np.nan,
+        np.where(
+            data_decoded['inputData']['cb_condition'] == 'dense_left', (tt['chosen_ref_value'] > tt['query_item']).astype(int),
+            np.where(
+                data_decoded['inputData']['cb_condition'] == 'dense_right', (tt['chosen_ref_value'] < tt['query_item']).astype(int),
+                'seriously_something_is_wrong'
+                )
+            )
+        )
+    
+    # %% Chose towards high dimensions?
+    tt['chose_towards_highdim'] = np.where(
+        np.isnan(tt['chosen_ref_value']),np.nan,
+        tt['chosen_ref_value'] > tt['query_item']
+        )
+    
+    # %% Give a numerical value to the chosen referent
+    tt['chosen_ref_numeric'] = np.where(
+        tt['chosen_ref_lowdim_highdim'] == 'ref_highdim',2,
+        np.where(
+            tt['chosen_ref_lowdim_highdim'] == 'ref_lowdim',1,
+            0
             )
         )
     
@@ -406,6 +446,9 @@ for iF in file_list:
         'sparse_region',
         'across_density_regions')
                 )
+
+    
+
 
     # %% Add the counterbalancing and pilot_paradigm conditions as a columns
     tt.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])

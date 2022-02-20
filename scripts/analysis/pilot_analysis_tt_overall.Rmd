@@ -66,7 +66,7 @@ which_paradigm <- c(2)
 print(paste0('Which pilot paradigm? ', which_paradigm))
 
 source('./scripts/utils/load_transform_tt_data.R')
-source('./scripts/utils/get_diff_scores_between_triplet_locations.R')
+source('./scripts/utils/summary_stats_for_various_factors.R')
 
 # Flags and settings
 
@@ -85,147 +85,6 @@ tt_long %>%
 
 ```
 
-# Summary stats for various combinations of factors.
-
-(Code hidden)
-Calculates some tables for plotting them below.
-
-```{r part-specific-summary-stats}
-
-# Create participant summary stats
-tt_participant_summary_stats <- tt_long_post_pre_and_diff %>%
-        group_by(prolific_id,
-                 counterbalancing,
-                 dep_var_type) %>%
-        summarise(n_datapoints = n(),
-                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
-                  mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
-                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
-                  mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
-        ungroup()
-
-tt_participant_summary_stats_triplet_location <- tt_long_post_pre_and_diff %>%
-        group_by(prolific_id,
-                 counterbalancing,
-                 triplet_location,
-                 dep_var_type) %>%
-        summarise(n_datapoints = n(),
-                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
-                  mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
-                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
-                  mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
-        ungroup()
-
-tt_participant_summary_stats_curve_type <- tt_long_post_pre_and_diff %>%
-        group_by(prolific_id,
-                 counterbalancing,
-                 curve_type,
-                 dep_var_type) %>%
-        summarise(n_datapoints = n(),
-                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
-                  mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
-                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
-                  mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
-        ungroup()
-
-tt_participant_summary_stats_triplet_location_easiness <- tt_long_post_pre_and_diff %>%
-        group_by(prolific_id,
-                 counterbalancing,
-                 triplet_location,
-                 triplet_easiness,
-                 dep_var_type) %>%
-        summarise(n_datapoints = n(),
-                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
-                  mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
-                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
-                  mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
-        ungroup()
-
-tt_participant_summary_stats_template_triplet_location_easiness <- tt_long_post_pre_and_diff %>%
-        group_by(prolific_id,
-                 counterbalancing,
-                 template_distances,
-                 triplet_location,
-                 triplet_easiness,
-                 dep_var_type) %>%
-        summarise(n_datapoints = n(),
-                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
-                  mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
-                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
-                  mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
-        ungroup()
-
-tt_participant_summary_stats_curve_type_template <- tt_long_post_pre_and_diff %>%
-        group_by(prolific_id,
-                 counterbalancing,
-                 curve_type,
-                 template_distances,
-                 dep_var_type) %>%
-        summarise(n_datapoints = n(),
-                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
-                  mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
-                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
-                  mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
-        ungroup()
-
-tt_participant_summary_stats_triplet_location_template <- tt_long_post_pre_and_diff %>%
-        group_by(prolific_id,
-                 counterbalancing,
-                 triplet_location,
-                 template_distances,
-                 dep_var_type) %>%
-        summarise(n_datapoints = n(),
-                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
-                  mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
-                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
-                  mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
-        ungroup()
-
-# Difference scrores between triplet locations
-tt_participant_summary_stats_triplet_location_differences <- tt_participant_summary_stats_triplet_location %>%
-        pivot_wider(id_cols = c(prolific_id,
-                                counterbalancing,
-                                dep_var_type),
-                    names_from = triplet_location,
-                    values_from = starts_with('mean_'),
-                    names_glue = '{.value}__{triplet_location}') %>%
-        mutate(chose_towards_sparse__across_minus_dense   = mean_chose_towards_sparse__across_density_regions - mean_chose_towards_sparse__dense_region,
-               chose_towards_sparse__across_minus_sparse  = mean_chose_towards_sparse__across_density_regions - mean_chose_towards_sparse__sparse_region,
-               chose_towards_sparse__dense_minus_sparse   = mean_chose_towards_sparse__dense_region - mean_chose_towards_sparse__sparse_region,
-               chose_towards_highdim__across_minus_dense  = mean_chose_towards_highdim__across_density_regions - mean_chose_towards_highdim__dense_region,
-               chose_towards_highdim__across_minus_sparse = mean_chose_towards_highdim__across_density_regions - mean_chose_towards_highdim__sparse_region,
-               chose_towards_highdim__dense_minus_sparse  = mean_chose_towards_highdim__dense_region - mean_chose_towards_highdim__sparse_region) %>%
-        select(-starts_with('mean_')) %>%
-        pivot_longer(cols = starts_with('chose_towards_'),
-                     names_to = c('chose_towards_type','difference_type'),
-                     values_to = 'difference_value',
-                     names_pattern = '(.+)__(.+)')
-
-tt_participant_summary_stats_triplet_location_easiness_differences <- tt_participant_summary_stats_triplet_location_easiness %>%
-        pivot_wider(id_cols = c(prolific_id,
-                                counterbalancing,
-                                triplet_easiness,
-                                dep_var_type),
-                    names_from = triplet_location,
-                    values_from = starts_with('mean_'),
-                    names_glue = '{.value}__{triplet_location}') %>%
-        mutate(chose_towards_sparse__across_minus_dense   = mean_chose_towards_sparse__across_density_regions - mean_chose_towards_sparse__dense_region,
-               chose_towards_sparse__across_minus_sparse  = mean_chose_towards_sparse__across_density_regions - mean_chose_towards_sparse__sparse_region,
-               chose_towards_sparse__dense_minus_sparse   = mean_chose_towards_sparse__dense_region - mean_chose_towards_sparse__sparse_region,
-               chose_towards_highdim__across_minus_dense  = mean_chose_towards_highdim__across_density_regions - mean_chose_towards_highdim__dense_region,
-               chose_towards_highdim__across_minus_sparse = mean_chose_towards_highdim__across_density_regions - mean_chose_towards_highdim__sparse_region,
-               chose_towards_highdim__dense_minus_sparse  = mean_chose_towards_highdim__dense_region - mean_chose_towards_highdim__sparse_region) %>%
-        select(-starts_with('mean_')) %>%
-        pivot_longer(cols = starts_with('chose_towards_'),
-                     names_to = c('chose_towards_type','difference_type'),
-                     values_to = 'difference_value',
-                     names_pattern = '(.+)__(.+)')
-
-
-
-
-```
-
 # Plots over all trials
 
 Show data for Pre, post, and post-minus-pre difference. 
@@ -238,7 +97,7 @@ But its good to see that accuracy is alright: around 75% pre and post.
 ```{r all-dep-var-overall-plots, fig.width=12, fig.height=10, warning=F}
 
 # Choice towards sparse
-fig1 <- tt_participant_summary_stats %>%
+fig1 <- tt_part_sum_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_chose_towards_sparse)) +
@@ -255,7 +114,7 @@ fig1 <- tt_participant_summary_stats %>%
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
         ggtitle('chose towards sparse')
 
-fig2 <- tt_participant_summary_stats %>%
+fig2 <- tt_part_sum_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_chose_towards_sparse)) +
@@ -273,7 +132,7 @@ fig2 <- tt_participant_summary_stats %>%
         facet_wrap(~counterbalancing) 
 
 #  
-fig3 <- tt_participant_summary_stats %>%
+fig3 <- tt_part_sum_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_chose_towards_highdim)) +
@@ -290,7 +149,7 @@ fig3 <- tt_participant_summary_stats %>%
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
         ggtitle('chose towards high dimension')
 
-fig4 <- tt_participant_summary_stats %>%
+fig4 <- tt_part_sum_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_chose_towards_highdim)) +
@@ -308,7 +167,7 @@ fig4 <- tt_participant_summary_stats %>%
         facet_wrap(~counterbalancing)
 
 #  
-fig5 <- tt_participant_summary_stats %>%
+fig5 <- tt_part_sum_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_correct)) +
@@ -325,7 +184,7 @@ fig5 <- tt_participant_summary_stats %>%
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
         ggtitle('accuracy')
 
-fig6 <- tt_participant_summary_stats %>%
+fig6 <- tt_part_sum_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
                    y=mean_correct)) +
@@ -357,7 +216,7 @@ grid.arrange(fig1,fig2,
 x_font_size <- 10
 
 # Choice towards sparse
-fig1 <- tt_participant_summary_stats_triplet_location %>%
+fig1 <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_sparse)) +
@@ -375,7 +234,7 @@ fig1 <- tt_participant_summary_stats_triplet_location %>%
         theme(text = element_text(size=x_font_size)) + 
         ggtitle('Post-pre chose towards sparse')
 
-fig2 <- tt_participant_summary_stats_triplet_location %>%
+fig2 <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_sparse)) +
@@ -394,7 +253,7 @@ fig2 <- tt_participant_summary_stats_triplet_location %>%
         facet_wrap(~counterbalancing) 
 
 #  
-fig3 <- tt_participant_summary_stats_triplet_location %>%
+fig3 <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_highdim)) +
@@ -412,7 +271,7 @@ fig3 <- tt_participant_summary_stats_triplet_location %>%
         theme(text = element_text(size=x_font_size)) + 
         ggtitle('Post-pre chose towards high dimension')
 
-fig4 <- tt_participant_summary_stats_triplet_location %>%
+fig4 <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_highdim)) +
@@ -450,7 +309,7 @@ x_font_size <- 10
 x_font_angle <- 10
 
 # Now plot this
-fig1 <- tt_participant_summary_stats_triplet_location_differences %>%
+fig1 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == 'post_pre_diff',
                chose_towards_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=difference_type,
@@ -477,7 +336,7 @@ fig1 <- tt_participant_summary_stats_triplet_location_differences %>%
         ggtitle('Post-pre chose towards sparse. Diff scores')
 
 # Now plot this
-fig2 <- tt_participant_summary_stats_triplet_location_differences %>%
+fig2 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == 'post_pre_diff',
                chose_towards_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=difference_type,
@@ -524,7 +383,7 @@ So, its useful to check which of these templates are driving the overall effects
 x_font_size <- 10
 
 # Choice towards sparse
-fig1 <- tt_participant_summary_stats_triplet_location_easiness %>%
+fig1 <- tt_part_sum_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_sparse)) +
@@ -542,7 +401,7 @@ fig1 <- tt_participant_summary_stats_triplet_location_easiness %>%
         theme(text = element_text(size=x_font_size)) + 
         ggtitle('Post-pre chose towards sparse')
 
-fig2 <- tt_participant_summary_stats_triplet_location_easiness %>%
+fig2 <- tt_part_sum_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_sparse)) +
@@ -575,7 +434,7 @@ x_font_size <- 10
 x_font_angle <- 10
 
 # Now plot this
-fig1 <- tt_participant_summary_stats_triplet_location_easiness_differences %>%
+fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == 'post_pre_diff',
                chose_towards_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=difference_type,
@@ -602,7 +461,7 @@ fig1 <- tt_participant_summary_stats_triplet_location_easiness_differences %>%
         ggtitle('Post-pre chose towards sparse. Diff scores')
 
 # Now plot this
-fig2 <- tt_participant_summary_stats_triplet_location_easiness_differences %>%
+fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == 'post_pre_diff',
                chose_towards_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=difference_type,
@@ -647,11 +506,11 @@ This is just in case there is a really strong signal showing us that one of the 
 
 x_font_size <- 10
 
-for (iE in levels(tt_participant_summary_stats_template_triplet_location_easiness$triplet_easiness)){
+for (iE in levels(tt_part_sum_stats_template_triplet_location_easiness$triplet_easiness)){
         print(iE)
         
         # Choice towards sparse
-        fig1 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
+        fig1 <- tt_part_sum_stats_template_triplet_location_easiness %>%
                 filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
                 ggplot(aes(x=triplet_location,
                            y=mean_chose_towards_sparse)) +
@@ -669,7 +528,7 @@ for (iE in levels(tt_participant_summary_stats_template_triplet_location_easines
                 theme(text = element_text(size=x_font_size)) +
                 ggtitle('Post-pre chose towards sparse')
         
-        fig2 <- tt_participant_summary_stats_template_triplet_location_easiness %>%
+        fig2 <- tt_part_sum_stats_template_triplet_location_easiness %>%
                 filter(dep_var_type == 'post_pre_diff',triplet_easiness == iE) %>%  
                 ggplot(aes(x=triplet_location,
                            y=mean_chose_towards_sparse)) +
@@ -696,46 +555,274 @@ for (iE in levels(tt_participant_summary_stats_template_triplet_location_easines
 
 ```
 
-# Sorted plot
+# Plots with x axis sorted by diagnosticity
 
+## Y axis: post-pre chose low-density
 
-```{r sorted-plot, fig.width=13}
+```{r sorted-plot-chose-low-density, fig.width=13, fig.height=15}
 
+# Calculate the mean data separately
 
 # For sorted data
-tt_long_post_pre_and_diff %>%
-        
-        ggplot(aes(x=triplet_unique_name,
+fig1 <- tt_long_post_pre_and_diff %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_sparse_avg_across_reps),
+                   y=chose_towards_sparse_avg_across_reps)) +
+        geom_boxplot(fatten = 3) + 
+        stat_summary(fun=mean,
+                     geom = 'point',
+                     size = 5,
+                     color="black",
+                     aes(shape = triplet_easiness)) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') +
+        ylab('Post-pre: chose low-density') + 
+        xlab('Individual Triplets') +
+        ggtitle('All counterbalancing groups')
+
+
+
+fig2 <- tt_long_post_pre_and_diff %>%
+        filter(counterbalancing == 'dense_right',
+               dep_var_type == 'post_pre_diff') %>% 
+         ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_sparse_avg_across_reps),
                    y=chose_towards_sparse_avg_across_reps)) +
         geom_boxplot(fatten = 4,aes(color=triplet_location)) + 
-        stat_summary(fun=mean,color='red') + 
-        facet_wrap(~counterbalancing,
-                   nrow = 2) + 
+        stat_summary(fun=mean,
+                     color='black',
+                     aes(shape = triplet_easiness),
+                     size = 1) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        # geom_point(data = filter(tt_bw_part_sum_stats_triplets,counterbalancing == 'dense_right'),
+        #            aes(x = triplet_unique_name,
+        #                y = mean_chose_towards_sparse)) +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = 'top')
-        
-        
-        group_by(counterbalancing,
-                 triplet_location,
-                 triplet_unique_name) %>%
-        summarise(n_datapoints = n(),
-                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
-                  mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
-                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
-                  mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
-        ungroup() %>%
-        ggplot(aes(x=reorder(triplet_unique_name, -mean_chose_towards_sparse),
-                   y=mean_chose_towards_sparse)) +
-        geom_boxplot() + 
-        stat_summary(fun=mean, geom="point", shape=20, size=5, color="red", fill="red") +    
-        theme(axis.text.x = element_text(angle = 90))
-        
+              legend.position = 'top') +
+        ylab('Post-pre: chose low-density') + 
+        xlab('Individual Triplets') +
+        ggtitle('Dense Right')
+
+fig3 <- tt_long_post_pre_and_diff %>%
+        filter(counterbalancing == 'dense_left',
+               dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_sparse_avg_across_reps),
+                   y=chose_towards_sparse_avg_across_reps)) +
+        geom_boxplot(fatten = 4,aes(color=triplet_location)) +
+        stat_summary(fun=mean,
+                     color='black',
+                     aes(shape = triplet_easiness),
+                     size = 1) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = '') +
+        ylab('Post-pre: chose low-density') +
+        xlab('Individual Triplets') +
+        ggtitle('Dense Left')
 
 
+grid.arrange(fig1,fig2,fig3,
+             nrow = 3)
+```
+
+
+
+## Y axis: post-pre chose high-dimension
+
+```{r sorted-plot-chose-high-dimension, fig.width=13, fig.height=15}
+
+# For sorted data
+fig1 <- tt_long_post_pre_and_diff %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
+                   y=chose_towards_highdim_avg_across_reps)) +
+        geom_boxplot(fatten = 3) + 
+        stat_summary(fun=mean,
+                     geom = 'point',
+                     size = 5,
+                     color="black",
+                     aes(shape = triplet_easiness)) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') +
+        ylab('Post-pre: chose high-dim') + 
+        xlab('Individual Triplets') +
+        ggtitle('All counterbalancing groups')
+
+
+
+fig2 <- tt_long_post_pre_and_diff %>%
+        filter(counterbalancing == 'dense_right',
+               dep_var_type == 'post_pre_diff') %>% 
+         ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
+                   y=chose_towards_highdim_avg_across_reps)) +
+        geom_boxplot(fatten = 4,aes(color=triplet_location)) + 
+        stat_summary(fun=mean,
+                     color='black',
+                     aes(shape = triplet_easiness),
+                     size = 1) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        # geom_point(data = filter(tt_bw_part_sum_stats_triplets,counterbalancing == 'dense_right'),
+        #            aes(x = triplet_unique_name,
+        #                y = mean_chose_towards_sparse)) +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') +
+        ylab('Post-pre: chose high-dim') + 
+        xlab('Individual Triplets') +
+        ggtitle('Dense Right')
+
+fig3 <- tt_long_post_pre_and_diff %>%
+        filter(counterbalancing == 'dense_left',
+               dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
+                   y=chose_towards_highdim_avg_across_reps)) +
+        geom_boxplot(fatten = 4,aes(color=triplet_location)) +
+        stat_summary(fun=mean,
+                     color='black',
+                     aes(shape = triplet_easiness),
+                     size = 1) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = '') +
+        ylab('Post-pre: chose high-dim') +
+        xlab('Individual Triplets') +
+        ggtitle('Dense Left')
+
+
+grid.arrange(fig1,fig2,fig3,
+             nrow = 3)
+```
+
+## Y axis: post-pre chose towards higher dimension, between counterbalancing groups
+
+```{r sorted-plot-chose-low-density-cb-differences, fig.width=13, fig.height=3}
+
+tt_bw_part_sum_stats_triplets_difference %>%
+        filter(dep_var_type == 'post_pre_diff',
+               chose_towards_type == 'chose_towards_highdim') %>%
+        ggplot(aes(x=reorder(triplet_unique_name,-difference_value),
+                   y=difference_value)) +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_point(aes(color = triplet_easiness,
+                       shape = curve_type),
+                   size = 3) +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'right') +
+        ylab('Dense_right - Dense_left') + 
+        xlab('Individual Triplets') +
+        ggtitle('Post-pre chose high-dimension: Counterbalancing group difference')
 
 
 ```
 
+
+## Y axis: triplet_location differences in their post-pre value
+
+```{r sorted-plot-triplet-location-diff-socres-1, fig.width=8, fig.height=8}
+
+# For sorted data
+fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
+        filter(counterbalancing == 'dense_right',
+               dep_var_type == 'post_pre_diff',
+               difference_type == 'across_minus_dense',
+               chose_towards_type == 'chose_towards_sparse') %>%
+        ggplot(aes(x=reorder(template_distances,-difference_value),
+                   y=difference_value)) +
+        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        # geom_jitter(height = 0,
+        #             width = 0.2,
+        #             alpha = 0.4,
+        #             aes(shape = triplet_easiness)) +
+        stat_summary(fun=mean,color='black') + 
+        # facet_wrap(~counterbalancing,
+        #            nrow = 2) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') + 
+        ylab('Across-Dense:\n Post-pre chose low-density') + 
+        xlab('Templates') +
+        ggtitle('Dense Right')
+
+fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
+        filter(counterbalancing == 'dense_left',
+               dep_var_type == 'post_pre_diff',
+               difference_type == 'across_minus_dense',
+               chose_towards_type == 'chose_towards_sparse') %>%
+        ggplot(aes(x=reorder(template_distances,-difference_value),
+                   y=difference_value)) +
+        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        # geom_jitter(height = 0,
+        #             width = 0.2,
+        #             alpha = 0.4,
+        #             aes(shape = triplet_easiness)) +
+        stat_summary(fun=mean,color='black') + 
+        # facet_wrap(~counterbalancing,
+        #            nrow = 2) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') + 
+        ylab('Across-Dense:\n Post-pre chose low-density') + 
+        xlab('Templates') +
+        ggtitle('Dense Left')
+        
+
+grid.arrange(fig1,fig2,
+             nrow = 2,
+             top = 'Across - Dense')
+```
+
+```{r sorted-plot-triplet-location-diff-socres-2, fig.width=8, fig.height=8}
+
+# For sorted data
+fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
+        filter(counterbalancing == 'dense_right',
+               dep_var_type == 'post_pre_diff',
+               difference_type == 'across_minus_sparse',
+               chose_towards_type == 'chose_towards_sparse') %>%
+        ggplot(aes(x=reorder(template_distances,-difference_value),
+                   y=difference_value)) +
+        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        # geom_jitter(height = 0,
+        #             width = 0.2,
+        #             alpha = 0.4,
+        #             aes(shape = triplet_easiness)) +
+        stat_summary(fun=mean,color='black') + 
+        # facet_wrap(~counterbalancing,
+        #            nrow = 2) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') + 
+        ylab('Across-Sparse:\n Post-pre chose low-density') + 
+        xlab('Templates') +
+        ggtitle('Dense Right')
+
+fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
+        filter(counterbalancing == 'dense_left',
+               dep_var_type == 'post_pre_diff',
+               difference_type == 'across_minus_sparse',
+               chose_towards_type == 'chose_towards_sparse') %>%
+        ggplot(aes(x=reorder(template_distances,-difference_value),
+                   y=difference_value)) +
+        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        # geom_jitter(height = 0,
+        #             width = 0.2,
+        #             alpha = 0.4,
+        #             aes(shape = triplet_easiness)) +
+        stat_summary(fun=mean,color='black') + 
+        # facet_wrap(~counterbalancing,
+        #            nrow = 2) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') + 
+        ylab('Across-Sparse:\n Post-pre chose low-density') + 
+        xlab('Templates') +
+        ggtitle('Dense Left')
+        
+
+grid.arrange(fig1,fig2,
+             nrow = 2,
+             top = 'Across - Sparse')
+```
 
 
 # Between participant comparisons:
@@ -750,7 +837,7 @@ But its useful to plot the data from the two counterbalancing groups next to eac
 
 ylimits <- c(-0.2,0.2)
 
-fig1 <- tt_participant_summary_stats %>%
+fig1 <- tt_part_sum_stats %>%
         filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_chose_towards_sparse)) +
@@ -772,7 +859,7 @@ fig1 <- tt_participant_summary_stats %>%
         coord_cartesian(ylim = ylimits) + 
         ggtitle('Chose towards sparse')
 
-fig2 <- tt_participant_summary_stats %>%
+fig2 <- tt_part_sum_stats %>%
         filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_chose_towards_highdim)) +
@@ -794,7 +881,7 @@ fig2 <- tt_participant_summary_stats %>%
         coord_cartesian(ylim = ylimits) + 
         ggtitle('Chose towards high dimension')
 
-fig3 <- tt_participant_summary_stats %>%
+fig3 <- tt_part_sum_stats %>%
         filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_correct)) +
@@ -834,7 +921,7 @@ If density stretches the psychological space then what we want to see below is t
 
 ylimits <- c(-0.4,0.4)
 
-fig1 <- tt_participant_summary_stats_triplet_location %>%
+fig1 <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_chose_towards_sparse)) +
@@ -857,7 +944,7 @@ fig1 <- tt_participant_summary_stats_triplet_location %>%
         facet_wrap(~triplet_location) +
         ggtitle('Chose towards sparse')
 
-fig2 <- tt_participant_summary_stats_triplet_location %>%
+fig2 <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_chose_towards_highdim)) +
@@ -880,7 +967,7 @@ fig2 <- tt_participant_summary_stats_triplet_location %>%
         facet_wrap(~triplet_location) + 
         ggtitle('Chose towards high dimension')
 
-# fig3 <- tt_participant_summary_stats_triplet_location %>%
+# fig3 <- tt_part_sum_stats_triplet_location %>%
 #         filter(dep_var_type == 'post_pre_diff') %>%
 #         ggplot(aes(x=counterbalancing,
 #                    y=mean_correct)) +
@@ -917,7 +1004,7 @@ grid.arrange(fig1,fig2,
 
 ylimits <- c(-1,1)
 
-fig1 <- tt_participant_summary_stats_triplet_location_template %>%
+fig1 <- tt_part_sum_stats_triplet_location_template %>%
         filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_chose_towards_sparse)) +
@@ -940,7 +1027,7 @@ fig1 <- tt_participant_summary_stats_triplet_location_template %>%
         facet_grid(template_distances~triplet_location) +
         ggtitle('Chose towards sparse')
 
-fig2 <- tt_participant_summary_stats_triplet_location_template %>%
+fig2 <- tt_part_sum_stats_triplet_location_template %>%
         filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_chose_towards_highdim)) +

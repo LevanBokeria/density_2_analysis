@@ -11,7 +11,7 @@ knit: (function(input, ...) {
       output_file = paste0(
       rprojroot::find_rstudio_root_file(),
       '/results/pilots/',
-      'pilot_analysis_paradigm_1_qc_NOT_filtered_',Sys.Date(),'.html'
+      'pilot_analysis_plots_for_presentation_',Sys.Date(),'.html'
       ),
       envir = globalenv()
     )
@@ -66,6 +66,7 @@ which_paradigm <- c(2)
 print(paste0('Which pilot paradigm? ', which_paradigm))
 
 source('./scripts/utils/load_transform_tt_data.R')
+source('./scripts/utils/load_transform_exp_data.R')
 source('./scripts/utils/summary_stats_for_various_factors.R')
 
 # Flags and settings
@@ -84,6 +85,118 @@ tt_long %>%
         kable_styling(bootstrap_options = "striped")
 
 ```
+
+# Exposure:
+
+```{r exposure}
+
+n_same_resp <- 
+        exp_long %>%
+        group_by(prolific_id,dist_abs_from_prev,response,.drop=FALSE) %>% 
+        summarise(n = n()) %>%
+        ungroup() %>%
+        filter(response == 'q')
+
+
+n_tot_resp <- 
+        exp_long %>%
+        group_by(prolific_id,dist_abs_from_prev) %>%
+        summarise(n = n()) %>%
+        ungroup()
+
+same_resp_table <- 
+        merge(n_same_resp,n_tot_resp,by=c('prolific_id','dist_abs_from_prev')) %>%
+        mutate(avg_same_resp = n.x*100/n.y) %>% 
+        ungroup()
+
+same_resp_table %>%
+        filter(!is.na(dist_abs_from_prev)) %>%
+        mutate(dist_abs_from_prev = as.numeric(as.character(dist_abs_from_prev))) %>%
+        ggplot(aes(x=dist_abs_from_prev,y=avg_same_resp)) +
+        geom_point(size=0.5) +
+        geom_line(size=0.5, aes(group=prolific_id,color=prolific_id)) +
+        geom_smooth() +
+        stat_summary(fun='mean',
+                     geom='line',
+                     size=1.5,
+                     color = 'blue',
+                     linetype = 'dashed') +
+        scale_y_continuous(breaks=seq(0,100,5)) +
+        scale_x_continuous(breaks=seq(0,40,1)) +
+        ylab('% "Same" response') +
+        xlab('Unit distance from previous') + 
+        theme_classic() +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = '') +
+        geom_hline(yintercept = 100-75,linetype='dashed') +
+        geom_hline(yintercept = 100-50,linetype='dashed') +
+        # stat_summary(aes(x=dist_abs_from_prev,y=n.y),
+        #              fun='mean',
+        #              geom='line',
+        #              size=1) + 
+        ggtitle('exposure psychometric curves')
+
+same_resp_table %>%
+  group_by(prolific_id,dist_abs_from_prev) %>%
+  summarise(n = n())
+
+
+```
+
+
+# Accuracy
+
+```{r accuracy, fig.width=10, fig.height=4}
+
+fig1 <- tt_part_sum_stats %>%
+        filter(dep_var_type != 'post_pre_diff') %>%
+        ggplot(aes(x=dep_var_type,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +     
+        stat_summary(fun = mean,
+                     color = 'red') + 
+        coord_cartesian(ylim = c(0.5,1)) +
+        # geom_hline(yintercept = 0, linetype = 'dashed') +         
+        ggtitle('accuracy') +
+        xlab('') +
+        ylab('Accuracy')
+
+fig2 <- tt_part_sum_stats %>%
+        filter(dep_var_type != 'post_pre_diff') %>%
+        ggplot(aes(x=dep_var_type,
+                   y=mean_correct)) +
+        geom_violin(fill = accuracy_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +    
+        stat_summary(fun = mean,
+                     color = 'red') + 
+        coord_cartesian(ylim = c(0.5,1)) +
+        # geom_hline(yintercept = 0, linetype = 'dashed') +         
+        facet_wrap(~counterbalancing) +
+        xlab('') +
+        ylab('Accuracy')
+
+grid.arrange(fig1,fig2,
+             nrow = 1,
+             widths = 1:2)
+
+```
+
+
 
 # Plots over all trials
 
@@ -112,7 +225,9 @@ fig1 <- tt_part_sum_stats %>%
                   alpha = 0.2) +  
         stat_summary(fun = mean,
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('chose towards sparse')
+        ggtitle('chose towards sparse') +
+        ylab('P(chose sparse)') +
+        xlab('')
 
 fig2 <- tt_part_sum_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
@@ -129,7 +244,9 @@ fig2 <- tt_part_sum_stats %>%
                   alpha = 0.2) +        
         stat_summary(fun = mean,
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing) 
+        facet_wrap(~counterbalancing)  +
+        ylab('P(chose sparse)') +
+        xlab('')
 
 #  
 fig3 <- tt_part_sum_stats %>%
@@ -147,7 +264,9 @@ fig3 <- tt_part_sum_stats %>%
                   alpha = 0.2) +     
         stat_summary(fun = mean,
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        ggtitle('chose towards high dimension')
+        ggtitle('chose towards high dimension') +
+        ylab('P(chose high-simension)') +
+        xlab('')
 
 fig4 <- tt_part_sum_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
@@ -164,7 +283,9 @@ fig4 <- tt_part_sum_stats %>%
                   alpha = 0.2) +    
         stat_summary(fun = mean,
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
-        facet_wrap(~counterbalancing)
+        facet_wrap(~counterbalancing) +
+        ylab('P(chose high-dimension)') +
+        xlab('')
 
 #  
 fig5 <- tt_part_sum_stats %>%
@@ -232,7 +353,8 @@ fig1 <- tt_part_sum_stats_triplet_location %>%
                      color = 'red') + 
         geom_hline(yintercept = 0, linetype = 'dashed') +      
         theme(text = element_text(size=x_font_size)) + 
-        ggtitle('Post-pre chose towards sparse')
+        ggtitle('Post-pre P(chose sparse)') + 
+        ylab('Post-pre P(chose sparse)')
 
 fig2 <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
@@ -250,7 +372,8 @@ fig2 <- tt_part_sum_stats_triplet_location %>%
                      color = 'red') + 
         geom_hline(yintercept = 0, linetype = 'dashed') +       
         theme(text = element_text(size=x_font_size)) + 
-        facet_wrap(~counterbalancing) 
+        facet_wrap(~counterbalancing) + 
+        ylab('Post-pre P(chose sparse)')
 
 #  
 fig3 <- tt_part_sum_stats_triplet_location %>%
@@ -269,7 +392,8 @@ fig3 <- tt_part_sum_stats_triplet_location %>%
                      color = 'red') + 
         geom_hline(yintercept = 0, linetype = 'dashed') +   
         theme(text = element_text(size=x_font_size)) + 
-        ggtitle('Post-pre chose towards high dimension')
+        ggtitle('Post-pre: P(chose high-dimension)') + 
+        ylab('Post-pre P(chose high-dim)')
 
 fig4 <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>% 
@@ -287,7 +411,8 @@ fig4 <- tt_part_sum_stats_triplet_location %>%
                      color = 'red') + 
         geom_hline(yintercept = 0, linetype = 'dashed') +      
         theme(text = element_text(size=x_font_size)) + 
-        facet_wrap(~counterbalancing)
+        facet_wrap(~counterbalancing) + 
+        ylab('Post-pre P(chose dim)')
         
 grid.arrange(fig1,fig2,
              fig3,fig4,

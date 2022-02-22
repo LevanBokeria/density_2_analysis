@@ -349,7 +349,7 @@ while not triplets_good:
 skip_balancing = False
 
 n_triplet_rep  = 2
-n_exposure_rep = 10
+n_exposure_rep = 0
 
 stim_seq = np.concatenate((np.repeat(stim_triplets,n_triplet_rep),
                            np.repeat(stim_exposure,n_exposure_rep)))
@@ -362,9 +362,9 @@ model_after_bal = DensityModel(model_type, params, all_stim)
 res = model_after_bal.train(stim_seq, test_upd_density=upd_dns)
 
 # Plot
-lower_ylim = 20
+lower_ylim = 0
 if n_exposure_rep == 0:
-    upper_ylim = 40
+    upper_ylim = 110
     titlestr = 'Pre'
 else:
     upper_ylim = 110

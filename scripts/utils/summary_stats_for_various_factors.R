@@ -81,6 +81,7 @@ tt_part_sum_stats_triplet_location_template <- tt_long_post_pre_and_diff %>%
         group_by(prolific_id,
                  counterbalancing,
                  triplet_location,
+                 triplet_easiness,
                  template_distances,
                  dep_var_type) %>%
         summarise(n_datapoints = n(),
@@ -134,6 +135,7 @@ tt_part_sum_stats_triplet_location_template_differences <- tt_part_sum_stats_tri
         pivot_wider(id_cols = c(prolific_id,
                                 counterbalancing,
                                 template_distances,
+                                triplet_easiness,
                                 dep_var_type),
                     names_from = triplet_location,
                     values_from = starts_with('mean_'),

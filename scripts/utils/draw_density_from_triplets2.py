@@ -159,7 +159,10 @@ params = {
 upd_dns = False
 
 # Show low density stimuli
-expose_low_density = False
+expose_low_density = True
+
+# balance Parducci frequency?
+parducci_balance = True
 
 # all possible stimuli (to set the density map, index stimuli, etc.)
 px_min = 30
@@ -170,18 +173,29 @@ all_stim = np.arange(px_min, px_max+1, dtype=float)  # assumning stimuli start f
 # input stimuli (exposure phase)
 
 # - Create gaps of the dense and sparse regions
-step_dense  = 2
+step_dense  = 1
 step_sparse = 8
 
 # - make the dense and sparse sections
 section_1 = np.arange(px_min,mid_point,step_sparse, dtype=int)
 
 section_2 = np.arange(section_1[-1]+step_sparse,px_max+1,step_dense, dtype=int)
+section_2 = np.arange(section_1[-1]+step_sparse,91,step_dense, dtype=int)
+# section_2 = np.arange(90,px_max+1,step_dense, dtype=int)
 # Drop the ones less than mid point
 section_2 = np.delete(section_2,np.where(section_2 < mid_point))
 
 if expose_low_density:
+    
     stim_exposure = np.concatenate((section_1,section_2))    
+    
+    if parducci_balance:
+        
+        density_ratio = step_sparse / step_dense
+        density_ratio = (len(section_2)-1)/len(section_1)
+        
+        stim_exposure = np.concatenate((np.repeat(section_1,density_ratio),section_2))    
+        
 else:
     stim_exposure = section_2
 
@@ -278,78 +292,83 @@ for iBal in range(n_balance):
                         str(iBal+1) + ' additional triplet', ylims)
 
 # %% Move around exemplars in the balanced triplet set, if triplets are "bad"
-triplets_good = False
+fix_balancing_triplets = False
 
-# threshold_diff = 8
 
-# threshold_easy = 3*step_sparse
-threshold_hard = 2*step_sparse
+if fix_balancing_triplets:
 
-perc_hard_min = 40
-perc_hard_max = 60
-# perc_easy = 30
-
-n_hard_min = round(len(bal_triplets)*perc_hard_min/100)
-n_hard_max = round(len(bal_triplets)*perc_hard_max/100)
-# n_easy_wanted = round(len(bal_triplets)*perc_easy/100)
-
-i = 1
-
-while not triplets_good:
-    print(i)
+    triplets_good = False
     
-    i+=1    
+    # threshold_diff = 8
     
-    # Sort each row 
-    bal_triplets = np.sort(bal_triplets, axis=1)
+    # threshold_easy = 3*step_sparse
+    threshold_hard = 2*step_sparse
     
-    # Take a difference between the columns
-    col_diff  = abs(bal_triplets[:,0] - bal_triplets[:,1])
-    col_diff2 = abs(bal_triplets[:,1] - bal_triplets[:,2])
-    col_diff3 = abs(bal_triplets[:,0] - bal_triplets[:,2])
+    perc_hard_min = 40
+    perc_hard_max = 60
+    # perc_easy = 30
     
-    all_col_diffs = np.concatenate((col_diff,col_diff2,col_diff3))
+    n_hard_min = round(len(bal_triplets)*perc_hard_min/100)
+    n_hard_max = round(len(bal_triplets)*perc_hard_max/100)
+    # n_easy_wanted = round(len(bal_triplets)*perc_easy/100)
     
-    # How easy are each triplet?
-    diff_of_distances = abs(col_diff - col_diff2)
+    i = 1
     
-    # How many are below our threshold of difference of distances
-    # n_easy = sum(diff_of_distances >= threshold_easy)
-    n_hard = sum(diff_of_distances < threshold_hard)
-    
-    # If not satisfied, shuffle
-    if (n_hard > n_hard_max) | (n_hard < n_hard_min) | sum(all_col_diffs < step_sparse):
+    while not triplets_good:
+        print(i)
         
-        # Randomly choose another row
-        # row_idx = np.random.randint(0,n_balance)
-        # col_idx = np.random.randint(0,3)
+        i+=1    
         
-        # # Swap the min value
+        # Sort each row 
+        bal_triplets = np.sort(bal_triplets, axis=1)
         
-        # min_idx = np.argmin(col_diff)
+        # Take a difference between the columns
+        col_diff  = abs(bal_triplets[:,0] - bal_triplets[:,1])
+        col_diff2 = abs(bal_triplets[:,1] - bal_triplets[:,2])
+        col_diff3 = abs(bal_triplets[:,0] - bal_triplets[:,2])
         
-        # bal_triplets[min_idx,0], bal_triplets[row_idx,col_idx] = \
-        #     bal_triplets[row_idx,col_idx], bal_triplets[min_idx,0]
+        all_col_diffs = np.concatenate((col_diff,col_diff2,col_diff3))
         
-        # Shuffle the whole array
-        bal_triplets = bal_triplets.flatten()
+        # How easy are each triplet?
+        diff_of_distances = abs(col_diff - col_diff2)
         
-        np.random.shuffle(bal_triplets)
+        # How many are below our threshold of difference of distances
+        # n_easy = sum(diff_of_distances >= threshold_easy)
+        n_hard = sum(diff_of_distances < threshold_hard)
         
-        bal_triplets = bal_triplets.reshape(n_balance,3)
-        
-        print(bal_triplets)
-        print(n_hard)
-        
-    else:
-        triplets_good = True
+        # If not satisfied, shuffle
+        if (n_hard > n_hard_max) | (n_hard < n_hard_min) | sum(all_col_diffs < step_sparse):
+            
+            # Randomly choose another row
+            # row_idx = np.random.randint(0,n_balance)
+            # col_idx = np.random.randint(0,3)
+            
+            # # Swap the min value
+            
+            # min_idx = np.argmin(col_diff)
+            
+            # bal_triplets[min_idx,0], bal_triplets[row_idx,col_idx] = \
+            #     bal_triplets[row_idx,col_idx], bal_triplets[min_idx,0]
+            
+            # Shuffle the whole array
+            bal_triplets = bal_triplets.flatten()
+            
+            np.random.shuffle(bal_triplets)
+            
+            bal_triplets = bal_triplets.reshape(n_balance,3)
+            
+            print(bal_triplets)
+            print(n_hard)
+            
+        else:
+            triplets_good = True
 
 # %% Add exposure trials and see what the final density space looks like
 
-skip_balancing = False
+skip_balancing = True
 
-n_triplet_rep  = 2
-n_exposure_rep = 0
+n_triplet_rep  = 0
+n_exposure_rep = 5
 
 stim_seq = np.concatenate((np.repeat(stim_triplets,n_triplet_rep),
                            np.repeat(stim_exposure,n_exposure_rep)))
@@ -367,7 +386,7 @@ if n_exposure_rep == 0:
     upper_ylim = 110
     titlestr = 'Pre'
 else:
-    upper_ylim = 110
+    upper_ylim = 60
     titlestr = 'Post'
     
 plot_density_fn(model_after_bal,stim_seq,titlestr + '-exposure\n' + \

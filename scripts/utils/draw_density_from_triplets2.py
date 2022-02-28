@@ -162,7 +162,7 @@ upd_dns = False
 expose_low_density = True
 
 # balance Parducci frequency?
-parducci_balance = True
+parducci_balance = False
 
 # all possible stimuli (to set the density map, index stimuli, etc.)
 px_min = 30
@@ -173,14 +173,14 @@ all_stim = np.arange(px_min, px_max+1, dtype=float)  # assumning stimuli start f
 # input stimuli (exposure phase)
 
 # - Create gaps of the dense and sparse regions
-step_dense  = 1
+step_dense  = 2
 step_sparse = 8
 
 # - make the dense and sparse sections
 section_1 = np.arange(px_min,mid_point,step_sparse, dtype=int)
 
 section_2 = np.arange(section_1[-1]+step_sparse,px_max+1,step_dense, dtype=int)
-section_2 = np.arange(section_1[-1]+step_sparse,91,step_dense, dtype=int)
+# section_2 = np.arange(section_1[-1]+step_sparse,91,step_dense, dtype=int)
 # section_2 = np.arange(90,px_max+1,step_dense, dtype=int)
 # Drop the ones less than mid point
 section_2 = np.delete(section_2,np.where(section_2 < mid_point))
@@ -202,7 +202,7 @@ else:
 # %% Load the manually selected triplets
 chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets.xlsx')
 
-skip_balancing_from_excel = True
+skip_balancing_from_excel = False
 plot_only_balancing       = False
 
 if skip_balancing_from_excel:
@@ -367,8 +367,8 @@ if fix_balancing_triplets:
 
 skip_balancing = True
 
-n_triplet_rep  = 0
-n_exposure_rep = 5
+n_triplet_rep  = 2
+n_exposure_rep = 10
 
 stim_seq = np.concatenate((np.repeat(stim_triplets,n_triplet_rep),
                            np.repeat(stim_exposure,n_exposure_rep)))
@@ -386,7 +386,7 @@ if n_exposure_rep == 0:
     upper_ylim = 110
     titlestr = 'Pre'
 else:
-    upper_ylim = 60
+    upper_ylim = 110
     titlestr = 'Post'
     
 plot_density_fn(model_after_bal,stim_seq,titlestr + '-exposure\n' + \
@@ -442,11 +442,19 @@ if plot_average_density:
     error_allowed = [sparse_std,dense_std]    
     
     # %% Get count of exemplars at each location
-    count_sparse = np.delete(stim_seq,np.where(stim_seq >= mid_point)).astype(int)
-    count_sparse = np.bincount(count_sparse)[np.unique(count_sparse)]
     
-    count_dense = np.delete(stim_seq,np.where(stim_seq <= mid_point)).astype(int)
-    count_dense = np.bincount(count_dense)[np.unique(count_dense)]    
+    # Should the mid point at 70 be included in the counts?
+    include_mid_point = True
+    
+    count_sparse_exemplars = np.delete(stim_seq,np.where(stim_seq >= mid_point)).astype(int)
+    count_sparse = np.bincount(count_sparse_exemplars)[np.unique(count_sparse_exemplars)]
+    
+    if include_mid_point:
+        count_dense_exemplars = np.delete(stim_seq,np.where(stim_seq < mid_point)).astype(int)
+    else:
+        count_dense_exemplars = np.delete(stim_seq,np.where(stim_seq <= mid_point)).astype(int)
+        
+    count_dense = np.bincount(count_dense_exemplars)[np.unique(count_dense_exemplars)]    
     
     sparse_sum  = count_sparse.sum()
     sparse_mean = count_sparse.mean()
@@ -459,6 +467,26 @@ if plot_average_density:
     error_counts_mean = [sparse_std,dense_std] 
     
     CTEs_counts_sum  = [sparse_sum,dense_sum]    
+    
+    # %% Plot the frequency counts of each exemplar
+    
+    # t ticks?
+    x_pos = np.concatenate((np.unique(count_sparse_exemplars),np.unique(count_dense_exemplars)))
+    
+    y_values = np.concatenate((count_sparse,count_dense))
+    
+    plt.bar(x_pos,y_values)
+    plt.xticks(x_pos,fontsize=5,rotation=90)
+    
+    if n_exposure_rep != 0:        
+        plt.title('Post: Frequency Count of each exemplar')
+    else:
+        plt.title('Pre: Frequency Count of each exemplar')
+    
+    plt.ylim((0,40))
+    plt.grid(axis = 'y', linewidth = 0.2)
+    
+    plt.show()
     
     # %% Build the plot
     # figure(figsize=(3, 6), dpi=80)

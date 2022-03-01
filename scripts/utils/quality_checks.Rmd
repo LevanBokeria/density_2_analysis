@@ -53,6 +53,7 @@ Will create a table called qc_table, listing which participants failed which of 
 
 # Check QC for the triplet task:
 
+
 ## Button response sequences:
 
 (code hidden)
@@ -159,6 +160,22 @@ qc_table <- merge(qc_table,select(qc_table_rt,prolific_id,qc_fail_rt), by = 'pro
 
 ```
 
+
+## Technical difficulties or debriefing-based
+
+```{r qc-check-technical-debriefing}
+
+manual_qc <- import('./results/pilots/preprocessed_data/qc_manual_for_breaks_debriefing.csv')
+
+qc_table <- qc_table %>% 
+        mutate(qc_fail_manual = case_when(
+                prolific_id %in% manual_qc$ID ~ TRUE,
+                TRUE ~ FALSE
+        ))
+
+```
+
+
 ## Output the resulting table:
 
 ```{r qc-table-report}
@@ -167,6 +184,12 @@ qc_table <- merge(qc_table,select(qc_table_rt,prolific_id,qc_fail_rt), by = 'pro
 qc_table <- qc_table %>%
         rowwise() %>%
         mutate(qc_fail_overall = sum(qc_fail_button_sequence,qc_fail_rt) > 0)
+
+# Add the counterbalancing column
+cb <- tt_long %>% select(prolific_id,pilot_paradigm,counterbalancing) %>% group_by(prolific_id) %>% slice_head()
+
+qc_table <- merge(qc_table,cb,by = 'prolific_id')
+
 
 qc_table  %>%
         knitr::kable() %>%
@@ -191,7 +214,7 @@ if (save_qc_table){
 plot_tt_per_part <- T
 
 if (plot_tt_per_part){
-        for (iP in unique(tt_long$prolific_id)[30:31]){
+        for (iP in unique(tt_long$prolific_id)[30:40]){
                 print(iP)
                 
                 

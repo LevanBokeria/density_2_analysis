@@ -32,7 +32,7 @@ save_breaks       = True
 save_exposure     = True
 
 # A quick flag
-save_nothing = True
+save_nothing = False
 
 if save_nothing:
     save_tt_data      = False
@@ -117,7 +117,7 @@ for iF in file_list:
     sub_numeric = [int(s) for s in data_decoded['prolific_ID'].split('_') if s.isdigit()]
     
     pilot_1_subjects = np.arange(1,17)
-    pilot_2_subjects = np.arange(18,31)
+    pilot_2_subjects = np.arange(17,31)
     
     if sub_numeric in pilot_1_subjects:
         exemplar_min = 30

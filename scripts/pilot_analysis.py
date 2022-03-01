@@ -117,6 +117,7 @@ for iF in file_list:
     sub_numeric = [int(s) for s in data_decoded['prolific_ID'].split('_') if s.isdigit()]
     
     pilot_1_subjects = np.arange(1,17)
+    pilot_2_subjects = np.arange(18,31)
     
     if sub_numeric in pilot_1_subjects:
         exemplar_min = 30
@@ -128,10 +129,14 @@ for iF in file_list:
         density_boundary = 78
         
     else:
+        
+        if sub_numeric in pilot_2_subjects:
+            pilot_paradigm = 2   
+        else:
+            pilot_paradigm = 3
+
         exemplar_min = 30
         exemplar_max = 110
-        
-        pilot_paradigm = 2   
         
         density_boundary = 70
     

@@ -31,7 +31,7 @@ pacman::p_load(pacman,
 
 save_qc_table  <- T
 qc_filter      <- F
-which_paradigm <- c(1,2,3)
+which_paradigm <- c(3)
 
 
 ```
@@ -214,7 +214,7 @@ if (save_qc_table){
 plot_tt_per_part <- T
 
 if (plot_tt_per_part){
-        for (iP in unique(tt_long$prolific_id)[30:40]){
+        for (iP in unique(tt_long$prolific_id)){
                 print(iP)
                 
                 
@@ -299,7 +299,7 @@ if (plot_tt_per_part){
 
 ```{r per-participant, fig.height=5, fig.width=8, message=FALSE, warning=FALSE}
 
-for (iP in unique(tt_long$prolific_id)[30:31]){
+for (iP in unique(tt_long$prolific_id)){
         print(iP)
 
         p5 <- 

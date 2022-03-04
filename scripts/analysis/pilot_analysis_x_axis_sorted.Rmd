@@ -11,7 +11,7 @@ knit: (function(input, ...) {
       output_file = paste0(
       rprojroot::find_rstudio_root_file(),
       '/results/pilots/',
-      'pilot_sort_x_axis_paradigm_2_qc_filtered_',Sys.Date(),'.html'
+      'pilot_sort_x_axis_paradigm_2_3_qc_filtered_',Sys.Date(),'.html'
       ),
       envir = globalenv()
     )
@@ -62,7 +62,7 @@ pacman::p_load(pacman,
 qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(2)
+which_paradigm <- c(2,3)
 print(paste0('Which pilot paradigm? ', which_paradigm))
 
 source('./scripts/utils/load_transform_tt_data.R')

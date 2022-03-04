@@ -105,7 +105,9 @@ tt_part_sum_stats_triplet_location_differences <- tt_part_sum_stats_triplet_loca
                chose_towards_highdim__across_minus_dense  = mean_chose_towards_highdim__across_density_regions - mean_chose_towards_highdim__dense_region,
                chose_towards_highdim__across_minus_sparse = mean_chose_towards_highdim__across_density_regions - mean_chose_towards_highdim__sparse_region,
                chose_towards_highdim__dense_minus_sparse  = mean_chose_towards_highdim__dense_region - mean_chose_towards_highdim__sparse_region) %>%
-        select(-starts_with('mean_')) %>%
+        mutate(avg_dense_sparse = rowMeans(.[,c('mean_chose_towards_sparse__sparse_region','mean_chose_towards_sparse__dense_region')]),
+               chose_towards_sparse__across_minus_avg_dense_sparse = mean_chose_towards_sparse__across_density_regions - avg_dense_sparse) %>% 
+        select(-starts_with('mean_')) %>% 
         pivot_longer(cols = starts_with('chose_towards_'),
                      names_to = c('chose_towards_type','difference_type'),
                      values_to = 'difference_value',
@@ -125,6 +127,8 @@ tt_part_sum_stats_triplet_location_easiness_differences <- tt_part_sum_stats_tri
                chose_towards_highdim__across_minus_dense  = mean_chose_towards_highdim__across_density_regions - mean_chose_towards_highdim__dense_region,
                chose_towards_highdim__across_minus_sparse = mean_chose_towards_highdim__across_density_regions - mean_chose_towards_highdim__sparse_region,
                chose_towards_highdim__dense_minus_sparse  = mean_chose_towards_highdim__dense_region - mean_chose_towards_highdim__sparse_region) %>%
+        mutate(avg_dense_sparse = rowMeans(.[,c('mean_chose_towards_sparse__sparse_region','mean_chose_towards_sparse__dense_region')]),
+               chose_towards_sparse__across_minus_avg_dense_sparse = mean_chose_towards_sparse__across_density_regions - avg_dense_sparse) %>% 
         select(-starts_with('mean_')) %>%
         pivot_longer(cols = starts_with('chose_towards_'),
                      names_to = c('chose_towards_type','difference_type'),
@@ -146,6 +150,8 @@ tt_part_sum_stats_triplet_location_template_differences <- tt_part_sum_stats_tri
                chose_towards_highdim__across_minus_dense  = mean_chose_towards_highdim__across_density_regions - mean_chose_towards_highdim__dense_region,
                chose_towards_highdim__across_minus_sparse = mean_chose_towards_highdim__across_density_regions - mean_chose_towards_highdim__sparse_region,
                chose_towards_highdim__dense_minus_sparse  = mean_chose_towards_highdim__dense_region - mean_chose_towards_highdim__sparse_region) %>%
+        mutate(avg_dense_sparse = rowMeans(.[,c('mean_chose_towards_sparse__sparse_region','mean_chose_towards_sparse__dense_region')]),
+               chose_towards_sparse__across_minus_avg_dense_sparse = mean_chose_towards_sparse__across_density_regions - avg_dense_sparse) %>% 
         select(-starts_with('mean_')) %>%
         pivot_longer(cols = starts_with('chose_towards_'),
                      names_to = c('chose_towards_type','difference_type'),

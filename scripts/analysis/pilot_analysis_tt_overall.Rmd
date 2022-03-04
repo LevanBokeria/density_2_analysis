@@ -11,7 +11,7 @@ knit: (function(input, ...) {
       output_file = paste0(
       rprojroot::find_rstudio_root_file(),
       '/results/pilots/',
-      'pilot_analysis_paradigm_1_2_and_3_qc_filtered_',Sys.Date(),'.html'
+      'pilot_analysis_paradigm_2_3_qc_filtered_',Sys.Date(),'.html'
       ),
       envir = globalenv()
     )
@@ -62,7 +62,7 @@ pacman::p_load(pacman,
 qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(1,2,3)
+which_paradigm <- c(2,3)
 print(paste0('Which pilot paradigm? ', which_paradigm))
 
 source('./scripts/utils/load_transform_tt_data.R')
@@ -306,7 +306,7 @@ We want across_minus_dense or across_minus_sparse to be above 0.
 ```{r triplet-location-differences, fig.width=12, fig.height=3, warning=F}
 
 x_font_size <- 10
-x_font_angle <- 10
+x_font_angle <- 20
 
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_differences %>%
@@ -431,7 +431,7 @@ grid.arrange(fig1,fig2,
 ```{r triplet-location-differences-easiness-levels, fig.width=12, fig.height=6, warning=F}
 
 x_font_size <- 10
-x_font_angle <- 10
+x_font_angle <- 20
 
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%

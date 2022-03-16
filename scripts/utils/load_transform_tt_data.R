@@ -65,6 +65,23 @@ tt_long %<>%
         reorder_levels(response, order = c('q','p')) %>%
         reorder_levels(correct_ref_lowdim_highdim,order = c('ref_lowdim','ref_highdim'))
 
+# If its paradigm 2 or 3, then reorder the triplets this way
+if (which_paradigm %in% c(2,3)){
+        
+        tt_long <- tt_long %>%
+                reorder_levels(triplet_unique_name, 
+                               order = c("38_30_46","38_30_54","38_30_62",
+                                         "46_30_54","46_30_62","46_30_70",
+                                         "54_30_62","54_30_70","54_30_78",
+                                         "70_46_78","70_46_86","70_46_94",
+                                         "70_54_78","70_54_86","70_54_94",
+                                         "70_62_78","70_62_86","70_62_94",
+                                         "86_62_110","86_70_110","86_78_110",
+                                         "94_70_110","94_78_110","94_86_110",
+                                         "102_78_110","102_86_110","102_94_110"))
+}
+
+
 
 # Do a QC filtering
 if (qc_filter){
@@ -199,4 +216,15 @@ tt_long_post_pre_and_diff <- tt_wide_reps_wide_trial_stage %>%
                      names_pattern = '(.+)__(.+)') %>%
         reorder_levels(dep_var_type,order = c('pre_exposure',
                                                'post_exposure',
-                                               'post_pre_diff'))
+                                               'post_pre_diff')) %>%
+        reorder_levels(template_distances, order = c("8_-8_-16",
+                                                     "16_-16_-32",
+                                                     "24_-24_-48",
+                                                     "16_-8_-24",
+                                                     "8_-16_-24",
+                                                     "24_-16_-40",
+                                                     "16_-24_-40",
+                                                     "24_-8_-32",
+                                                     "8_-24_-32"))
+
+

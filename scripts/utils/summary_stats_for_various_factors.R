@@ -68,6 +68,7 @@ tt_part_sum_stats_curve_type_template <- tt_long_post_pre_and_diff %>%
                  counterbalancing,
                  curve_type,
                  template_distances,
+                 triplet_easiness,
                  dep_var_type) %>%
         summarise(n_datapoints               = n(),
                   mean_choice_sum            = mean(choice_numeric_sum_across_reps),

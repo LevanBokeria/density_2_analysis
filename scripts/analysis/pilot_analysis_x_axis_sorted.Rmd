@@ -47,7 +47,7 @@ qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
 
-which_paradigm <- c(2)
+which_paradigm <- c(3)
 
 print(paste0('Which pilot paradigm? ', which_paradigm))
 
@@ -265,6 +265,38 @@ tt_bw_part_sum_stats_triplets_difference %>%
         ylab('Dense_right - Dense_left') + 
         xlab('Individual Triplets') +
         ggtitle('Post-pre chose high-dimension: Counterbalancing group difference')
+
+# Unsorted
+tt_bw_part_sum_stats_triplets_difference %>%
+        filter(dep_var_type == 'post_pre_diff',
+               chose_towards_type == 'chose_towards_highdim') %>%
+        ggplot(aes(x=triplet_unique_name,
+                   y=difference_value)) +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_point(aes(color = triplet_easiness,
+                       shape = curve_type),
+                   size = 3) +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'right') +
+        ylab('Dense_right - Dense_left') + 
+        xlab('Individual Triplets') +
+        ggtitle('(UNSORTED) Post-pre chose high-dimension: Counterbalancing group difference')
+
+# Unsorted absolute value
+tt_bw_part_sum_stats_triplets_difference %>%
+        filter(dep_var_type == 'post_pre_diff',
+               chose_towards_type == 'chose_towards_highdim') %>%
+        ggplot(aes(x=triplet_unique_name,
+                   y=abs(difference_value))) +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_point(aes(color = triplet_easiness,
+                       shape = curve_type),
+                   size = 3) +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'right') +
+        ylab('Dense_right - Dense_left') + 
+        xlab('Individual Triplets') +
+        ggtitle('(UNSORTED ABS) Post-pre chose high-dimension: Counterbalancing group difference')
 
 
 ```

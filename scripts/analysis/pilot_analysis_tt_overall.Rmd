@@ -11,7 +11,7 @@ knit: (function(input, ...) {
       output_file = paste0(
       rprojroot::find_rstudio_root_file(),
       '/results/pilots/',
-      'pilot_analysis_paradigm_2_3_qc_filtered_',Sys.Date(),'.html'
+      'pilot_analysis_paradigm_3_qc_NOT_filtered_',Sys.Date(),'.html'
       ),
       envir = globalenv()
     )
@@ -59,10 +59,10 @@ pacman::p_load(pacman,
 
 ```{r load-transform-tt-data}
 
-qc_filter <- T
+qc_filter <- F
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(2,3)
+which_paradigm <- c(3)
 
 print(paste0('Which pilot paradigm? ', which_paradigm))
 

@@ -17,9 +17,6 @@ knit: (function(input, ...) {
       envir = globalenv()
     )
   })
-  
-  
-    
 ---
 
 ```{r setup, include=FALSE}
@@ -64,7 +61,7 @@ qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
 
-which_paradigm <- c(3)
+which_paradigm <- c(1)
 
 print(paste0('Which pilot paradigm? ', which_paradigm))
 

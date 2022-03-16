@@ -62,7 +62,7 @@ pacman::p_load(pacman,
 qc_filter <- F
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(3)
+which_paradigm <- c(1)
 
 print(paste0('Which pilot paradigm? ', which_paradigm))
 

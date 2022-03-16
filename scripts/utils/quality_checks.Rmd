@@ -11,19 +11,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r}
 rm(list=ls())
 
-pacman::p_load(pacman,
-               rio,
-               tidyverse,
-               rstatix,
-               DT,
-               kableExtra,
-               readr,
-               writexl,
-               jsonlite,
-               stringr,
-               gridExtra,
-               knitr,
-               magrittr)
+source('./scripts/utils/load_all_libraries.R')
 
 # Some global setup ###########################################################
 
@@ -31,7 +19,7 @@ pacman::p_load(pacman,
 
 save_qc_table  <- T
 qc_filter      <- F
-which_paradigm <- c(3)
+which_paradigm <- c(1,2,3)
 
 
 ```

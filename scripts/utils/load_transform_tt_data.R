@@ -19,21 +19,7 @@ if (!exists('which_paradigm')){
 
 
 # Load the libraries ###########################################################
-pacman::p_load(pacman,
-               rio,
-               tidyverse,
-               rstatix,
-               DT,
-               kableExtra,
-               readr,
-               writexl,
-               jsonlite,
-               stringr,
-               gridExtra,
-               knitr,
-               magrittr,
-               Hmisc,
-               psycho)
+source('./scripts/utils/load_all_libraries.R')
 
 # Read the txt file ###########################################################
 

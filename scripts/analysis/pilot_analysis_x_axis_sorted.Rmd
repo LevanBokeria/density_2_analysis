@@ -33,21 +33,7 @@ options(dplyr.summarise.inform = FALSE)
 
 rm(list=ls())
 
-pacman::p_load(pacman,
-               rio,
-               tidyverse,
-               rstatix,
-               DT,
-               kableExtra,
-               readr,
-               writexl,
-               jsonlite,
-               stringr,
-               gridExtra,
-               knitr,
-               magrittr,
-               Hmisc,
-               psycho)
+source('./scripts/utils/load_all_libraries.R')
 
 ```
 
@@ -61,7 +47,7 @@ qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
 
-which_paradigm <- c(1)
+which_paradigm <- c(2)
 
 print(paste0('Which pilot paradigm? ', which_paradigm))
 
@@ -86,9 +72,95 @@ tt_long %>%
 ```
 # Plots with x axis sorted by diagnosticity
 
+## Y axis: post-pre chose high-dimension
+
+```{r sorted-plot-chose-high-dimension, fig.width=13, fig.height=18}
+
+# For sorted data
+fig1 <- tt_long_post_pre_and_diff %>%
+        filter(dep_var_type == 'post_pre_diff') %>% 
+        ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
+                   y=chose_towards_highdim_avg_across_reps)) +
+        geom_boxplot(fatten = 3) + 
+        stat_summary(fun=mean,
+                     geom = 'point',
+                     size = 5,
+                     color="black",
+                     aes(shape = triplet_easiness)) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') +
+        ylab('Post-pre: chose high-dim') + 
+        xlab('Individual Triplets') +
+        ggtitle('All counterbalancing groups')
+
+
+
+fig2 <- tt_long_post_pre_and_diff %>%
+        filter(counterbalancing == 'dense_right',
+               dep_var_type == 'post_pre_diff') %>% 
+         ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
+                   y=chose_towards_highdim_avg_across_reps)) +
+        geom_boxplot(fatten = 4,aes(color=triplet_location)) + 
+        stat_summary(fun=mean,
+                     color='black',
+                     aes(shape = triplet_easiness),
+                     size = 1) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        # geom_point(data = filter(tt_bw_part_sum_stats_triplets,counterbalancing == 'dense_right'),
+        #            aes(x = triplet_unique_name,
+        #                y = mean_chose_towards_sparse)) +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') +
+        ylab('Post-pre: chose high-dim') + 
+        xlab('Individual Triplets') +
+        ggtitle('Dense Right')
+
+fig3 <- tt_long_post_pre_and_diff %>%
+        filter(counterbalancing == 'dense_left',
+               dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
+                   y=chose_towards_highdim_avg_across_reps)) +
+        geom_boxplot(fatten = 4,aes(color=triplet_location)) +
+        stat_summary(fun=mean,
+                     color='black',
+                     aes(shape = triplet_easiness),
+                     size = 1) + 
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = '') +
+        ylab('Post-pre: chose high-dim') +
+        xlab('Individual Triplets') +
+        ggtitle('Dense Left')
+
+fig4 <- tt_long_post_pre_and_diff %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=triplet_unique_name,
+                   y=chose_towards_highdim_avg_across_reps,
+                   fill=counterbalancing)) +
+        geom_boxplot(fatten = 4,
+                     aes(color=triplet_location)) +
+        stat_summary(fun=mean,
+                     color='black',
+                     aes(shape = triplet_easiness),
+                     size = 0.7,
+                     position = position_dodge(width = 0.8)) +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = '') +
+        scale_fill_manual(values=c('white','gray')) + 
+        ylab('Post-pre: chose high-dim') +
+        xlab('Individual Triplets') +
+        ggtitle('Both groups')
+
+grid.arrange(fig1,fig2,fig3,fig4,
+             nrow = 4)
+```
+
+
 ## Y axis: post-pre chose low-density
 
-```{r sorted-plot-chose-low-density, fig.width=13, fig.height=15}
+```{r sorted-plot-chose-low-density, fig.width=13, fig.height=18}
 
 # Calculate the mean data separately
 
@@ -149,78 +221,31 @@ fig3 <- tt_long_post_pre_and_diff %>%
         xlab('Individual Triplets') +
         ggtitle('Dense Left')
 
-
-grid.arrange(fig1,fig2,fig3,
-             nrow = 3)
-```
-
-
-
-## Y axis: post-pre chose high-dimension
-
-```{r sorted-plot-chose-high-dimension, fig.width=13, fig.height=15}
-
-# For sorted data
-fig1 <- tt_long_post_pre_and_diff %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
-        ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
-                   y=chose_towards_highdim_avg_across_reps)) +
-        geom_boxplot(fatten = 3) + 
-        stat_summary(fun=mean,
-                     geom = 'point',
-                     size = 5,
-                     color="black",
-                     aes(shape = triplet_easiness)) + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +
-        theme(axis.text.x = element_text(angle = 90),
-              legend.position = 'top') +
-        ylab('Post-pre: chose high-dim') + 
-        xlab('Individual Triplets') +
-        ggtitle('All counterbalancing groups')
-
-
-
-fig2 <- tt_long_post_pre_and_diff %>%
-        filter(counterbalancing == 'dense_right',
-               dep_var_type == 'post_pre_diff') %>% 
-         ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
-                   y=chose_towards_highdim_avg_across_reps)) +
-        geom_boxplot(fatten = 4,aes(color=triplet_location)) + 
+fig4 <- tt_long_post_pre_and_diff %>%
+        filter(dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=triplet_unique_name,
+                   y=chose_towards_sparse_avg_across_reps,
+                   fill=counterbalancing)) +
+        geom_boxplot(fatten = 4,
+                     aes(color=triplet_location)) +
         stat_summary(fun=mean,
                      color='black',
                      aes(shape = triplet_easiness),
-                     size = 1) + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +
-        # geom_point(data = filter(tt_bw_part_sum_stats_triplets,counterbalancing == 'dense_right'),
-        #            aes(x = triplet_unique_name,
-        #                y = mean_chose_towards_sparse)) +
-        theme(axis.text.x = element_text(angle = 90),
-              legend.position = 'top') +
-        ylab('Post-pre: chose high-dim') + 
-        xlab('Individual Triplets') +
-        ggtitle('Dense Right')
-
-fig3 <- tt_long_post_pre_and_diff %>%
-        filter(counterbalancing == 'dense_left',
-               dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
-                   y=chose_towards_highdim_avg_across_reps)) +
-        geom_boxplot(fatten = 4,aes(color=triplet_location)) +
-        stat_summary(fun=mean,
-                     color='black',
-                     aes(shape = triplet_easiness),
-                     size = 1) + 
+                     size = 0.7,
+                     position = position_dodge(width = 0.8)) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = '') +
+        scale_fill_manual(values=c('white','gray')) + 
         ylab('Post-pre: chose high-dim') +
         xlab('Individual Triplets') +
-        ggtitle('Dense Left')
+        ggtitle('Both groups')
 
-
-grid.arrange(fig1,fig2,fig3,
-             nrow = 3)
+grid.arrange(fig1,fig2,fig3,fig4,
+             nrow = 4)
 ```
+
+
 
 ## Y axis: post-pre chose towards higher dimension, between counterbalancing groups
 

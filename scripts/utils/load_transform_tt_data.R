@@ -13,7 +13,7 @@ if (!exists('qc_filter')){
 
 if (!exists('which_paradigm')){
 
-        which_paradigm <- c(1,2)
+        which_paradigm <- c(1)
         
 }
 
@@ -66,20 +66,51 @@ tt_long %<>%
         reorder_levels(correct_ref_lowdim_highdim,order = c('ref_lowdim','ref_highdim'))
 
 # If its paradigm 2 or 3, then reorder the triplets this way
-if (which_paradigm %in% c(2,3)){
+if (!1 %in% which_paradigm){
+        
+        # Get a sorted array of triplet_unique_names
+        triplet_unique_name_order <- tt_long %>%
+                select(triplet_unique_name,
+                       curve_type,
+                       template_distances,
+                       triplet_easiness,
+                       triplet_location,
+                       ref_lowdim,
+                       query_item,
+                       dist_query_ref_lowdim) %>% 
+                distinct(triplet_unique_name,.keep_all = TRUE) %>% 
+                arrange(triplet_easiness,
+                        dist_query_ref_lowdim,
+                        template_distances,
+                        curve_type,
+                        query_item) %>% 
+                select(triplet_unique_name) %>% .[[1]]
         
         tt_long <- tt_long %>%
-                reorder_levels(triplet_unique_name, 
-                               order = c("38_30_46","38_30_54","38_30_62",
-                                         "46_30_54","46_30_62","46_30_70",
-                                         "54_30_62","54_30_70","54_30_78",
-                                         "70_46_78","70_46_86","70_46_94",
-                                         "70_54_78","70_54_86","70_54_94",
-                                         "70_62_78","70_62_86","70_62_94",
-                                         "86_62_110","86_70_110","86_78_110",
-                                         "94_70_110","94_78_110","94_86_110",
-                                         "102_78_110","102_86_110","102_94_110"))
-}
+                reorder_levels(triplet_unique_name, order = triplet_unique_name_order)        
+        
+        # 
+        # tt_long <- tt_long %>%
+        #         reorder_levels(triplet_unique_name, 
+        #                        order = c("38_30_46","38_30_54","38_30_62",
+        #                                  "46_30_54","46_30_62","46_30_70",
+        #                                  "54_30_62","54_30_70","54_30_78",
+        #                                  "70_46_78","70_46_86","70_46_94",
+        #                                  "70_54_78","70_54_86","70_54_94",
+        #                                  "70_62_78","70_62_86","70_62_94",
+        #                                  "86_62_110","86_70_110","86_78_110",
+        #                                  "94_70_110","94_78_110","94_86_110",
+        #                                  "102_78_110","102_86_110","102_94_110"))
+                               # order = c("38_30_46","46_30_54","54_30_78",
+                               #           "38_30_54","46_30_70","54_30_70",
+                               #           "38_30_62","46_30_62","54_30_62",
+                               #           "70_46_78","70_46_86","70_46_94",
+                               #           "70_54_78","70_54_86","70_54_94",
+                               #           "70_62_78","70_62_86","70_62_94",
+                               #           "86_62_110","86_70_110","86_78_110",
+                               #           "94_70_110","94_78_110","94_86_110",
+                               #           "102_78_110","102_86_110","102_94_110"))                               
+        }
 
 
 

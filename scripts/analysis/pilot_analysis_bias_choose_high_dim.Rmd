@@ -73,10 +73,6 @@ tt_long %>%
 
 # Over all trials, pre post and post-pre
 
-Answer: NO.
-
-Neither pre, post, nor post-pre is there a GENERAL bias to choose higher dimension.
-
 ```{r all-trials, fig.width=12, fig.height=3, warning=F}
 
 #  
@@ -132,14 +128,31 @@ grid.arrange(fig3,fig4,
              
 ```
 
+```{r which-dep-var}
+
+# What to plot on the y axis
+
+plot_dep_var <- 'post_pre_diff'
+
+
+if (plot_dep_var != 'post_pre_diff'){
+        y_intercept <- 0.5        
+} else {
+        y_intercept <- 0
+}
+
+```
+
+
 # Curvature:
 
 Ok so concave ones seem to have more of a tendency to choose towards high-dimension.
 
-```{r curvature, fig.width=12, fig.height=3, warning=F}
+```{r curvature, fig.width=12, fig.height=7, warning=F}
 x_font_size <- 10
+
 fig3 <- tt_part_sum_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
+        # filter(dep_var_type == plot_dep_var) %>% 
         ggplot(aes(x=curve_type,
                    y=mean_chose_towards_highdim)) +
         geom_violin(fill = chose_highdim_color,alpha = 0.2) +
@@ -157,12 +170,13 @@ fig3 <- tt_part_sum_stats_curve_type %>%
              size=1,
              width=0.1,
              color='red') +          
-        geom_hline(yintercept = 0, linetype = 'dashed') +   
+        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +   
         theme(text = element_text(size=x_font_size)) + 
-        ggtitle('Post-pre chose towards high dimension')
+        ggtitle(paste0(plot_dep_var,'; chose towards high dimension')) +
+        facet_wrap(~dep_var_type, ncol = 1, strip.position = 'right')
 
 fig4 <- tt_part_sum_stats_curve_type %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
+        # filter(dep_var_type == plot_dep_var) %>% 
         ggplot(aes(x=curve_type,
                    y=mean_chose_towards_highdim)) +
         geom_violin(fill = chose_highdim_color,alpha = 0.2) +
@@ -180,9 +194,9 @@ fig4 <- tt_part_sum_stats_curve_type %>%
              size=1,
              width=0.1,
              color='red') +          
-        geom_hline(yintercept = 0, linetype = 'dashed') +      
+        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +      
         theme(text = element_text(size=x_font_size)) + 
-        facet_wrap(~counterbalancing)
+        facet_grid(dep_var_type~counterbalancing)
 
 grid.arrange(fig3,fig4,
              nrow = 1,
@@ -192,12 +206,11 @@ grid.arrange(fig3,fig4,
 
 # Curvature, by template + easiness
 
-Seems like positive bias for 16_-16, 8_-16 and 24_-16 ones only. Why?
-
-```{r curvature-template-easiness, fig.width=12, fig.height=15, warning=F}
+```{r curvature-template-easiness, fig.width=12, fig.height=55, warning=F}
 x_font_size <- 10
+
 fig3 <- tt_part_sum_stats_curve_type_template %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
+        # filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=curve_type,
                    y=mean_chose_towards_highdim)) +
         geom_violin(fill = chose_highdim_color,alpha = 0.2) +
@@ -215,14 +228,14 @@ fig3 <- tt_part_sum_stats_curve_type_template %>%
              size=1,
              width=0.1,
              color='red') +          
-        geom_hline(yintercept = 0, linetype = 'dashed') +   
+        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +   
         theme(text = element_text(size=x_font_size)) + 
-        facet_wrap(~template_distances, ncol = 1, strip.position = 'right') +
+        facet_wrap(~template_distances+dep_var_type, ncol = 1, strip.position = 'right') +
         geom_text(aes(x=0.5,y=1,label=triplet_easiness)) +
-        ggtitle('Post-pre chose towards high dimension')
+        ggtitle(paste0(plot_dep_var, '; chose towards high dimension'))
 
 fig4 <- tt_part_sum_stats_curve_type_template %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
+        # filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=curve_type,
                    y=mean_chose_towards_highdim)) +
         geom_violin(fill = chose_highdim_color,alpha = 0.2) +
@@ -240,7 +253,65 @@ fig4 <- tt_part_sum_stats_curve_type_template %>%
              size=1,
              width=0.1,
              color='red') +          
-        geom_hline(yintercept = 0, linetype = 'dashed') +      
+        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +      
+        theme(text = element_text(size=x_font_size)) + 
+        geom_text(aes(x=0.5,y=1,label=triplet_easiness)) +
+        facet_grid(template_distances+dep_var_type~counterbalancing)
+
+grid.arrange(fig3,fig4,
+             nrow = 1,
+             widths = 1:2)
+
+```
+
+```{r curvature-template-easiness-pre-post-diff, fig.width=12, fig.height=15, warning=F}
+x_font_size <- 10
+
+fig3 <- tt_part_sum_stats_curve_type_template %>%
+        filter(dep_var_type == plot_dep_var) %>%
+        ggplot(aes(x=curve_type,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +     
+        stat_summary(fun = mean,
+                     color = 'red') + 
+        stat_summary(fun.data = mean_cl_normal,
+             geom = "errorbar",
+             size=1,
+             width=0.1,
+             color='red') +          
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +   
+        theme(text = element_text(size=x_font_size)) + 
+        facet_wrap(~template_distances, ncol = 1, strip.position = 'right') +
+        geom_text(aes(x=0.5,y=1,label=triplet_easiness)) +
+        ggtitle(paste0(plot_dep_var, '; chose towards high dimension'))
+
+fig4 <- tt_part_sum_stats_curve_type_template %>%
+        filter(dep_var_type == plot_dep_var) %>%
+        ggplot(aes(x=curve_type,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+        geom_boxplot(width=0.15,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +    
+        stat_summary(fun = mean,
+                     color = 'red') + 
+        stat_summary(fun.data = mean_cl_normal,
+             geom = "errorbar",
+             size=1,
+             width=0.1,
+             color='red') +          
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +      
         theme(text = element_text(size=x_font_size)) + 
         geom_text(aes(x=0.5,y=1,label=triplet_easiness)) +
         facet_grid(template_distances~counterbalancing)
@@ -251,17 +322,15 @@ grid.arrange(fig3,fig4,
 
 ```
 
-
-
 # Plots with x axis sorted by diagnosticity
 
-## Y axis: post-pre chose high-dimension
+## Y axis: `r plot_dep_var` chose high-dimension
 
 ```{r sorted-plot-chose-high-dimension, fig.width=13, fig.height=15}
 
 # For sorted data
 fig1 <- tt_long_post_pre_and_diff %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
+        filter(dep_var_type == plot_dep_var) %>% 
         ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
                    y=chose_towards_highdim_avg_across_reps)) +
         geom_boxplot(fatten = 3, aes(color=curve_type)) + 
@@ -270,10 +339,10 @@ fig1 <- tt_long_post_pre_and_diff %>%
                      size = 5,
                      color="black",
                      aes(shape = triplet_easiness)) + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = 'top') +
-        ylab('Post-pre: chose high-dim') + 
+        ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
         ggtitle('All counterbalancing groups')
 
@@ -281,7 +350,7 @@ fig1 <- tt_long_post_pre_and_diff %>%
 
 fig2 <- tt_long_post_pre_and_diff %>%
         filter(counterbalancing == 'dense_right',
-               dep_var_type == 'post_pre_diff') %>% 
+               dep_var_type == plot_dep_var) %>% 
          ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
                    y=chose_towards_highdim_avg_across_reps)) +
         geom_boxplot(fatten = 4,aes(color=curve_type)) + 
@@ -289,19 +358,19 @@ fig2 <- tt_long_post_pre_and_diff %>%
                      color='black',
                      aes(shape = triplet_easiness),
                      size = 1) + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         # geom_point(data = filter(tt_bw_part_sum_stats_triplets,counterbalancing == 'dense_right'),
         #            aes(x = triplet_unique_name,
         #                y = mean_chose_towards_sparse)) +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = 'top') +
-        ylab('Post-pre: chose high-dim') + 
+        ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
         ggtitle('Dense Right')
 
 fig3 <- tt_long_post_pre_and_diff %>%
         filter(counterbalancing == 'dense_left',
-               dep_var_type == 'post_pre_diff') %>%
+               dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_highdim_avg_across_reps),
                    y=chose_towards_highdim_avg_across_reps)) +
         geom_boxplot(fatten = 4,aes(color=curve_type)) +
@@ -309,10 +378,10 @@ fig3 <- tt_long_post_pre_and_diff %>%
                      color='black',
                      aes(shape = triplet_easiness),
                      size = 1) + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = '') +
-        ylab('Post-pre: chose high-dim') +
+        ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
         ggtitle('Dense Left')
 
@@ -324,7 +393,7 @@ grid.arrange(fig1,fig2,fig3,
 
 # For sorted data
 fig1 <- tt_long_post_pre_and_diff %>%
-        filter(dep_var_type == 'post_pre_diff') %>% 
+        filter(dep_var_type == plot_dep_var) %>% 
         ggplot(aes(x=triplet_unique_name,-chose_towards_highdim_avg_across_reps,
                    y=chose_towards_highdim_avg_across_reps)) +
         geom_boxplot(fatten = 3, aes(color=curve_type)) + 
@@ -333,10 +402,10 @@ fig1 <- tt_long_post_pre_and_diff %>%
                      size = 5,
                      color="black",
                      aes(shape = triplet_easiness)) + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = 'top') +
-        ylab('Post-pre: chose high-dim') + 
+        ylab(paste0(plot_dep_var, '; chose high-dim')) + 
         xlab('Individual Triplets') +
         ggtitle('All counterbalancing groups')
 
@@ -344,7 +413,7 @@ fig1 <- tt_long_post_pre_and_diff %>%
 
 fig2 <- tt_long_post_pre_and_diff %>%
         filter(counterbalancing == 'dense_right',
-               dep_var_type == 'post_pre_diff') %>% 
+               dep_var_type == plot_dep_var) %>% 
          ggplot(aes(x=triplet_unique_name,-chose_towards_highdim_avg_across_reps,
                    y=chose_towards_highdim_avg_across_reps)) +
         geom_boxplot(fatten = 4,aes(color=curve_type)) + 
@@ -352,19 +421,19 @@ fig2 <- tt_long_post_pre_and_diff %>%
                      color='black',
                      aes(shape = triplet_easiness),
                      size = 1) + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         # geom_point(data = filter(tt_bw_part_sum_stats_triplets,counterbalancing == 'dense_right'),
         #            aes(x = triplet_unique_name,
         #                y = mean_chose_towards_sparse)) +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = 'top') +
-        ylab('Post-pre: chose high-dim') + 
+        ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
         ggtitle('Dense Right')
 
 fig3 <- tt_long_post_pre_and_diff %>%
         filter(counterbalancing == 'dense_left',
-               dep_var_type == 'post_pre_diff') %>%
+               dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=triplet_unique_name,-chose_towards_highdim_avg_across_reps,
                    y=chose_towards_highdim_avg_across_reps)) +
         geom_boxplot(fatten = 4,aes(color=curve_type)) +
@@ -372,10 +441,10 @@ fig3 <- tt_long_post_pre_and_diff %>%
                      color='black',
                      aes(shape = triplet_easiness),
                      size = 1) + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = '') +
-        ylab('Post-pre: chose high-dim') +
+        ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
         ggtitle('Dense Left')
 
@@ -390,7 +459,7 @@ grid.arrange(fig1,fig2,fig3,
 ```{r sorted-plot-chose-low-density-cb-differences, fig.width=13, fig.height=20}
 
 fig1 <- tt_bw_part_sum_stats_triplets_difference %>%
-        filter(dep_var_type == 'post_pre_diff',
+        filter(dep_var_type == plot_dep_var,
                chose_towards_type == 'chose_towards_highdim') %>%
         ggplot(aes(x=reorder(triplet_unique_name,-difference_value),
                    y=difference_value)) +
@@ -402,10 +471,10 @@ fig1 <- tt_bw_part_sum_stats_triplets_difference %>%
               legend.position = 'right') +
         ylab('Dense_right - Dense_left') + 
         xlab('Individual Triplets') +
-        ggtitle('Post-pre chose high-dimension: Counterbalancing group difference')
+        ggtitle(paste0(plot_dep_var, '; chose high-dimension: Counterbalancing group difference'))
 
 fig2 <- tt_bw_part_sum_stats_triplets_difference %>%
-        filter(dep_var_type == 'post_pre_diff',
+        filter(dep_var_type == plot_dep_var,
                chose_towards_type == 'chose_towards_highdim') %>%
         ggplot(aes(x=reorder(triplet_unique_name,-abs(difference_value)),
                    y=abs(difference_value))) +
@@ -417,11 +486,11 @@ fig2 <- tt_bw_part_sum_stats_triplets_difference %>%
               legend.position = 'right') +
         ylab('ABS(Dense_right - Dense_left)') + 
         xlab('Individual Triplets') +
-        ggtitle('(SORTED BY ABS) Post-pre chose high-dimension: Counterbalancing group difference')
+        ggtitle(paste0(plot_dep_var, '; (SORTED BY ABS) chose high-dimension: Counterbalancing group difference'))
 
 # Unsorted both groups
 fig3 <- tt_long_post_pre_and_diff %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
+        filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=triplet_unique_name,
                    y=chose_towards_highdim_avg_across_reps,
                    fill=counterbalancing)) +
@@ -433,18 +502,18 @@ fig3 <- tt_long_post_pre_and_diff %>%
                      aes(shape = triplet_easiness),
                      size = 0.7,
                      position = position_dodge(width = 0.5)) +
-        geom_hline(yintercept = 0, linetype = 'dashed') +
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = '') +
         scale_fill_manual(values=c('white','gray')) + 
-        ylab('Post-pre: chose high-dim') +
+        ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
         ggtitle('Both groups')
 
 # Unsorted
 fig4 <- tt_bw_part_sum_stats_triplets_difference %>%
         # reorder_levels(triplet_unique_name,order = levels(tt_long_post_pre_and_diff$triplet_unique_name)) %>%
-        filter(dep_var_type == 'post_pre_diff',
+        filter(dep_var_type == plot_dep_var,
                chose_towards_type == 'chose_towards_highdim') %>%
         ggplot(aes(x=triplet_unique_name,
                    y=difference_value)) +
@@ -456,11 +525,11 @@ fig4 <- tt_bw_part_sum_stats_triplets_difference %>%
               legend.position = '') +
         ylab('Dense_right - Dense_left') + 
         xlab('Individual Triplets') +
-        ggtitle('(UNSORTED) Post-pre chose high-dimension: Counterbalancing group difference')
+        ggtitle(paste0(plot_dep_var, '; (UNSORTED) chose high-dimension: Counterbalancing group difference'))
 
 # Unsorted absolute value
 fig5 <- tt_bw_part_sum_stats_triplets_difference %>%
-        filter(dep_var_type == 'post_pre_diff',
+        filter(dep_var_type == plot_dep_var,
                chose_towards_type == 'chose_towards_highdim') %>%
         ggplot(aes(x=triplet_unique_name,
                    y=abs(difference_value))) +
@@ -472,9 +541,9 @@ fig5 <- tt_bw_part_sum_stats_triplets_difference %>%
               legend.position = '') +
         ylab('ABS(Dense_right - Dense_left)') + 
         xlab('Individual Triplets') +
-        ggtitle('(UNSORTED ABS) Post-pre chose high-dimension: Counterbalancing group difference')
+        ggtitle(paste0(plot_dep_var, '; (UNSORTED ABS) chose high-dimension: Counterbalancing group difference'))
 
-grid.arrange(fig1,fig2,fig3,fig4,fig5,
+grid.arrange(fig3,fig4,fig5,fig1,fig2,
              nrow = 5)
 
 ```

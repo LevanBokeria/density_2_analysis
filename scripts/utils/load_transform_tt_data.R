@@ -46,6 +46,7 @@ tt_long %<>%
                         correct_response,
                         triplet_left_right_name,
                         triplet_unique_name,
+                        density_relative_triplet_name,
                         template_distances,
                         template_abs_distances,
                         query_position,
@@ -87,7 +88,29 @@ if (!1 %in% which_paradigm){
                 select(triplet_unique_name) %>% .[[1]]
         
         tt_long <- tt_long %>%
-                reorder_levels(triplet_unique_name, order = triplet_unique_name_order)        
+                reorder_levels(triplet_unique_name, order = triplet_unique_name_order)    
+        
+        # Get a sorted array of triplet_unique_names
+        density_relative_triplet_name_order <- tt_long %>%
+                select(density_relative_triplet_name,
+                       template_distances,
+                       template_abs_distances,
+                       triplet_easiness,
+                       triplet_location,
+                       ref_lowdim,
+                       query_item,
+                       dist_query_ref_lowdim) %>% 
+                distinct(density_relative_triplet_name,.keep_all = TRUE) %>% 
+                arrange(triplet_easiness,
+                        dist_query_ref_lowdim,
+                        template_abs_distances,
+                        triplet_location,
+                        query_item) %>% 
+                select(density_relative_triplet_name) %>% .[[1]]
+        
+        tt_long <- tt_long %>%
+                reorder_levels(density_relative_triplet_name, order = triplet_unique_name_order)         
+        
         
         # 
         # tt_long <- tt_long %>%
@@ -147,6 +170,7 @@ tt_wide_reps <- tt_long %>%
                             dist_query_ref_highdim,
                             dist_ref_lowdim_ref_highdim,
                             triplet_unique_name,
+                            density_relative_triplet_name,
                             template_distances,
                             template_abs_distances,
                             triplet_location,
@@ -198,6 +222,7 @@ tt_wide_reps_wide_trial_stage <-
                                 dist_query_ref_highdim,
                                 dist_ref_lowdim_ref_highdim,
                                 triplet_unique_name,
+                                density_relative_triplet_name,
                                 template_distances,
                                 template_abs_distances,
                                 triplet_location,

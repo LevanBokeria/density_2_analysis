@@ -434,9 +434,10 @@ for iF in file_list:
     dense_boundary  = np.array((density_boundary,exemplar_max))
     sparse_boundary = np.array((exemplar_min,density_boundary))
     # - But depending on the density condition, swap these
+    
+    flip_val = (exemplar_max-exemplar_min)/2 + exemplar_min
+    
     if data_decoded['inputData']['cb_condition'] == 'dense_left':
-        
-        flip_val = (exemplar_max-exemplar_min)/2 + exemplar_min
         
         dense_boundary  = np.flip(2*flip_val - dense_boundary)
         sparse_boundary = np.flip(2*flip_val - sparse_boundary)
@@ -452,6 +453,14 @@ for iF in file_list:
         'across_density_regions')
                 )
 
+    # %% Create a density-relative triplet name
+    tt['density_relative_triplet_name'] = tt['triplet_unique_name']
+    
+    if data_decoded['inputData']['cb_condition'] == 'dense_left':
+        tt['density_relative_triplet_name'] = \
+            (2*flip_val - tt['query_item']).astype(int).astype(str) + \
+        '_' + (2*flip_val - tt['ref_highdim']).astype(int).astype(str) + \
+            '_' + (2*flip_val - tt['ref_lowdim']).astype(int).astype(str)
     
 
 

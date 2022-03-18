@@ -173,7 +173,7 @@ all_stim = np.arange(px_min, px_max+1, dtype=float)  # assumning stimuli start f
 # input stimuli (exposure phase)
 
 # - Create gaps of the dense and sparse regions
-step_dense  = 1
+step_dense  = 2
 step_sparse = 8
 
 # - make the dense and sparse sections
@@ -236,7 +236,7 @@ res = model.train(stim_triplets, test_upd_density=upd_dns)
 # %% plot results
 
 # Flags
-plot_initial_density = False
+plot_initial_density = True
 plot_average_density = True
 
 # Get y lims of the existing density space
@@ -247,7 +247,7 @@ if plot_initial_density:
 
 # %% Supplement with X number of balancing triplets
 
-plot_each_step      = False
+plot_each_step      = True
 choose_any_exemplar = False
 
 n_balance = 10
@@ -365,10 +365,10 @@ if fix_balancing_triplets:
 
 # %% Add exposure trials and see what the final density space looks like
 
-skip_balancing = True
+skip_balancing = False
 
-n_triplet_rep  = 0
-n_exposure_rep = 5
+n_triplet_rep  = 2
+n_exposure_rep = 0
 
 stim_seq = np.concatenate((np.repeat(stim_triplets,n_triplet_rep),
                            np.repeat(stim_exposure,n_exposure_rep)))

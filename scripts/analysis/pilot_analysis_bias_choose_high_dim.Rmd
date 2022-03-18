@@ -132,7 +132,7 @@ grid.arrange(fig3,fig4,
 
 # What to plot on the y axis
 
-plot_dep_var <- 'post_pre_diff'
+plot_dep_var <- 'pre_exposure'
 
 
 if (plot_dep_var != 'post_pre_diff'){

@@ -1,4 +1,4 @@
-function save_triplet_screenshots()
+function save_triplet_screenshots_only_density_inset()
 
 %% Description
 
@@ -29,7 +29,8 @@ debugMode = 1;
 saveImg      = 1;
 saveImgNames = 0;
 
-flip_space = 1;
+flip_space = 0;
+density_absent = 0;
 
 % If flipping the space, whats the flip value
 flip_value = ((110-30)/2 + 30)*2;
@@ -40,6 +41,10 @@ saveFolder = 'try_8';
 
 if flip_space
     saveFolder = [saveFolder '_flipped'];
+end
+
+if density_absent
+    saveFolder = [saveFolder '_no_density'];
 end
 
 % Make save folders
@@ -152,6 +157,11 @@ end
 if flip_space
     [inset, ~, ~] = imread(fullfile(home,'docs',...
     'density_space_flipped.png'));
+end
+
+if density_absent
+    [inset, ~, ~] = imread(fullfile(home,'docs',...
+    'density_space_no_density.png'));
 end
 
 inset_idx = Screen('MakeTexture', ptb_window, inset);

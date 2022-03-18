@@ -1,5 +1,5 @@
 ---
-title: "TT Bias to choose high dimension"
+title: "TT Edge effects"
 output:
   html_document:
     number_sections: false
@@ -132,7 +132,7 @@ grid.arrange(fig3,fig4,
 
 # What to plot on the y axis
 
-plot_dep_var <- 'pre_exposure'
+plot_dep_var <- 'post_pre_diff'
 
 
 if (plot_dep_var != 'post_pre_diff'){
@@ -145,8 +145,6 @@ if (plot_dep_var != 'post_pre_diff'){
 
 
 # Curvature:
-
-Ok so concave ones seem to have more of a tendency to choose towards high-dimension.
 
 ```{r curvature, fig.width=12, fig.height=7, warning=F}
 x_font_size <- 10
@@ -203,6 +201,7 @@ grid.arrange(fig3,fig4,
              widths = 1:2)
 
 ```
+
 
 # Curvature, by template + easiness
 
@@ -263,6 +262,8 @@ grid.arrange(fig3,fig4,
              widths = 1:2)
 
 ```
+
+## Only the selected plot_dep_var
 
 ```{r curvature-template-easiness-pre-post-diff, fig.width=12, fig.height=15, warning=F}
 x_font_size <- 10
@@ -389,7 +390,7 @@ grid.arrange(fig1,fig2,fig3,
              nrow = 3)
 ```
 
-```{r unsorted-plot-chose-high-dimension, fig.width=13, fig.height=15}
+```{r unsorted-plot-chose-high-dimension, fig.width=13, fig.height=25}
 
 # For sorted data
 fig1 <- tt_long_post_pre_and_diff %>%
@@ -407,7 +408,11 @@ fig1 <- tt_long_post_pre_and_diff %>%
               legend.position = 'top') +
         ylab(paste0(plot_dep_var, '; chose high-dim')) + 
         xlab('Individual Triplets') +
-        ggtitle('All counterbalancing groups')
+        ggtitle('All counterbalancing groups') +
+        geom_vline(xintercept = seq(0.5,27.5,3), 
+                   linetype = 'dashed',
+                   alpha = 0.5) +
+        facet_wrap(~pilot_paradigm, ncol = 1, strip.position = 'right')
 
 
 
@@ -429,7 +434,11 @@ fig2 <- tt_long_post_pre_and_diff %>%
               legend.position = 'top') +
         ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
-        ggtitle('Dense Right')
+        ggtitle('Dense Right') +
+        geom_vline(xintercept = seq(0.5,27.5,3), 
+                   linetype = 'dashed',
+                   alpha = 0.5) +
+        facet_wrap(~pilot_paradigm, ncol = 1, strip.position = 'right')
 
 fig3 <- tt_long_post_pre_and_diff %>%
         filter(counterbalancing == 'dense_left',
@@ -446,7 +455,11 @@ fig3 <- tt_long_post_pre_and_diff %>%
               legend.position = '') +
         ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
-        ggtitle('Dense Left')
+        ggtitle('Dense Left') +
+        geom_vline(xintercept = seq(0.5,27.5,3), 
+                   linetype = 'dashed',
+                   alpha = 0.5) +
+        facet_wrap(~pilot_paradigm, ncol = 1, strip.position = 'right')
 
 grid.arrange(fig1,fig2,fig3,
              nrow = 3)
@@ -508,7 +521,10 @@ fig3 <- tt_long_post_pre_and_diff %>%
         scale_fill_manual(values=c('white','gray')) + 
         ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
-        ggtitle('Both groups')
+        ggtitle('Both groups') +
+        geom_vline(xintercept = seq(0.5,27.5,3), 
+                   linetype = 'dashed',
+                   alpha = 0.5)
 
 # Unsorted
 fig4 <- tt_bw_part_sum_stats_triplets_difference %>%
@@ -525,7 +541,10 @@ fig4 <- tt_bw_part_sum_stats_triplets_difference %>%
               legend.position = '') +
         ylab('Dense_right - Dense_left') + 
         xlab('Individual Triplets') +
-        ggtitle(paste0(plot_dep_var, '; (UNSORTED) chose high-dimension: Counterbalancing group difference'))
+        ggtitle(paste0(plot_dep_var, '; (UNSORTED) chose high-dimension: Counterbalancing group difference')) +
+        geom_vline(xintercept = seq(0.5,27.5,3), 
+                   linetype = 'dashed',
+                   alpha = 0.5)
 
 # Unsorted absolute value
 fig5 <- tt_bw_part_sum_stats_triplets_difference %>%
@@ -541,7 +560,10 @@ fig5 <- tt_bw_part_sum_stats_triplets_difference %>%
               legend.position = '') +
         ylab('ABS(Dense_right - Dense_left)') + 
         xlab('Individual Triplets') +
-        ggtitle(paste0(plot_dep_var, '; (UNSORTED ABS) chose high-dimension: Counterbalancing group difference'))
+        ggtitle(paste0(plot_dep_var, '; (UNSORTED ABS) chose high-dimension: Counterbalancing group difference')) +
+        geom_vline(xintercept = seq(0.5,27.5,3), 
+                   linetype = 'dashed',
+                   alpha = 0.5)
 
 grid.arrange(fig3,fig4,fig5,fig1,fig2,
              nrow = 5)

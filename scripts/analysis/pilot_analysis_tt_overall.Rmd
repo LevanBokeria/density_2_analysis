@@ -62,7 +62,7 @@ pacman::p_load(pacman,
 qc_filter <- F
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(1)
+which_paradigm <- c(3)
 
 print(paste0('Which pilot paradigm? ', which_paradigm))
 
@@ -113,6 +113,11 @@ fig1 <- tt_part_sum_stats %>%
                   alpha = 0.2) +  
         stat_summary(fun = mean,
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        stat_summary(fun.data = mean_cl_normal,
+             geom = "errorbar",
+             size=1,
+             width=0.1,
+             color='red') +  
         ggtitle('chose towards sparse')
 
 fig2 <- tt_part_sum_stats %>%
@@ -129,7 +134,12 @@ fig2 <- tt_part_sum_stats %>%
         geom_line(aes(group=prolific_id),
                   alpha = 0.2) +        
         stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +      
+        stat_summary(fun.data = mean_cl_normal,
+             geom = "errorbar",
+             size=1,
+             width=0.1,
+             color='red') +          
         facet_wrap(~counterbalancing) 
 
 #  
@@ -147,7 +157,12 @@ fig3 <- tt_part_sum_stats %>%
         geom_line(aes(group=prolific_id),
                   alpha = 0.2) +     
         stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +      
+        stat_summary(fun.data = mean_cl_normal,
+             geom = "errorbar",
+             size=1,
+             width=0.1,
+             color='red') +          
         ggtitle('chose towards high dimension')
 
 fig4 <- tt_part_sum_stats %>%
@@ -164,7 +179,12 @@ fig4 <- tt_part_sum_stats %>%
         geom_line(aes(group=prolific_id),
                   alpha = 0.2) +    
         stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +     
+        stat_summary(fun.data = mean_cl_normal,
+             geom = "errorbar",
+             size=1,
+             width=0.1,
+             color='red') +          
         facet_wrap(~counterbalancing)
 
 #  
@@ -183,6 +203,11 @@ fig5 <- tt_part_sum_stats %>%
                   alpha = 0.2) +     
         stat_summary(fun = mean,
                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+        stat_summary(fun.data = mean_cl_normal,
+             geom = "errorbar",
+             size=1,
+             width=0.1,
+             color='red') +          
         ggtitle('accuracy')
 
 fig6 <- tt_part_sum_stats %>%
@@ -199,7 +224,12 @@ fig6 <- tt_part_sum_stats %>%
         geom_line(aes(group=prolific_id),
                   alpha = 0.2) +    
         stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +         
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +       
+        stat_summary(fun.data = mean_cl_normal,
+             geom = "errorbar",
+             size=1,
+             width=0.1,
+             color='red') +          
         facet_wrap(~counterbalancing)
         
 grid.arrange(fig1,fig2,

@@ -19,7 +19,7 @@ source('./scripts/utils/load_all_libraries.R')
 
 save_qc_table  <- T
 qc_filter      <- F
-which_paradigm <- c(1,2,3)
+which_paradigm <- c(3)
 
 
 ```
@@ -199,7 +199,7 @@ if (save_qc_table){
 
 ```{r plots-per-participant-tt, fig.height=8, fig.width=10, warning=FALSE, message=FALSE}
 
-plot_tt_per_part <- T
+plot_tt_per_part <- F
 
 if (plot_tt_per_part){
         for (iP in unique(tt_long$prolific_id)){
@@ -287,36 +287,42 @@ if (plot_tt_per_part){
 
 ```{r per-participant, fig.height=5, fig.width=8, message=FALSE, warning=FALSE}
 
-for (iP in unique(tt_long$prolific_id)){
-        print(iP)
+plot_exp_per_part <- F
 
-        p5 <- 
-                exp_long %>%
-                filter(prolific_id == iP) %>%
-                ggplot(aes(x=rt,fill=session)) +
-                geom_histogram(color="#e9ecef", alpha=0.6, position = 'identity') + 
-                facet_grid(~session, labeller = label_both) + 
-                geom_vline(xintercept = 500,color='red',linetype='dashed') + 
-                ggtitle('Same/different task: RT') + 
-                theme(legend.position = '') + 
-                scale_x_continuous(limits = c(0,3000))
+if (plot_exp_per_part){
+                
+        
+        
+        for (iP in unique(tt_long$prolific_id)){
+                print(iP)
+        
+                p5 <- 
+                        exp_long %>%
+                        filter(prolific_id == iP) %>%
+                        ggplot(aes(x=rt,fill=session)) +
+                        geom_histogram(color="#e9ecef", alpha=0.6, position = 'identity') + 
+                        facet_grid(~session, labeller = label_both) + 
+                        geom_vline(xintercept = 500,color='red',linetype='dashed') + 
+                        ggtitle('Same/different task: RT') + 
+                        theme(legend.position = '') + 
+                        scale_x_continuous(limits = c(0,3000))
+        
+                p6 <- exp_long %>%
+                        filter(prolific_id == iP) %>%
+                        ggplot(aes(x=response,fill=session)) +
+                        geom_histogram(color="#e9ecef", alpha=0.6, 
+                                       position = 'identity', stat = 'count') + 
+                        facet_grid(~session, labeller = label_both) + 
+                        ggtitle('Same/Different task: responses') + 
+                        theme(legend.position = '')
+                
+                grid.arrange(p5,p6,
+                     ncol=1,
+                     top=iP) 
+                
+        }
 
-        p6 <- exp_long %>%
-                filter(prolific_id == iP) %>%
-                ggplot(aes(x=response,fill=session)) +
-                geom_histogram(color="#e9ecef", alpha=0.6, 
-                               position = 'identity', stat = 'count') + 
-                facet_grid(~session, labeller = label_both) + 
-                ggtitle('Same/Different task: responses') + 
-                theme(legend.position = '')
-        
-        grid.arrange(p5,p6,
-             ncol=1,
-             top=iP) 
-        
 }
-
- 
 
 ```
 
@@ -483,13 +489,13 @@ exp_acc_by_type %>%
 
 ```{r}
 ## Overall accuracy for payment ----------------------------------------------
-# overall_acc <- rbind(select(tt_acc,prolific_id,correct),exp_acc)
-# 
-# overall_acc %>%
-#         mutate(correct = as.numeric(correct)) %>%
-#         group_by(prolific_id) %>%
-#         get_summary_stats(correct,type='mean_sd') %>% 
-#         mutate(payment = 2*mean) %>% select(prolific_id,payment) %>% View()
-#         write_csv('payment.csv')
+overall_acc <- rbind(select(tt_acc,prolific_id,correct),exp_acc)
+
+overall_acc %>%
+        mutate(correct = as.numeric(correct)) %>%
+        group_by(prolific_id) %>%
+        get_summary_stats(correct,type='mean_sd') %>%
+        mutate(payment = 2*mean) %>% select(prolific_id,payment) %>% View()
+        write_csv('payment.csv')
 
 ```

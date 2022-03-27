@@ -47,7 +47,7 @@ qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
 
-which_paradigm <- c(3)
+which_paradigm <- c(2,3)
 
 print(paste0('Which pilot paradigm? ', which_paradigm))
 
@@ -132,7 +132,7 @@ grid.arrange(fig3,fig4,
 
 # What to plot on the y axis
 
-plot_dep_var <- 'pre_exposure'
+plot_dep_var <- 'post_pre_diff'
 
 
 if (plot_dep_var != 'post_pre_diff'){
@@ -390,12 +390,85 @@ grid.arrange(fig1,fig2,fig3,
              nrow = 3)
 ```
 
-```{r unsorted-plot-chose-high-dimension, fig.width=13, fig.height=25}
+```{r unsorted-plot-chose-high-dimension, fig.width=13, fig.height=15}
 
 # For sorted data
 fig1 <- tt_long_post_pre_and_diff %>%
         filter(dep_var_type == plot_dep_var) %>% 
-        ggplot(aes(x=triplet_unique_name,-chose_towards_highdim_avg_across_reps,
+        ggplot(aes(x=triplet_unique_name,
+                   y=chose_towards_highdim_avg_across_reps)) +
+        geom_boxplot(fatten = 3, aes(color=curve_type)) + 
+        stat_summary(fun=mean,
+                     geom = 'point',
+                     size = 5,
+                     color="black",
+                     aes(shape = triplet_easiness)) + 
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') +
+        ylab(paste0(plot_dep_var, '; chose high-dim')) + 
+        xlab('Individual Triplets') +
+        ggtitle('All counterbalancing groups') +
+        geom_vline(xintercept = seq(0.5,27.5,3), 
+                   linetype = 'dashed',
+                   alpha = 0.5)
+
+
+
+fig2 <- tt_long_post_pre_and_diff %>%
+        filter(counterbalancing == 'dense_right',
+               dep_var_type == plot_dep_var) %>% 
+         ggplot(aes(x=triplet_unique_name,
+                   y=chose_towards_highdim_avg_across_reps)) +
+        geom_boxplot(fatten = 4,aes(color=curve_type)) + 
+        stat_summary(fun=mean,
+                     color='black',
+                     aes(shape = triplet_easiness),
+                     size = 1) + 
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +
+        # geom_point(data = filter(tt_bw_part_sum_stats_triplets,counterbalancing == 'dense_right'),
+        #            aes(x = triplet_unique_name,
+        #                y = mean_chose_towards_sparse)) +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = 'top') +
+        ylab(paste0(plot_dep_var, '; chose high-dim')) +
+        xlab('Individual Triplets') +
+        ggtitle('Dense Right') +
+        geom_vline(xintercept = seq(0.5,27.5,3), 
+                   linetype = 'dashed',
+                   alpha = 0.5)
+
+fig3 <- tt_long_post_pre_and_diff %>%
+        filter(counterbalancing == 'dense_left',
+               dep_var_type == plot_dep_var) %>%
+        ggplot(aes(x=triplet_unique_name,
+                   y=chose_towards_highdim_avg_across_reps)) +
+        geom_boxplot(fatten = 4,aes(color=curve_type)) +
+        stat_summary(fun=mean,
+                     color='black',
+                     aes(shape = triplet_easiness),
+                     size = 1) + 
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = '') +
+        ylab(paste0(plot_dep_var, '; chose high-dim')) +
+        xlab('Individual Triplets') +
+        ggtitle('Dense Left') +
+        geom_vline(xintercept = seq(0.5,27.5,3), 
+                   linetype = 'dashed',
+                   alpha = 0.5)
+
+grid.arrange(fig1,fig2,fig3,
+             nrow = 3)
+```
+
+
+```{r unsorted-plot-chose-high-dimension-by-pilot-by-cb, fig.width=13, fig.height=25}
+
+# For sorted data
+fig1 <- tt_long_post_pre_and_diff %>%
+        filter(dep_var_type == plot_dep_var) %>% 
+        ggplot(aes(x=triplet_unique_name,
                    y=chose_towards_highdim_avg_across_reps)) +
         geom_boxplot(fatten = 3, aes(color=curve_type)) + 
         stat_summary(fun=mean,
@@ -419,7 +492,7 @@ fig1 <- tt_long_post_pre_and_diff %>%
 fig2 <- tt_long_post_pre_and_diff %>%
         filter(counterbalancing == 'dense_right',
                dep_var_type == plot_dep_var) %>% 
-         ggplot(aes(x=triplet_unique_name,-chose_towards_highdim_avg_across_reps,
+         ggplot(aes(x=triplet_unique_name,
                    y=chose_towards_highdim_avg_across_reps)) +
         geom_boxplot(fatten = 4,aes(color=curve_type)) + 
         stat_summary(fun=mean,
@@ -443,7 +516,7 @@ fig2 <- tt_long_post_pre_and_diff %>%
 fig3 <- tt_long_post_pre_and_diff %>%
         filter(counterbalancing == 'dense_left',
                dep_var_type == plot_dep_var) %>%
-        ggplot(aes(x=triplet_unique_name,-chose_towards_highdim_avg_across_reps,
+        ggplot(aes(x=triplet_unique_name,
                    y=chose_towards_highdim_avg_across_reps)) +
         geom_boxplot(fatten = 4,aes(color=curve_type)) +
         stat_summary(fun=mean,

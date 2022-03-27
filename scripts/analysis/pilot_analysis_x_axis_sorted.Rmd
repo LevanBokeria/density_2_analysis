@@ -70,6 +70,7 @@ tt_long %>%
         kable_styling(bootstrap_options = "striped")
 
 ```
+
 # Plots with x axis sorted by diagnosticity
 
 ## Y axis: post-pre chose high-dimension

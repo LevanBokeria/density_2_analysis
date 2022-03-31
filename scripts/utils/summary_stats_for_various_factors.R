@@ -6,7 +6,6 @@ tt_part_sum_stats <- tt_long_post_pre_and_diff %>%
                  counterbalancing,
                  dep_var_type) %>%
         summarise(n_datapoints               = n(),
-                  mean_choice_sum            = mean(choice_numeric_sum_across_reps),
                   mean_chose_towards_sparse  = mean(chose_towards_sparse_avg_across_reps),
                   mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
                   mean_correct               = mean(correct_avg_across_reps, na.rm = T)) %>%
@@ -18,7 +17,6 @@ tt_part_sum_stats_triplet_location <- tt_long_post_pre_and_diff %>%
                  triplet_location,
                  dep_var_type) %>%
         summarise(n_datapoints               = n(),
-                  mean_choice_sum            = mean(choice_numeric_sum_across_reps),
                   mean_chose_towards_sparse  = mean(chose_towards_sparse_avg_across_reps),
                   mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
                   mean_correct               = mean(correct_avg_across_reps, na.rm = T)) %>%
@@ -30,7 +28,6 @@ tt_part_sum_stats_curve_type <- tt_long_post_pre_and_diff %>%
                  curve_type,
                  dep_var_type) %>%
         summarise(n_datapoints               = n(),
-                  mean_choice_sum            = mean(choice_numeric_sum_across_reps),
                   mean_chose_towards_sparse  = mean(chose_towards_sparse_avg_across_reps),
                   mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
                   mean_correct               = mean(correct_avg_across_reps, na.rm = T)) %>%
@@ -43,7 +40,6 @@ tt_part_sum_stats_triplet_location_easiness <- tt_long_post_pre_and_diff %>%
                  triplet_easiness,
                  dep_var_type) %>%
         summarise(n_datapoints               = n(),
-                  mean_choice_sum            = mean(choice_numeric_sum_across_reps),
                   mean_chose_towards_sparse  = mean(chose_towards_sparse_avg_across_reps),
                   mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
                   mean_correct               = mean(correct_avg_across_reps, na.rm = T)) %>%
@@ -57,7 +53,6 @@ tt_part_sum_stats_template_triplet_location_easiness <- tt_long_post_pre_and_dif
                  triplet_easiness,
                  dep_var_type) %>%
         summarise(n_datapoints               = n(),
-                  mean_choice_sum            = mean(choice_numeric_sum_across_reps),
                   mean_chose_towards_sparse  = mean(chose_towards_sparse_avg_across_reps),
                   mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
                   mean_correct               = mean(correct_avg_across_reps, na.rm = T)) %>%
@@ -71,7 +66,6 @@ tt_part_sum_stats_curve_type_template <- tt_long_post_pre_and_diff %>%
                  triplet_easiness,
                  dep_var_type) %>%
         summarise(n_datapoints               = n(),
-                  mean_choice_sum            = mean(choice_numeric_sum_across_reps),
                   mean_chose_towards_sparse  = mean(chose_towards_sparse_avg_across_reps),
                   mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
                   mean_correct               = mean(correct_avg_across_reps, na.rm = T)) %>%
@@ -85,13 +79,12 @@ tt_part_sum_stats_triplet_location_template <- tt_long_post_pre_and_diff %>%
                  template_distances,
                  dep_var_type) %>%
         summarise(n_datapoints = n(),
-                  mean_choice_sum = mean(choice_numeric_sum_across_reps),
                   mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
                   mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
                   mean_correct = mean(correct_avg_across_reps, na.rm = T)) %>%
         ungroup()
 
-# Difference scrores between triplet locations ##################################
+# Regional analysis: difference between triplet locations######################
 tt_part_sum_stats_triplet_location_differences <- tt_part_sum_stats_triplet_location %>%
         pivot_wider(id_cols = c(prolific_id,
                                 counterbalancing,
@@ -168,7 +161,6 @@ tt_bw_part_sum_stats_triplets <- tt_long_post_pre_and_diff %>%
                  triplet_easiness,
                  dep_var_type) %>%
         summarise(n_datapoints               = n(),
-                  mean_choice_sum            = mean(choice_numeric_sum_across_reps),
                   mean_chose_towards_sparse  = mean(chose_towards_sparse_avg_across_reps),
                   mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
                   mean_correct               = mean(correct_avg_across_reps, na.rm = T)) %>%

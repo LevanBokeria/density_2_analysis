@@ -19,4 +19,7 @@ pacman::p_load(pacman,
                knitr,
                magrittr,
                Hmisc,
-               psycho)
+               psycho,
+               data.table,
+               grid,
+               png)

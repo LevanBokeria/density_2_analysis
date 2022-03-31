@@ -75,8 +75,8 @@ tt_part_sum_stats_triplet_location_template <- tt_long_post_pre_and_diff %>%
         group_by(prolific_id,
                  counterbalancing,
                  triplet_location,
-                 triplet_easiness,
                  template_distances,
+                 triplet_easiness,
                  dep_var_type) %>%
         summarise(n_datapoints = n(),
                   mean_chose_towards_sparse = mean(chose_towards_sparse_avg_across_reps),
@@ -85,13 +85,14 @@ tt_part_sum_stats_triplet_location_template <- tt_long_post_pre_and_diff %>%
         ungroup()
 
 # Regional analysis: difference between triplet locations######################
+
 tt_part_sum_stats_triplet_location_differences <- tt_part_sum_stats_triplet_location %>%
         pivot_wider(id_cols = c(prolific_id,
                                 counterbalancing,
                                 dep_var_type),
                     names_from  = triplet_location,
                     values_from = starts_with('mean_'),
-                    names_glue  = '{.value}__{triplet_location}') %>%
+                    names_glue  = '{.value}__{triplet_location}') %>% 
         mutate(chose_towards_sparse__across_minus_dense   = mean_chose_towards_sparse__across_density_regions - mean_chose_towards_sparse__dense_region,
                chose_towards_sparse__across_minus_sparse  = mean_chose_towards_sparse__across_density_regions - mean_chose_towards_sparse__sparse_region,
                chose_towards_sparse__dense_minus_sparse   = mean_chose_towards_sparse__dense_region - mean_chose_towards_sparse__sparse_region,
@@ -100,7 +101,7 @@ tt_part_sum_stats_triplet_location_differences <- tt_part_sum_stats_triplet_loca
                chose_towards_highdim__dense_minus_sparse  = mean_chose_towards_highdim__dense_region - mean_chose_towards_highdim__sparse_region) %>%
         mutate(avg_dense_sparse = rowMeans(.[,c('mean_chose_towards_sparse__sparse_region','mean_chose_towards_sparse__dense_region')]),
                chose_towards_sparse__across_minus_avg_dense_sparse = mean_chose_towards_sparse__across_density_regions - avg_dense_sparse) %>% 
-        select(-starts_with('mean_')) %>% 
+        select(-starts_with('mean_'),-avg_dense_sparse) %>%
         pivot_longer(cols = starts_with('chose_towards_'),
                      names_to = c('chose_towards_type','difference_type'),
                      values_to = 'difference_value',
@@ -122,7 +123,7 @@ tt_part_sum_stats_triplet_location_easiness_differences <- tt_part_sum_stats_tri
                chose_towards_highdim__dense_minus_sparse  = mean_chose_towards_highdim__dense_region - mean_chose_towards_highdim__sparse_region) %>%
         mutate(avg_dense_sparse = rowMeans(.[,c('mean_chose_towards_sparse__sparse_region','mean_chose_towards_sparse__dense_region')]),
                chose_towards_sparse__across_minus_avg_dense_sparse = mean_chose_towards_sparse__across_density_regions - avg_dense_sparse) %>% 
-        select(-starts_with('mean_')) %>%
+        select(-starts_with('mean_'),-avg_dense_sparse) %>%
         pivot_longer(cols = starts_with('chose_towards_'),
                      names_to = c('chose_towards_type','difference_type'),
                      values_to = 'difference_value',
@@ -145,7 +146,7 @@ tt_part_sum_stats_triplet_location_template_differences <- tt_part_sum_stats_tri
                chose_towards_highdim__dense_minus_sparse  = mean_chose_towards_highdim__dense_region - mean_chose_towards_highdim__sparse_region) %>%
         mutate(avg_dense_sparse = rowMeans(.[,c('mean_chose_towards_sparse__sparse_region','mean_chose_towards_sparse__dense_region')]),
                chose_towards_sparse__across_minus_avg_dense_sparse = mean_chose_towards_sparse__across_density_regions - avg_dense_sparse) %>% 
-        select(-starts_with('mean_')) %>%
+        select(-starts_with('mean_'),-avg_dense_sparse) %>%
         pivot_longer(cols = starts_with('chose_towards_'),
                      names_to = c('chose_towards_type','difference_type'),
                      values_to = 'difference_value',

@@ -283,4 +283,6 @@ tt_long_post_pre_and_diff <- tt_wide_reps_wide_trial_stage %>%
                                                      "24_-8_-32",
                                                      "8_-24_-32"))
 
-
+# Delete some variables ####################################################
+rm(tt_wide_reps)
+rm(tt_wide_reps_wide_trial_stage)

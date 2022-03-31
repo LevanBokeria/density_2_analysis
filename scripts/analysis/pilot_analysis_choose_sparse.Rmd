@@ -628,7 +628,7 @@ grid.arrange(fig1,fig2,
 fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_dense',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               chose_towards_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) + 

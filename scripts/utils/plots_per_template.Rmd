@@ -1,5 +1,5 @@
 ---
-title: "TT choose sparse"
+title: "TT Template Report"
 output:
   html_document:
     number_sections: false
@@ -11,7 +11,7 @@ knit: (function(input, ...) {
       output_file = paste0(
       rprojroot::find_rstudio_root_file(),
       '/results/pilots/individual_templates/',
-      'template_8_-8_-16_',Sys.Date(),'.html'
+      'template_24_-8_-32_',Sys.Date(),'.html'
 
       ),
       envir = globalenv()
@@ -47,7 +47,14 @@ source('./scripts/utils/load_all_libraries.R')
 # template       <- '16_-16_-32'
 # template       <- '24_-24_-48'
 
-template       <- '24_-16_-40'
+# template       <- '24_-16_-40'
+# template       <- '16_-24_-40'
+
+# template       <- '8_-16_-24'
+# template       <- '16_-8_-24'
+
+# template       <- '8_-24_-32'
+template       <- '24_-8_-32'
 
 template_split <- str_split(template,'_')
 
@@ -62,7 +69,7 @@ print(paste0('Which pilot paradigm? ', which_paradigm))
 
 source('./scripts/utils/load_transform_tt_data.R')
 
-print(paste0('Which triplet? ', template))
+print(paste0('Which Template? ', template))
 
 # Filter the main table!
 tt_long <- tt_long %>%
@@ -362,7 +369,7 @@ grid.arrange(fig1,fig2,
 
 ```
 
-```{r post-pre-separately, fig.width=10, fig.height=8}
+```{r post-pre-separately, fig.width=10, fig.height=8, warning=FALSE}
 
 
 fig1 <- tt_part_sum_stats_triplet_location_template %>%

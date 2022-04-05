@@ -1,5 +1,5 @@
 ---
-title: "TT choose sparse"
+title: "TT Plots per triplet"
 output:
   html_document:
     number_sections: false
@@ -43,7 +43,7 @@ source('./scripts/utils/load_all_libraries.R')
 
 ```{r load-transform-tt-data}
 
-triplet       <- '38_30_46'
+triplet       <- '54_30_78'
 triplet_split <- str_split(triplet,'_')
 
 qc_filter <- T

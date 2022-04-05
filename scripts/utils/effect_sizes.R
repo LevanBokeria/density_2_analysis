@@ -224,7 +224,7 @@ tbl <- full_join(tbl1,  tbl2)
 tbl <- full_join(tbl,tbl3)
 tbl <- full_join(tbl,tbl4)
 
-tbl$.y. <- c('Within','Across','Within','Across')
+tbl$.y. <- c('Within','Between','Within','Between')
 
 tbl <- tbl %>% 
         add_column(all_trials = c('True','True','False','False'),

@@ -12,7 +12,7 @@ source('./scripts/utils/load_all_libraries.R')
 
 ## Load the data and set flags -------------------------------------------------
 
-qc_filter <- T
+qc_filter <- F
 print(paste0('QC filter? ', qc_filter))
 
 which_paradigm <- c(3)
@@ -121,7 +121,14 @@ tbl2 <- tt_part_sum_stats_triplet_location %>%
                  paired = FALSE,
                  hedges.correction = TRUE)
 
+## One-sample against 0: P(choose sparse) != 0 for across trials
 
+tbl2_1 <- tt_part_sum_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff',
+               triplet_location == 'across_density_regions') %>%
+        cohens_d(mean_chose_towards_sparse ~ 1,
+                 mu = 0,
+                 hedges.correction = FALSE)
 
 # Excluding bad trials  ##########################################################
 

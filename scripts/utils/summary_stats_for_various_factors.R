@@ -71,6 +71,19 @@ tt_part_sum_stats_curve_type_template <- tt_long_post_pre_and_diff %>%
                   mean_correct               = mean(correct_avg_across_reps, na.rm = T)) %>%
         ungroup()
 
+tt_part_sum_stats_curve_type_template_session <- tt_long_post_pre_and_diff %>%
+        group_by(prolific_id,
+                 counterbalancing,
+                 curve_type,
+                 template_distances,
+                 triplet_easiness,
+                 dep_var_type) %>%
+        summarise(n_datapoints               = n(),
+                  mean_chose_towards_sparse  = mean(chose_towards_sparse_avg_across_reps),
+                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
+                  mean_correct               = mean(correct_avg_across_reps, na.rm = T)) %>%
+        ungroup()
+
 tt_part_sum_stats_triplet_location_template <- tt_long_post_pre_and_diff %>%
         group_by(prolific_id,
                  counterbalancing,

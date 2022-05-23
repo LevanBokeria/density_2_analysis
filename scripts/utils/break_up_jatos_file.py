@@ -37,7 +37,7 @@ pid_mapping = pd.read_excel('C:\\Users\\lb08\\Desktop\\density_pid_map.xlsx')
 
 file_name = 'jatos_results_batch1.txt'
 
-f = open('./data/pilots/gui_downloads/' + file_name,'r')    
+f = open('./data/experiments/gui_downloads/' + file_name,'r')    
 
 rawtext = f.read()
 
@@ -89,7 +89,7 @@ for iP in range(0,len(pid_idxs)):
     
     if saveData:
         # Save this data
-        f= open('./data/pilots/gui_downloads/jatos_prolific_id_' + anonID + '.txt',"w+")    
+        f= open('./data/experiments/gui_downloads/jatos_prolific_id_' + anonID + '.txt',"w+")    
         
         f.write(tosave)
         f.close()

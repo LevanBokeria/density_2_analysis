@@ -34,7 +34,7 @@ saveData = True
 
 file_name = 'jatos_results_batch1.txt'
 
-f = open('./data/experiments/gui_downloads/' + file_name,'r')    
+f = open('./data/pilots/gui_downloads/' + file_name,'r')    
 
 rawtext = f.read()
 

@@ -8,9 +8,8 @@ Created on Wed Aug 11 13:01:22 2021
 # Description:
 
 # This script can take a txt file from jatos, that contains multiple 
-# participant data, and get the prolific IDs as a text file so that I can then
-# manually assign an anonimized string to it and save it in a file in the 
-# secure data area.
+# participant data, and break it up into txt files for each individual 
+# participant, and save them.
 
 
 # Import other libraries
@@ -28,13 +27,17 @@ print(os.getcwd())
 # Set the working directory
 os.chdir(r'C:\Users\lb08\GitHub\density_2_analysis')
 
-saveData = True
+saveData       = True
+
+# %% Import the pid mappings
+pid_mapping = pd.read_excel('C:\\Users\\lb08\\Desktop\\density_pid_map.xlsx')
+
 
 # %% Import the files
 
 file_name = 'jatos_results_batch1.txt'
 
-f = open('./data/experiments/gui_downloads/' + file_name,'r')    
+f = open('./data/pilots/gui_downloads/' + file_name,'r')    
 
 rawtext = f.read()
 
@@ -51,9 +54,6 @@ for idx, iLine in enumerate(rawtext_split):
 # %% Look to split the file and save individual txt files
     
 # Loop over all get_pid_component start positions.
-all_pids = []
-
-
 for iP in range(0,len(pid_idxs)):
     print(iP)
     
@@ -67,7 +67,9 @@ for iP in range(0,len(pid_idxs)):
     else:
         iIdx_end = pid_idxs[iP+1]
     
-
+    # Join all these componenets
+    tosave = '\n'.join(rawtext_split[iIdx_start:iIdx_end])
+    
     # Whats the prolific ID
     json_start_loc = rawtext_split[iIdx_start].find('[get_pid_comp_start---') + \
         len('[get_pid_comp_start---')
@@ -79,4 +81,15 @@ for iP in range(0,len(pid_idxs)):
     elif 'prolific_ID' in iData_decoded['inputData']:
         iPID = iData_decoded['inputData']['prolific_ID']
     
-    all_pids.append(iPID)
+    # Whats the anonimized ID?
+    anonID = pid_mapping.studyID[pid_mapping.prolificID == iPID].iloc[0]
+    
+    # Find the prolific ID in the tosave file and substitute
+    tosave = tosave.replace(iPID,anonID)
+    
+    if saveData:
+        # Save this data
+        f= open('./data/pilots/gui_downloads/jatos_prolific_id_' + anonID + '.txt',"w+")    
+        
+        f.write(tosave)
+        f.close()

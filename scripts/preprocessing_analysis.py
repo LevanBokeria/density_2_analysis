@@ -2,7 +2,7 @@
 """
 Created on Wed Aug 11 13:01:22 2021
 
-@author: lb08
+@author: levan
 """
 
 # Description:
@@ -23,7 +23,7 @@ import json
 print(os.getcwd())
 
 # Set the working directory
-os.chdir(r'C:\Users\lb08\GitHub\density_2_analysis')
+os.chdir(r'C:\Users\levan\GitHub\density_2_analysis')
 
 save_tt_data      = True
 save_debriefing   = True
@@ -47,10 +47,6 @@ if save_nothing:
 
 file_list = os.listdir('./data/experiments/gui_downloads/')
 
-# Remove the selftest I did on myself
-indices = [i for i, s in enumerate(file_list) if 'selftest' in s]
-del file_list[indices[0]]
-
 # Create empty data frames to append to
 ind_tt  = []
 ind_instr = []
@@ -61,6 +57,10 @@ ind_exp = []
 # Read the qc fail participant file
 # qc_fail_participants = pd.read_csv('./results/qc_fail_participants.csv',
 #                                    header = None)
+
+
+# Which experiment is this?
+experiment = 1
 
 # if it doesn't just start the loop
 for iF in file_list:

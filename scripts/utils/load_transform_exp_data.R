@@ -10,7 +10,7 @@ source('./scripts/utils/load_all_libraries.R')
 
 # Read the txt file ###########################################################
 
-exp_long <- import('./results/pilots/preprocessed_data/exposure_task_long_form.csv')
+exp_long <- import('./results/experiments/preprocessed_data/exposure_task_long_form.csv')
 
 
 # Start various transformations of columns######################################
@@ -24,7 +24,7 @@ exp_long %<>%
 if (qc_filter){
         
         # Load the qc table
-        qc_table <- import('./results/pilots/preprocessed_data/qc_table.csv')
+        qc_table <- import('./results/experiments/preprocessed_data/qc_table.csv')
         
         qc_fail_ptps <- qc_table %>% 
                 filter(qc_fail_overall) %>% 

@@ -1,5 +1,5 @@
 ---
-title: "QC for experiment 1"
+title: "QC for the initial pilots"
 output:
   html_document: default
 ---
@@ -19,7 +19,7 @@ source('./scripts/utils/load_all_libraries.R')
 
 save_qc_table  <- T
 qc_filter      <- F
-which_experiment <- c(1)
+which_paradigm <- c(3)
 
 
 ```
@@ -30,9 +30,9 @@ which_experiment <- c(1)
 source('./scripts/utils/load_transform_tt_data.R')
 source('./scripts/utils/load_transform_exp_data.R')
 
-# Filter to only have that experiment paradigm data which we specified above
+# Filter to only have that pilot paradigm data which we specified above
 exp_long <- exp_long %>%
-        filter(experiment %in% which_experiment) %>%
+        filter(pilot_paradigm %in% which_paradigm) %>%
         droplevels()
 
 ```
@@ -153,7 +153,7 @@ qc_table <- merge(qc_table,select(qc_table_rt,prolific_id,qc_fail_rt), by = 'pro
 
 ```{r qc-check-technical-debriefing}
 
-manual_qc <- import('./results/experiments/preprocessed_data/qc_manual_for_breaks_debriefing.csv')
+manual_qc <- import('./results/pilots/preprocessed_data/qc_manual_for_breaks_debriefing.csv')
 
 qc_table <- qc_table %>% 
         mutate(qc_fail_manual = case_when(
@@ -174,7 +174,7 @@ qc_table <- qc_table %>%
         mutate(qc_fail_overall = sum(qc_fail_button_sequence,qc_fail_rt) > 0)
 
 # Add the counterbalancing column
-cb <- tt_long %>% select(prolific_id,experiment,counterbalancing) %>% group_by(prolific_id) %>% slice_head()
+cb <- tt_long %>% select(prolific_id,pilot_paradigm,counterbalancing) %>% group_by(prolific_id) %>% slice_head()
 
 qc_table <- merge(qc_table,cb,by = 'prolific_id')
 
@@ -186,7 +186,7 @@ qc_table  %>%
 # Save qc_table
 if (save_qc_table){
 
-        export(qc_table,file = './results/experiments/preprocessed_data/qc_table.csv')
+        export(qc_table,file = './results/pilots/preprocessed_data/qc_table.csv')
 
 
 }
@@ -199,7 +199,7 @@ if (save_qc_table){
 
 ```{r plots-per-participant-tt, fig.height=8, fig.width=10, warning=FALSE, message=FALSE}
 
-plot_tt_per_part <- T
+plot_tt_per_part <- F
 
 if (plot_tt_per_part){
         for (iP in unique(tt_long$prolific_id)){
@@ -287,7 +287,7 @@ if (plot_tt_per_part){
 
 ```{r per-participant, fig.height=5, fig.width=8, message=FALSE, warning=FALSE}
 
-plot_exp_per_part <- T
+plot_exp_per_part <- F
 
 if (plot_exp_per_part){
                 

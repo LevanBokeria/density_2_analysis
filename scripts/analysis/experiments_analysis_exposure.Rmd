@@ -1,5 +1,5 @@
 ---
-title: "pilot_analysis_exposure"
+title: "experiments_analysis_exposure"
 output:
   html_document:
     number_sections: false
@@ -37,10 +37,10 @@ pacman::p_load(pacman,
 qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(3)
-print(paste0('Which paradigm? ', which_paradigm))
+which_experiment <- c(1)
+print(paste0('Which experiment? ', which_experiment))
 
-source('./scripts/utils/load_transform_exp_data_pilots.R')
+source('./scripts/utils/load_transform_exp_data.R')
 
 
 ```

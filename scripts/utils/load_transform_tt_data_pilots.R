@@ -25,8 +25,6 @@ source('./scripts/utils/load_all_libraries.R')
 
 tt_long <- import('./results/pilots/preprocessed_data/triplet_task_long_form.csv')
 
-
-
 # Start various transformations of columns######################################
 
 tt_long %<>% 

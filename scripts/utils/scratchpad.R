@@ -1,6 +1,6 @@
 # Description #################################################################
 
-# Explore various effect sizes in our 3rd pilots
+# Understand the experiment 1 data....
 
 
 # General setup ###############################################################
@@ -12,14 +12,14 @@ source('./scripts/utils/load_all_libraries.R')
 
 ## Load the data and set flags -------------------------------------------------
 
-qc_filter <- T
+qc_filter <- F
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(3)
+which_experiment <- c(1)
 
-print(paste0('Which pilot paradigm? ', which_paradigm))
+print(paste0('Which pilot paradigm? ', which_experiment))
 
-source('./scripts/utils/load_transform_tt_data_pilots.R')
+source('./scripts/utils/load_transform_tt_data.R')
 source('./scripts/utils/summary_stats_for_various_factors.R')
 
 # Flags and settings
@@ -36,6 +36,40 @@ tt_long %>%
         summarise(n = n()) %>%
         knitr::kable(caption = 'Participants and counterbalancing') %>%
         kable_styling(bootstrap_options = "striped")
+
+
+# Check variables coded correctly
+
+## Chose towards sparse
+
+a <- tt_long %>%
+        mutate(match = case_when(
+                chosen_ref_value > query_item & chosen_ref_lowdim_highdim == 'ref_highdim' ~ TRUE,
+                chosen_ref_value < query_item & chosen_ref_lowdim_highdim == 'ref_lowdim' ~ TRUE,
+                TRUE ~ FALSE
+        )
+        ) 
+
+a <- a %>%
+        mutate(button_match = case_when(
+                response == 'p' & ref_right
+        ))
+
+
+
+
+# Check demographic differences...
+
+## Load the tables 
+
+
+
+
+
+
+
+
+
 
 # Using all trials ##########################################################
 

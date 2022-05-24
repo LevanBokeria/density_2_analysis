@@ -22,4 +22,5 @@ pacman::p_load(pacman,
                psycho,
                data.table,
                grid,
-               png)
+               png,
+               BayesFactor)

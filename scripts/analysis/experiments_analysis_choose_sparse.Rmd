@@ -93,16 +93,35 @@ tbl2_1 <- tt_part_sum_stats_triplet_location %>%
 ylimits <- c(-0.2,0.2)
 
 fig1 <- tt_part_sum_stats_triplet_location %>%
+        filter(triplet_location == 'across_density_regions',
+               dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x='All participants',
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,
+                    alpha = 0.2) +
+        geom_boxplot(width = 0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') 
 
-
-fig1 <- tt_part_sum_stats %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
+fig2 <- tt_part_sum_stats_triplet_location %>%
+        filter(triplet_location == 'across_density_regions',
+               dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_chose_towards_sparse)) +
         geom_violin(fill = chose_sparse_color,
                     alpha = 0.2) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
+        geom_boxplot(width = 0.15,
+                     outlier.shape = '',
                      fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
@@ -113,31 +132,55 @@ fig1 <- tt_part_sum_stats %>%
                      geom = "errorbar",
                      size=0.5,
                      width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        ggtitle('Chose towards sparse')
+                     color='red') 
 
-fig2 <- tt_part_sum_stats %>%
-        filter(dep_var_type == 'post_pre_diff') %>%
-        ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_highdim)) +
-        geom_violin(fill = chose_highdim_color,
-                    alpha = 0.2) +
-        geom_boxplot(width=0.15,
-                     outlier.shape = '', 
-                     fatten = 4) +
-        geom_jitter(width = 0.05,
-                    height = 0,
-                    alpha = 0.3) +
-        stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
-        stat_summary(fun.data = mean_cl_normal,
-                     geom = "errorbar",
-                     size=0.5,
-                     width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        ggtitle('Chose towards high dimension')
+        # coord_cartesian(ylim = ylimits) + 
+        # ggtitle('Chose towards sparse')        
+
+
+# fig1 <- tt_part_sum_stats %>%
+#         filter(dep_var_type == 'post_pre_diff') %>%
+#         ggplot(aes(x=counterbalancing,
+#                    y=mean_chose_towards_sparse)) +
+#         geom_violin(fill = chose_sparse_color,
+#                     alpha = 0.2) +
+#         geom_boxplot(width=0.15,
+#                      outlier.shape = '', 
+#                      fatten = 4) +
+#         geom_jitter(width = 0.05,
+#                     height = 0,
+#                     alpha = 0.3) +
+#         stat_summary(fun = mean,
+#                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+#         stat_summary(fun.data = mean_cl_normal,
+#                      geom = "errorbar",
+#                      size=0.5,
+#                      width=0.1,
+#                      color='red') + 
+#         coord_cartesian(ylim = ylimits) + 
+#         ggtitle('Chose towards sparse')
+# 
+# fig2 <- tt_part_sum_stats %>%
+#         filter(dep_var_type == 'post_pre_diff') %>%
+#         ggplot(aes(x=counterbalancing,
+#                    y=mean_chose_towards_highdim)) +
+#         geom_violin(fill = chose_highdim_color,
+#                     alpha = 0.2) +
+#         geom_boxplot(width=0.15,
+#                      outlier.shape = '', 
+#                      fatten = 4) +
+#         geom_jitter(width = 0.05,
+#                     height = 0,
+#                     alpha = 0.3) +
+#         stat_summary(fun = mean,
+#                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+#         stat_summary(fun.data = mean_cl_normal,
+#                      geom = "errorbar",
+#                      size=0.5,
+#                      width=0.1,
+#                      color='red') + 
+#         coord_cartesian(ylim = ylimits) + 
+#         ggtitle('Chose towards high dimension')
         
 
 grid.arrange(fig1,fig2,
@@ -146,36 +189,61 @@ grid.arrange(fig1,fig2,
 
 ```
 
+# Bayes Factor calculation
+
+```{r bf-calculation}
+
+reportBF = function(x, digits){
+        round(as.numeric(as.vector(x)), digits)
+}
+
+bf_data <- tt_part_sum_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff',
+               triplet_location == 'across_density_regions') %>%
+        droplevels() %>% 
+        select(mean_chose_towards_sparse) %>% .[[1]]
+
+null_interval <- c(0,Inf)
+
+bf <- reportBF(ttestBF(
+        bf_data,
+        nullInterval = null_interval
+)[1],4)
+
+```
+
+
+
 # Over all trials, pre post and post-pre
 
 ```{r all-trials, fig.width=12, fig.height=3, warning=F}
 
-#  
+#
 fig3 <- tt_part_sum_stats %>%
-        #filter(dep_var_type == 'post_pre_diff') %>% 
+        #filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=dep_var_type,
                    y=mean_chose_towards_sparse)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
         geom_boxplot(width=0.2,
-                     outlier.shape = '', 
+                     outlier.shape = '',
                      fatten = 6) +
         geom_jitter(width = 0.05,
                     height = 0,
-                    alpha = 0.3) + 
+                    alpha = 0.3) +
         geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +     
+                  alpha = 0.2) +
         stat_summary(fun = mean,
-                     color = 'red') + 
+                     color = 'red') +
         stat_summary(fun.data = mean_cl_normal,
              geom = "errorbar",
              size=1,
              width=0.1,
-             color='red') +         
-        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +         
+             color='red') +
+        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +
         ggtitle('chose towards sparse')
 
 fig4 <- tt_part_sum_stats %>%
-        #filter(dep_var_type == 'post_pre_diff') %>% 
+        #filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=dep_var_type,
                    y=mean_chose_towards_sparse)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -186,28 +254,28 @@ fig4 <- tt_part_sum_stats %>%
                     height = 0,
                     alpha = 0.3) +
         geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +    
+                  alpha = 0.2) +
         stat_summary(fun = mean,
-                     color = 'red') + 
+                     color = 'red') +
         stat_summary(fun.data = mean_cl_normal,
              geom = "errorbar",
              size=1,
              width=0.1,
-             color='red') +         
-        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +         
+             color='red') +
+        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +
         facet_wrap(~counterbalancing)
 
 grid.arrange(fig3,fig4,
              nrow = 1,
              widths = 1:2)
-             
+
 ```
 
 ```{r triplet-location, fig.width=12, fig.height=7, warning=F}
 x_font_size <- 10
 
 fig3 <- tt_part_sum_stats_triplet_location %>%
-        # filter(dep_var_type == plot_dep_var) %>% 
+        # filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_sparse)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -215,23 +283,23 @@ fig3 <- tt_part_sum_stats_triplet_location %>%
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
-                    alpha = 0.3) + 
+                    alpha = 0.3) +
         geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +     
+                  alpha = 0.2) +
         stat_summary(fun = mean,
-                     color = 'red') + 
+                     color = 'red') +
         stat_summary(fun.data = mean_cl_normal,
              geom = "errorbar",
              size=1,
              width=0.1,
-             color='red') +          
-        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +   
-        theme(text = element_text(size=x_font_size)) + 
+             color='red') +
+        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +
+        theme(text = element_text(size=x_font_size)) +
         ggtitle(paste0('All stages','; chose towards sparse')) +
         facet_wrap(~dep_var_type, ncol = 1, strip.position = 'right')
 
 fig4 <- tt_part_sum_stats_triplet_location %>%
-        # filter(dep_var_type == plot_dep_var) %>% 
+        # filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=triplet_location,
                    y=mean_chose_towards_sparse)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -241,16 +309,16 @@ fig4 <- tt_part_sum_stats_triplet_location %>%
                     height = 0,
                     alpha = 0.3) +
         geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +    
+                  alpha = 0.2) +
         stat_summary(fun = mean,
-                     color = 'red') + 
+                     color = 'red') +
         stat_summary(fun.data = mean_cl_normal,
              geom = "errorbar",
              size=1,
              width=0.1,
-             color='red') +          
-        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +      
-        theme(text = element_text(size=x_font_size)) + 
+             color='red') +
+        geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +
+        theme(text = element_text(size=x_font_size)) +
         facet_grid(dep_var_type~counterbalancing)
 
 grid.arrange(fig3,fig4,
@@ -268,7 +336,7 @@ plot_dep_var <- 'post_pre_diff'
 
 
 if (plot_dep_var != 'post_pre_diff'){
-        y_intercept <- 0.5        
+        y_intercept <- 0.5
 } else {
         y_intercept <- 0
 }
@@ -281,15 +349,15 @@ if (plot_dep_var != 'post_pre_diff'){
 
 # For sorted data
 fig1 <- tt_long_post_pre_and_diff %>%
-        filter(dep_var_type == plot_dep_var) %>% 
+        filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_sparse_avg_across_reps),
                    y=chose_towards_sparse_avg_across_reps)) +
-        geom_boxplot(fatten = 6, aes(color=curve_type)) + 
+        geom_boxplot(fatten = 6, aes(color=curve_type)) +
         stat_summary(fun=mean,
                      geom = 'point',
                      size = 5,
                      color="black",
-                     aes(shape = triplet_easiness)) + 
+                     aes(shape = triplet_easiness)) +
         geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = 'top') +
@@ -298,17 +366,17 @@ fig1 <- tt_long_post_pre_and_diff %>%
         ggtitle('All counterbalancing groups')
 
 fig2 <- tt_long_post_pre_and_diff %>%
-        filter(dep_var_type == plot_dep_var) %>% 
+        filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=reorder(triplet_unique_name,-chose_towards_sparse_avg_across_reps),
                    y=chose_towards_sparse_avg_across_reps,
                    fill=counterbalancing)) +
-        geom_boxplot(fatten = 6, aes(color=curve_type)) + 
+        geom_boxplot(fatten = 6, aes(color=curve_type)) +
         stat_summary(fun=mean,
                      geom = 'point',
                      size = 3,
                      color="black",
                      aes(shape = triplet_easiness),
-                     position = position_dodge(width = 0.7)) + 
+                     position = position_dodge(width = 0.7)) +
         geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = '') +
@@ -360,11 +428,11 @@ fig1 <- tt_long_post_pre_and_diff %>%
         geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = '') +
-        scale_fill_manual(values=c('white','gray')) + 
+        scale_fill_manual(values=c('white','gray')) +
         ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
         ggtitle('Both groups') +
-        geom_vline(xintercept = seq(0.5,27.5,3), 
+        geom_vline(xintercept = seq(0.5,27.5,3),
                    linetype = 'dashed',
                    alpha = 0.5)
 
@@ -385,11 +453,11 @@ fig2 <- tt_long_post_pre_and_diff %>%
         geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = '') +
-        scale_fill_manual(values=c('white','gray')) + 
+        scale_fill_manual(values=c('white','gray')) +
         ylab(paste0(plot_dep_var, '; chose high-dim')) +
         xlab('Individual Triplets') +
         ggtitle('Both groups') +
-        geom_vline(xintercept = seq(0.5,27.5,3), 
+        geom_vline(xintercept = seq(0.5,27.5,3),
                    linetype = 'dashed',
                    alpha = 0.5)
 
@@ -406,10 +474,10 @@ grid.arrange(fig1,fig2,
 
 # For sorted data
 fig1 <- tt_long_post_pre_and_diff %>%
-        filter(dep_var_type == plot_dep_var) %>% 
+        filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=reorder(density_relative_triplet_name,-chose_towards_sparse_avg_across_reps),
                    y=chose_towards_sparse_avg_across_reps)) +
-        geom_boxplot(fatten = 6, aes(color=triplet_location)) + 
+        geom_boxplot(fatten = 6, aes(color=triplet_location)) +
         scale_color_manual(values=c("black",
                        "purple",
                        '#ffa303')) +
@@ -417,7 +485,7 @@ fig1 <- tt_long_post_pre_and_diff %>%
                      geom = 'point',
                      size = 5,
                      color="black",
-                     aes(shape = triplet_easiness)) + 
+                     aes(shape = triplet_easiness)) +
         geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = 'top') +
@@ -426,20 +494,20 @@ fig1 <- tt_long_post_pre_and_diff %>%
         ggtitle('All counterbalancing groups')
 
 fig2 <- tt_long_post_pre_and_diff %>%
-        filter(dep_var_type == plot_dep_var) %>% 
+        filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=reorder(density_relative_triplet_name,-chose_towards_sparse_avg_across_reps),
                    y=chose_towards_sparse_avg_across_reps,
                    fill=counterbalancing)) +
-        geom_boxplot(fatten = 6, aes(color=triplet_location)) + 
+        geom_boxplot(fatten = 6, aes(color=triplet_location)) +
         scale_color_manual(values=c("black",
                        "purple",
-                       '#ffa303')) +        
+                       '#ffa303')) +
         stat_summary(fun=mean,
                      geom = 'point',
                      size = 3,
                      color="black",
                      aes(shape = triplet_easiness),
-                     position = position_dodge(width = 0.7)) + 
+                     position = position_dodge(width = 0.7)) +
         geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = '') +
@@ -456,7 +524,7 @@ fig3 <- tt_long_post_pre_and_diff %>%
         geom_boxplot(fatten = 6,aes(color=triplet_location)) +
         scale_color_manual(values=c("black",
                        "purple",
-                       '#ffa303')) +        
+                       '#ffa303')) +
         stat_summary(fun=mean,
                      color='black',
                      aes(shape = triplet_easiness),
@@ -479,10 +547,10 @@ grid.arrange(fig1,fig2,fig3,
 
 # For sorted data
 fig1 <- tt_long_post_pre_and_diff %>%
-        filter(dep_var_type == plot_dep_var) %>% 
+        filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=density_relative_triplet_name,
                    y=chose_towards_sparse_avg_across_reps)) +
-        geom_boxplot(fatten = 6, aes(color=triplet_location)) + 
+        geom_boxplot(fatten = 6, aes(color=triplet_location)) +
         scale_color_manual(values=c("black",
                        "purple",
                        '#ffa303')) +
@@ -490,32 +558,32 @@ fig1 <- tt_long_post_pre_and_diff %>%
                      geom = 'point',
                      size = 5,
                      color="black",
-                     aes(shape = triplet_easiness)) + 
+                     aes(shape = triplet_easiness)) +
         geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = 'top') +
         ylab(paste0(plot_dep_var, '; chose sparse')) +
         xlab('Density relative triplets!') +
         ggtitle('All counterbalancing groups')+
-        geom_vline(xintercept = seq(0.5,27.5,3), 
+        geom_vline(xintercept = seq(0.5,27.5,3),
                    linetype = 'dashed',
                    alpha = 0.5)
 
 fig2 <- tt_long_post_pre_and_diff %>%
-        filter(dep_var_type == plot_dep_var) %>% 
+        filter(dep_var_type == plot_dep_var) %>%
         ggplot(aes(x=density_relative_triplet_name,
                    y=chose_towards_sparse_avg_across_reps,
                    fill=counterbalancing)) +
-        geom_boxplot(fatten = 6, aes(color=triplet_location)) + 
+        geom_boxplot(fatten = 6, aes(color=triplet_location)) +
         scale_color_manual(values=c("black",
                        "purple",
-                       '#ffa303')) +        
+                       '#ffa303')) +
         stat_summary(fun=mean,
                      geom = 'point',
                      size = 3,
                      color="black",
                      aes(shape = triplet_easiness),
-                     position = position_dodge(width = 0.7)) + 
+                     position = position_dodge(width = 0.7)) +
         geom_hline(yintercept = y_intercept, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = '') +
@@ -523,7 +591,7 @@ fig2 <- tt_long_post_pre_and_diff %>%
         ylab(paste0(plot_dep_var, '; chose sparse')) +
         xlab('Density relative triplets!') +
         ggtitle('All counterbalancing groups') +
-        geom_vline(xintercept = seq(0.5,27.5,3), 
+        geom_vline(xintercept = seq(0.5,27.5,3),
                    linetype = 'dashed',
                    alpha = 0.5)
 
@@ -535,7 +603,7 @@ fig3 <- tt_long_post_pre_and_diff %>%
         geom_boxplot(fatten = 6,aes(color=triplet_location)) +
         scale_color_manual(values=c("black",
                        "purple",
-                       '#ffa303')) +        
+                       '#ffa303')) +
         stat_summary(fun=mean,
                      color='black',
                      aes(shape = triplet_easiness),
@@ -547,7 +615,7 @@ fig3 <- tt_long_post_pre_and_diff %>%
         xlab('Density relative triplets!') +
         ggtitle('Both groups faceted') +
         facet_wrap(~counterbalancing, ncol = 1, strip.position = 'right') +
-        geom_vline(xintercept = seq(0.5,27.5,3), 
+        geom_vline(xintercept = seq(0.5,27.5,3),
                    linetype = 'dashed',
                    alpha = 0.5)
 
@@ -570,7 +638,7 @@ x_font_angle <- 20
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -578,26 +646,26 @@ fig1 <- tt_part_sum_stats_triplet_location_differences %>%
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
-                    alpha = 0.3) + 
+                    alpha = 0.3) +
         # geom_line(aes(group=prolific_id),
-        #           alpha = 0.2) +  
+        #           alpha = 0.2) +
         stat_summary(fun = mean,
-                     color = 'red') + 
+                     color = 'red') +
         stat_summary(fun.data = mean_cl_normal,
              geom = "errorbar",
              size=0.5,
              width=0.1,
-             color='red') + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +      
-        theme(text = element_text(size=x_font_size)) + 
+             color='red') +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(text = element_text(size=x_font_size)) +
         # facet_wrap(~counterbalancing) +
-        theme(axis.text.x = element_text(angle = x_font_angle)) + 
+        theme(axis.text.x = element_text(angle = x_font_angle)) +
         ggtitle(paste0(plot_dep_var, ': chose towards sparse. Diff scores'))
 
 # Now plot this
 fig2 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -605,18 +673,18 @@ fig2 <- tt_part_sum_stats_triplet_location_differences %>%
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
-                    alpha = 0.3) + 
+                    alpha = 0.3) +
         # geom_line(aes(group=prolific_id),
-        #           alpha = 0.2) +  
+        #           alpha = 0.2) +
         stat_summary(fun = mean,
-                     color = 'red') + 
+                     color = 'red') +
         stat_summary(fun.data = mean_cl_normal,
              geom = "errorbar",
              size=0.5,
              width=0.1,
-             color='red') + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +      
-        theme(text = element_text(size=x_font_size)) + 
+             color='red') +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(text = element_text(size=x_font_size)) +
         facet_wrap(~counterbalancing) +
         theme(axis.text.x = element_text(angle = x_font_angle))
 
@@ -635,7 +703,7 @@ x_font_angle <- 20
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -643,26 +711,26 @@ fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
-                    alpha = 0.3) + 
+                    alpha = 0.3) +
         # geom_line(aes(group=prolific_id),
-        #           alpha = 0.2) +  
+        #           alpha = 0.2) +
         stat_summary(fun = mean,
-                     color = 'red') + 
+                     color = 'red') +
         stat_summary(fun.data = mean_cl_normal,
              geom = "errorbar",
              size=0.5,
              width=0.1,
-             color='red') + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +      
-        theme(text = element_text(size=x_font_size)) + 
+             color='red') +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(text = element_text(size=x_font_size)) +
         facet_wrap(~triplet_easiness, ncol = 1, strip.position = 'right') +
-        theme(axis.text.x = element_text(angle = x_font_angle)) + 
+        theme(axis.text.x = element_text(angle = x_font_angle)) +
         ggtitle(paste0(plot_dep_var, '. chose towards sparse. Diff scores'))
 
 # Now plot this
 fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -670,18 +738,18 @@ fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
-                    alpha = 0.3) + 
+                    alpha = 0.3) +
         # geom_line(aes(group=prolific_id),
-        #           alpha = 0.2) +  
+        #           alpha = 0.2) +
         stat_summary(fun = mean,
-                     color = 'red') + 
+                     color = 'red') +
         stat_summary(fun.data = mean_cl_normal,
              geom = "errorbar",
              size=0.5,
              width=0.1,
-             color='red') + 
-        geom_hline(yintercept = 0, linetype = 'dashed') +      
-        theme(text = element_text(size=x_font_size)) + 
+             color='red') +
+        geom_hline(yintercept = 0, linetype = 'dashed') +
+        theme(text = element_text(size=x_font_size)) +
         facet_wrap(~counterbalancing) +
         facet_grid(triplet_easiness~counterbalancing) +
         theme(axis.text.x = element_text(angle = x_font_angle))
@@ -703,17 +771,17 @@ grid.arrange(fig1,fig2,
 fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_dense',
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
-                     size = 1) + 
+                     size = 1) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-Dense:\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-Dense:\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Both counterbalancing groups')
 
@@ -724,16 +792,16 @@ fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value,
                    fill=counterbalancing)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
                      size = 1,
-                     position = position_dodge(width = 0.7)) + 
+                     position = position_dodge(width = 0.7)) +
         scale_fill_manual(values = c('white','gray')) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-Dense:\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-Dense:\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Both counterbalancing groups')
 
@@ -745,14 +813,14 @@ fig3 <- tt_part_sum_stats_triplet_location_template_differences %>%
                chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
                      size = 1) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-Dense:\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-Dense:\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Dense Right')
 
@@ -763,17 +831,17 @@ fig4 <- tt_part_sum_stats_triplet_location_template_differences %>%
                chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
                      size = 1) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-Dense:\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-Dense:\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Dense Left')
-        
+
 
 grid.arrange(fig1,fig2,fig3,fig4,
              nrow = 4,
@@ -796,14 +864,14 @@ fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
                chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
-                     size = 1) + 
+                     size = 1) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-Sparse:\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-Sparse:\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Both counterbalancing groups')
 
@@ -814,16 +882,16 @@ fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value,
                    fill=counterbalancing)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
                      size = 1,
-                     position = position_dodge(width = 0.7)) + 
+                     position = position_dodge(width = 0.7)) +
         scale_fill_manual(values = c('white','gray')) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-Dense:\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-Dense:\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Both counterbalancing groups')
 
@@ -834,14 +902,14 @@ fig3 <- tt_part_sum_stats_triplet_location_template_differences %>%
                chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
                      size = 1) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-Sparse:\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-Sparse:\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Dense Right')
 
@@ -852,17 +920,17 @@ fig4 <- tt_part_sum_stats_triplet_location_template_differences %>%
                chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
                      size = 1) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-Sparse:\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-Sparse:\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Dense Left')
-        
+
 
 grid.arrange(fig1,fig2,fig3,fig4,
              nrow = 4,
@@ -878,17 +946,17 @@ grid.arrange(fig1,fig2,fig3,fig4,
 fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_avg_dense_sparse',
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
-                     size = 1) + 
+                     size = 1) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-avg(sparse+dense):\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-avg(sparse+dense):\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Both counterbalancing groups')
 
@@ -899,16 +967,16 @@ fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value,
                    fill=counterbalancing)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
                      size = 1,
-                     position = position_dodge(width = 0.7)) + 
+                     position = position_dodge(width = 0.7)) +
         scale_fill_manual(values = c('white','gray')) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-avg(sparse+dense):\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-avg(sparse+dense):\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Both counterbalancing groups')
 
@@ -920,14 +988,14 @@ fig3 <- tt_part_sum_stats_triplet_location_template_differences %>%
                chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
                      size = 1) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-avg(sparse+dense):\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-avg(sparse+dense):\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Dense Right')
 
@@ -938,17 +1006,17 @@ fig4 <- tt_part_sum_stats_triplet_location_template_differences %>%
                chose_towards_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
-        geom_boxplot(fatten = 4,aes(color=template_distances)) + 
+        geom_boxplot(fatten = 4,aes(color=template_distances)) +
         stat_summary(fun=mean,color='black',
                      aes(shape = triplet_easiness),
                      size = 1) +
         geom_hline(yintercept = 0, linetype = 'dashed') +
         theme(axis.text.x = element_text(angle = 90),
-              legend.position = '') + 
-        ylab('Across-avg(sparse+dense):\n Post-pre chose low-density') + 
+              legend.position = '') +
+        ylab('Across-avg(sparse+dense):\n Post-pre chose low-density') +
         xlab('Templates') +
         ggtitle('Dense Left')
-        
+
 
 grid.arrange(fig1,fig2,fig3,fig4,
              nrow = 4,
@@ -973,19 +1041,19 @@ fig1 <- tt_part_sum_stats %>%
         geom_violin(fill = chose_sparse_color,
                     alpha = 0.2) +
         geom_boxplot(width=0.15,
-                     outlier.shape = '', 
+                     outlier.shape = '',
                      fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
                     alpha = 0.3) +
         stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +
         stat_summary(fun.data = mean_cl_normal,
                      geom = "errorbar",
                      size=0.5,
                      width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
+                     color='red') +
+        coord_cartesian(ylim = ylimits) +
         ggtitle('Chose towards sparse')
 
 fig2 <- tt_part_sum_stats %>%
@@ -995,21 +1063,21 @@ fig2 <- tt_part_sum_stats %>%
         geom_violin(fill = chose_highdim_color,
                     alpha = 0.2) +
         geom_boxplot(width=0.15,
-                     outlier.shape = '', 
+                     outlier.shape = '',
                      fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
                     alpha = 0.3) +
         stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +
         stat_summary(fun.data = mean_cl_normal,
                      geom = "errorbar",
                      size=0.5,
                      width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
+                     color='red') +
+        coord_cartesian(ylim = ylimits) +
         ggtitle('Chose towards high dimension')
-        
+
 
 grid.arrange(fig1,fig2,
              nrow = 1,
@@ -1030,19 +1098,19 @@ fig1 <- tt_part_sum_stats_triplet_location %>%
         geom_violin(fill = chose_sparse_color,
                     alpha = 0.2) +
         geom_boxplot(width=0.15,
-                     outlier.shape = '', 
+                     outlier.shape = '',
                      fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
                     alpha = 0.3) +
         stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +
         stat_summary(fun.data = mean_cl_normal,
                      geom = "errorbar",
                      size=0.5,
                      width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
+                     color='red') +
+        coord_cartesian(ylim = ylimits) +
         facet_wrap(~triplet_location) +
         ggtitle('Chose towards sparse')
 
@@ -1053,20 +1121,20 @@ fig2 <- tt_part_sum_stats_triplet_location %>%
         geom_violin(fill = chose_highdim_color,
                     alpha = 0.2) +
         geom_boxplot(width=0.15,
-                     outlier.shape = '', 
+                     outlier.shape = '',
                      fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
                     alpha = 0.3) +
         stat_summary(fun = mean,
-                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +
         stat_summary(fun.data = mean_cl_normal,
                      geom = "errorbar",
                      size=0.5,
                      width=0.1,
-                     color='red') + 
-        coord_cartesian(ylim = ylimits) + 
-        facet_wrap(~triplet_location) + 
+                     color='red') +
+        coord_cartesian(ylim = ylimits) +
+        facet_wrap(~triplet_location) +
         ggtitle('Chose towards high dimension')
 
 # fig3 <- tt_part_sum_stats_triplet_location %>%
@@ -1076,20 +1144,20 @@ fig2 <- tt_part_sum_stats_triplet_location %>%
 #         geom_violin(fill = accuracy_color,
 #                     alpha = 0.2) +
 #         geom_boxplot(width=0.15,
-#                      outlier.shape = '', 
+#                      outlier.shape = '',
 #                      fatten = 4) +
 #         geom_jitter(width = 0.05,
 #                     height = 0,
 #                     alpha = 0.3) +
 #         stat_summary(fun = mean,
-#                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+#                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') +
 #         stat_summary(fun.data = mean_cl_normal,
 #                      geom = "errorbar",
 #                      size=0.5,
 #                      width=0.1,
-#                      color='red') + 
-#         coord_cartesian(ylim = ylimits) + 
-#         facet_wrap(~triplet_location) + 
+#                      color='red') +
+#         coord_cartesian(ylim = ylimits) +
+#         facet_wrap(~triplet_location) +
 #         ggtitle('Accuracy')
 
 
@@ -1113,10 +1181,10 @@ tt_bw_part_sum_stats_triplets_difference %>%
                    size = 3) +
         theme(axis.text.x = element_text(angle = 90),
               legend.position = 'right') +
-        ylab('Dense_right - Dense_left') + 
+        ylab('Dense_right - Dense_left') +
         xlab('Individual Triplets') +
         ggtitle('(UNSORTED) Post-pre chose high-dimension: Counterbalancing group difference') +
-        geom_vline(xintercept = seq(0.5,27.5,3), 
+        geom_vline(xintercept = seq(0.5,27.5,3),
                    linetype = 'dashed',
                    alpha = 0.5)
 

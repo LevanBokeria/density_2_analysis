@@ -171,7 +171,9 @@ qc_table <- qc_table %>%
 # Which failed?
 qc_table <- qc_table %>%
         rowwise() %>%
-        mutate(qc_fail_overall = sum(qc_fail_button_sequence,qc_fail_rt) > 0)
+        mutate(qc_fail_overall = sum(qc_fail_button_sequence,
+                                     qc_fail_rt,
+                                     qc_fail_manual) > 0)
 
 # Add the counterbalancing column
 cb <- tt_long %>% select(prolific_id,pilot_paradigm,counterbalancing) %>% group_by(prolific_id) %>% slice_head()
@@ -489,13 +491,13 @@ exp_acc_by_type %>%
 
 ```{r}
 ## Overall accuracy for payment ----------------------------------------------
-overall_acc <- rbind(select(tt_acc,prolific_id,correct),exp_acc)
-
-overall_acc %>%
-        mutate(correct = as.numeric(correct)) %>%
-        group_by(prolific_id) %>%
-        get_summary_stats(correct,type='mean_sd') %>%
-        mutate(payment = 2*mean) %>% select(prolific_id,payment) %>% View()
-        write_csv('payment.csv')
+# overall_acc <- rbind(select(tt_acc,prolific_id,correct),exp_acc)
+# 
+# overall_acc %>%
+#         mutate(correct = as.numeric(correct)) %>%
+#         group_by(prolific_id) %>%
+#         get_summary_stats(correct,type='mean_sd') %>%
+#         mutate(payment = 2*mean) %>% select(prolific_id,payment) %>% View()
+#         write_csv('payment.csv')
 
 ```

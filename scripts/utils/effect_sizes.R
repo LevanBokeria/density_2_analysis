@@ -15,7 +15,7 @@ source('./scripts/utils/load_all_libraries.R')
 qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(4)
+which_paradigm <- c(2,3)
 
 print(paste0('Which pilot paradigm? ', which_paradigm))
 

@@ -171,7 +171,8 @@ qc_table <- qc_table %>%
 # Which failed?
 qc_table <- qc_table %>%
         rowwise() %>%
-        mutate(qc_fail_overall = sum(qc_fail_button_sequence,qc_fail_rt,
+        mutate(qc_fail_overall = sum(qc_fail_button_sequence,
+                                     qc_fail_rt,
                                      qc_fail_manual) > 0)
 
 # Add the counterbalancing column

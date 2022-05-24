@@ -5,7 +5,7 @@ sub_60,FALSE,FALSE,FALSE,FALSE,4,dense_left
 sub_61,TRUE,TRUE,FALSE,TRUE,4,dense_right
 sub_62,FALSE,TRUE,FALSE,TRUE,4,dense_left
 sub_63,FALSE,TRUE,FALSE,TRUE,4,dense_left
-sub_64,FALSE,FALSE,FALSE,FALSE,4,dense_right
+sub_64,FALSE,FALSE,TRUE,TRUE,4,dense_right
 sub_65,FALSE,TRUE,FALSE,TRUE,4,dense_right
 sub_66,TRUE,FALSE,FALSE,TRUE,4,dense_right
 sub_67,TRUE,FALSE,FALSE,TRUE,4,dense_right
@@ -14,7 +14,7 @@ sub_69,FALSE,TRUE,FALSE,TRUE,4,dense_left
 sub_70,FALSE,TRUE,FALSE,TRUE,4,dense_left
 sub_71,FALSE,FALSE,FALSE,FALSE,4,dense_left
 sub_72,FALSE,FALSE,FALSE,FALSE,4,dense_left
-sub_73,FALSE,FALSE,FALSE,FALSE,4,dense_left
+sub_73,FALSE,FALSE,TRUE,TRUE,4,dense_left
 sub_74,FALSE,FALSE,FALSE,FALSE,4,dense_left
 sub_75,FALSE,FALSE,FALSE,FALSE,4,dense_right
 sub_76,FALSE,FALSE,FALSE,FALSE,4,dense_right

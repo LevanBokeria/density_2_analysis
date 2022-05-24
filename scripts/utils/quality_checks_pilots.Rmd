@@ -19,7 +19,7 @@ source('./scripts/utils/load_all_libraries.R')
 
 save_qc_table  <- T
 qc_filter      <- F
-which_paradigm <- c(3)
+which_paradigm <- c(4)
 
 
 ```
@@ -27,8 +27,8 @@ which_paradigm <- c(3)
 ```{r import-data}
 # Read the txt file
 
-source('./scripts/utils/load_transform_tt_data.R')
-source('./scripts/utils/load_transform_exp_data.R')
+source('./scripts/utils/load_transform_tt_data_pilots.R')
+source('./scripts/utils/load_transform_exp_data_pilots.R')
 
 # Filter to only have that pilot paradigm data which we specified above
 exp_long <- exp_long %>%

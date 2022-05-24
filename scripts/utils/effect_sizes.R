@@ -15,7 +15,7 @@ source('./scripts/utils/load_all_libraries.R')
 qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(3)
+which_paradigm <- c(4)
 
 print(paste0('Which pilot paradigm? ', which_paradigm))
 
@@ -105,7 +105,7 @@ fig2 <- tt_part_sum_stats_triplet_location %>%
                      size=0.5,
                      width=0.1,
                      color='red') + 
-        coord_cartesian(ylim = ylimits) + 
+        # coord_cartesian(ylim = ylimits) + 
         facet_wrap(~triplet_location) + 
         ggtitle('Chose towards high dimension')
 

@@ -29,3 +29,14 @@ sub_84,FALSE,FALSE,FALSE,FALSE,4,dense_left
 sub_85,FALSE,FALSE,FALSE,FALSE,4,dense_right
 sub_86,FALSE,FALSE,FALSE,FALSE,4,dense_left
 sub_87,TRUE,FALSE,FALSE,TRUE,4,dense_right
+sub_88,FALSE,TRUE,FALSE,TRUE,4,dense_right
+sub_89,FALSE,FALSE,FALSE,FALSE,4,dense_left
+sub_90,FALSE,FALSE,FALSE,FALSE,4,dense_right
+sub_91,TRUE,TRUE,FALSE,TRUE,4,dense_left
+sub_92,FALSE,FALSE,FALSE,FALSE,4,dense_right
+sub_93,FALSE,FALSE,FALSE,FALSE,4,dense_right
+sub_94,FALSE,FALSE,FALSE,FALSE,4,dense_right
+sub_95,TRUE,FALSE,FALSE,TRUE,4,dense_left
+sub_96,FALSE,TRUE,FALSE,TRUE,4,dense_left
+sub_97,FALSE,FALSE,TRUE,TRUE,4,dense_left
+sub_98,FALSE,FALSE,FALSE,FALSE,4,dense_left

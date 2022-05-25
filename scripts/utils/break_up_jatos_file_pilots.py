@@ -2,7 +2,7 @@
 """
 Created on Wed Aug 11 13:01:22 2021
 
-@author: lb08
+@author: levan
 """
 
 # Description:
@@ -25,12 +25,12 @@ import json
 print(os.getcwd())
 
 # Set the working directory
-os.chdir(r'C:\Users\lb08\GitHub\density_2_analysis')
+os.chdir(r'C:\Users\levan\GitHub\density_2_analysis')
 
 saveData       = True
 
 # %% Import the pid mappings
-pid_mapping = pd.read_excel('C:\\Users\\lb08\\Desktop\\density_pid_map.xlsx')
+pid_mapping = pd.read_excel('C:\\Users\\levan\\Desktop\\density_pid_map.xlsx')
 
 
 # %% Import the files

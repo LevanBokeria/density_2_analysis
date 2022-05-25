@@ -12,7 +12,7 @@ source('./scripts/utils/load_all_libraries.R')
 
 ## Load the data and set flags -------------------------------------------------
 
-qc_filter <- T
+qc_filter <- F
 print(paste0('QC filter? ', qc_filter))
 
 which_paradigm <- c(4)

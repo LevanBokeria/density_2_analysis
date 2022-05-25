@@ -9,6 +9,12 @@ sub_07,"No, the instructions were easy to understand.",I initially looked at the
 sub_08,no,"the border, rounded or straight",yes,very interesting game,no,yes,no
 sub_09,no all clearly laid explained,shape,yes,no,no,yes,no
 sub_10,How if the left and the right are exactly the same with the target?,Looking at the base,yes,No,No,Yes,No
+sub_100,no,i looked at the shape and its shadow,yes,none,the first trial was confusing but after I got hang of it.,yes,none
+sub_101,no,looking at the shape,yes plenty,no,no,focus on the 3D shape,no
+sub_102,I found the instructions clear,based on if it was triangular and if the side dipped in or pushed out,yes,nothing,instructions were clear,yes,nothing
+sub_103,Nothing,I chose which ones looked closest in shape or would need the fewest tweaks to be identical,Mostly yes but could have done with an extra second on each,None,Nothing,Yes,None
+sub_104,all fine,"I tried to match them up as closely as I could, with a similar amount of edge curvature.","yes, just about",some of them were quite tricky!,all fine,another second would have been useful.,very tricky!
+sub_105,no,looking at their curves,I guess so but more time would have been better,nothing,yes,yes,nothing 
 sub_11,no,tried to look at both and see which was most similar in the elements of the shape,yes,no,no,yes,no
 sub_12,No it was very clear and well explained,"Based on intuition, it was very hard to differentiate",Completely,"Maybe give a few seconds between the trials, like a countdown prior to the object being displayed","Similar to previous, all was clear and explained well.",Yes,"Maybe give a few seconds between the trials, like a countdown prior to the object being displayed"
 sub_13,"No, everything was very clear",I tried to identify the object that had similar features: such as a pointy corner or long and curved sides,"Yes, it was the right amount of time",-,The instructions were easy to understand,"yes, I did",-
@@ -97,3 +103,4 @@ sub_95,no,just tried to look at it quickly and judge which was the same,just abo
 sub_96,no,"chose whichever looked most similar in terms of the curve, size etc",yes,n/a,no,yes,n/a
 sub_97,no,i tried to follow the shape lines as best I could,yes,the pictures did not load a lot of the time making it impossible for me to do well.,no,yes,the pictures did not load a lot of the time making it impossible for me to do well.
 sub_98,no,i tried to focus on the shape made by the shaded faces,yes,nothing to add,no,yes,nothing to add
+sub_99,No,"Judging the shape, if it was more similar","Mostly, yes. Could have done with more time.",No,No,"Mostly, yes, but could have done with more time.",No

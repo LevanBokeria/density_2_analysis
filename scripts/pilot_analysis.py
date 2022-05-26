@@ -2,7 +2,7 @@
 """
 Created on Wed Aug 11 13:01:22 2021
 
-@author: lb08
+@author: levan
 """
 
 # Description:
@@ -23,7 +23,7 @@ import json
 print(os.getcwd())
 
 # Set the working directory
-os.chdir(r'C:\Users\lb08\GitHub\density_2_analysis')
+os.chdir(r'C:\Users\levan\GitHub\density_2_analysis')
 
 save_tt_data      = True
 save_debriefing   = True
@@ -118,6 +118,7 @@ for iF in file_list:
     
     pilot_1_subjects = np.arange(1,17)
     pilot_2_subjects = np.arange(17,31)
+    pilot_3_subjects = np.arange(31,58)
     
     if sub_numeric in pilot_1_subjects:
         exemplar_min = 30
@@ -132,8 +133,10 @@ for iF in file_list:
         
         if sub_numeric in pilot_2_subjects:
             pilot_paradigm = 2   
-        else:
+        elif sub_numeric in pilot_3_subjects:
             pilot_paradigm = 3
+        else:
+            pilot_paradigm = 4
 
         exemplar_min = 30
         exemplar_max = 110

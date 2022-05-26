@@ -40,7 +40,7 @@ print(paste0('QC filter? ', qc_filter))
 which_paradigm <- c(3)
 print(paste0('Which paradigm? ', which_paradigm))
 
-source('./scripts/utils/load_transform_exp_data.R')
+source('./scripts/utils/load_transform_exp_data_pilots.R')
 
 
 ```

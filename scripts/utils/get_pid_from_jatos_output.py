@@ -2,7 +2,7 @@
 """
 Created on Wed Aug 11 13:01:22 2021
 
-@author: lb08
+@author: levan
 """
 
 # Description:
@@ -26,7 +26,7 @@ import json
 print(os.getcwd())
 
 # Set the working directory
-os.chdir(r'C:\Users\lb08\GitHub\density_2_analysis')
+os.chdir(r'C:\Users\Levan\GitHub\density_2_analysis')
 
 saveData = True
 
@@ -34,7 +34,7 @@ saveData = True
 
 file_name = 'jatos_results_batch1.txt'
 
-f = open('./data/pilots/gui_downloads/' + file_name,'r')    
+f = open('./data/experiments/gui_downloads/' + file_name,'r')    
 
 rawtext = f.read()
 

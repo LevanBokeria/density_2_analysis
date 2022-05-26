@@ -15,11 +15,11 @@ source('./scripts/utils/load_all_libraries.R')
 qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(3)
+which_paradigm <- c(4)
 
 print(paste0('Which pilot paradigm? ', which_paradigm))
 
-source('./scripts/utils/load_transform_tt_data.R')
+source('./scripts/utils/load_transform_tt_data_pilots.R')
 source('./scripts/utils/summary_stats_for_various_factors.R')
 
 # Flags and settings
@@ -105,7 +105,7 @@ fig2 <- tt_part_sum_stats_triplet_location %>%
                      size=0.5,
                      width=0.1,
                      color='red') + 
-        coord_cartesian(ylim = ylimits) + 
+        # coord_cartesian(ylim = ylimits) + 
         facet_wrap(~triplet_location) + 
         ggtitle('Chose towards high dimension')
 
@@ -129,6 +129,77 @@ tbl2_1 <- tt_part_sum_stats_triplet_location %>%
         cohens_d(mean_chose_towards_sparse ~ 1,
                  mu = 0,
                  hedges.correction = FALSE)
+
+## BF test against 0 
+reportBF = function(x, digits){
+        round(as.numeric(as.vector(x)), digits)
+}
+
+bf_data <- tt_part_sum_stats_triplet_location %>%
+        filter(dep_var_type == 'post_pre_diff',
+               triplet_location == 'across_density_regions') %>%
+        droplevels() %>% 
+        select(mean_chose_towards_sparse) %>% .[[1]]
+
+null_interval <- c(0,Inf)
+
+bf <- reportBF(ttestBF(
+        bf_data,
+        nullInterval = null_interval
+)[1],4)
+
+
+## Plot this
+
+ylimits <- c(-0.2,0.2)
+
+fig1 <- tt_part_sum_stats_triplet_location %>%
+        filter(triplet_location == 'across_density_regions',
+               dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x='All participants',
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,
+                    alpha = 0.2) +
+        geom_boxplot(width = 0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') 
+
+fig2 <- tt_part_sum_stats_triplet_location %>%
+        filter(triplet_location == 'across_density_regions',
+               dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,
+                    alpha = 0.2) +
+        geom_boxplot(width = 0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') 
+
+
+grid.arrange(fig1,fig2,
+             nrow = 1,
+             top = 'Post minus pre')
+
 
 # Excluding bad trials  ##########################################################
 

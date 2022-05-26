@@ -11,9 +11,9 @@ if (!exists('qc_filter')){
                
 }
 
-if (!exists('which_paradigm')){
+if (!exists('which_experiment')){
 
-        which_paradigm <- c(1)
+        which_experiment <- c(1)
         
 }
 
@@ -23,7 +23,7 @@ source('./scripts/utils/load_all_libraries.R')
 
 # Read the txt file ###########################################################
 
-tt_long <- import('./results/pilots/preprocessed_data/triplet_task_long_form.csv')
+tt_long <- import('./results/experiments/preprocessed_data/triplet_task_long_form.csv')
 
 
 
@@ -31,12 +31,12 @@ tt_long <- import('./results/pilots/preprocessed_data/triplet_task_long_form.csv
 
 tt_long %<>% 
         filter(trial_stage != 'practice',
-               pilot_paradigm %in% which_paradigm) %>%
+               which_experiment %in% experiment) %>%
         droplevels() %>%
         mutate(across(c(triplet_easiness,
                         prolific_id,
                         counterbalancing,
-                        pilot_paradigm,
+                        experiment,
                         query_stimulus,
                         ref_left_stimulus,
                         ref_right_stimulus,                        
@@ -67,7 +67,7 @@ tt_long %<>%
         reorder_levels(correct_ref_lowdim_highdim,order = c('ref_lowdim','ref_highdim'))
 
 # If its paradigm 2 or 3, then reorder the triplets this way
-if (!1 %in% which_paradigm){
+if (!1 %in% which_experiment){
         
         # Get a sorted array of triplet_unique_names
         triplet_unique_name_order <- tt_long %>%
@@ -141,7 +141,7 @@ if (!1 %in% which_paradigm){
 if (qc_filter){
         
         # Load the qc table
-        qc_table <- import('./results/pilots/preprocessed_data/qc_table.csv')
+        qc_table <- import('./results/experiments/preprocessed_data/qc_table.csv')
         
         qc_fail_ptps <- qc_table %>% 
                 filter(qc_fail_overall) %>% 
@@ -160,7 +160,7 @@ if (qc_filter){
 tt_wide_reps <- tt_long %>%
         pivot_wider(
                 id_cols = c(prolific_id,
-                            pilot_paradigm,
+                            experiment,
                             trial_stage,
                             counterbalancing,
                             query_item,
@@ -213,7 +213,7 @@ tt_wide_reps <- tt_wide_reps %>%
 tt_wide_reps_wide_trial_stage <- 
         tt_wide_reps %>%
         pivot_wider(id_cols = c(prolific_id,
-                                pilot_paradigm,
+                                experiment,
                                 counterbalancing,
                                 query_item,
                                 ref_lowdim,

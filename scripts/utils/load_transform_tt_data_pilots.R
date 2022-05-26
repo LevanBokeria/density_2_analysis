@@ -7,13 +7,24 @@
 # If qc_filter variable doesnt exist, create it
 if (!exists('qc_filter')){
 
-        qc_filter <- F
+        qc_filter <- T
                
+}
+if (!exists('qc_filter_rt')){
+        
+        qc_filter_rt <- F
+        
 }
 
 if (!exists('which_paradigm')){
 
-        which_paradigm <- c(1)
+        which_paradigm <- c(4)
+        
+}
+
+if (!exists('exclude_participants')){
+        
+        exclude_participants <- T
         
 }
 
@@ -140,16 +151,45 @@ if (qc_filter){
         
         # Load the qc table
         qc_table <- import('./results/pilots/preprocessed_data/qc_table.csv')
+ 
         
-        qc_fail_ptps <- qc_table %>% 
-                filter(qc_fail_overall) %>% 
-                select(prolific_id) %>% .[[1]]
+        if (!qc_filter_rt){
+                
+                qc_fail_ptps <- qc_table %>% 
+                        filter(qc_fail_button_sequence | qc_fail_manual) %>% 
+                        select(prolific_id) %>% .[[1]]                
+                
+        } else {
+                qc_fail_ptps <- qc_table %>% 
+                        filter(qc_fail_overall) %>% 
+                        select(prolific_id) %>% .[[1]]                
+                
+        }
+               
         
         tt_long <-
                 tt_long %>%
                 filter(!prolific_id %in% qc_fail_ptps) %>%
                 droplevels()
 }
+
+
+# If excluding some participants?
+if (exclude_participants){
+        
+        # Get the full vector of ptp names
+        ptp_names <- tt_long$prolific_id %>% as.character() %>% unique()
+        
+        ptp_names <- str_sort(ptp_names, numeric = T)
+        
+        ptp_to_include <- ptp_names[ptp_min_idx:ptp_max_idx]
+        
+        tt_long <- tt_long %>%
+                filter(prolific_id %in% ptp_to_include) %>%
+                droplevels()
+
+}
+
 
 # Various long-to-wide-to-long form transformations ##########################
 

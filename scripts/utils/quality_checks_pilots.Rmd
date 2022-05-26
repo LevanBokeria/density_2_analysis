@@ -19,6 +19,7 @@ source('./scripts/utils/load_all_libraries.R')
 
 save_qc_table  <- T
 qc_filter      <- F
+qc_filter_rt   <- F
 which_paradigm <- c(4)
 
 
@@ -194,6 +195,21 @@ if (save_qc_table){
 }
 
 ```
+
+## Count QC pass per counterbalancing
+
+```{r count-how-many-we-need}
+
+qc_table %>%
+        group_by(counterbalancing,
+                 qc_fail_overall) %>%
+        summarise(n = n()) %>%
+        ungroup() %>%
+        knitr::kable() %>%
+        kable_styling(bootstrap_options = "striped")
+
+```
+
 
 # Plot a panel per participant
 

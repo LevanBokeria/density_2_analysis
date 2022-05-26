@@ -23,7 +23,8 @@ import json
 print(os.getcwd())
 
 # Set the working directory
-os.chdir(r'C:\Users\levan\GitHub\density_2_analysis')
+#os.chdir(r'C:\Users\levan\GitHub\density_2_analysis')
+os.chdir('../')
 
 save_tt_data      = True
 save_debriefing   = True

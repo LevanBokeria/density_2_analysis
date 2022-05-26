@@ -13,7 +13,7 @@ source('./scripts/utils/load_all_libraries.R')
 ## Load the data and set flags -------------------------------------------------
 
 qc_filter    <- T
-qc_filter_rt <- F
+qc_filter_rt <- T
 
 print(paste0('QC filter? ', qc_filter))
 
@@ -81,7 +81,7 @@ bf <- reportBF(ttestBF(
 
 ## Plot this
 
-ylimits <- c(-0.2,0.2)
+ylimits <- c(-0.21,0.5)
 
 fig1 <- tt_part_sum_stats_triplet_location %>%
         filter(triplet_location == 'across_density_regions',
@@ -102,7 +102,8 @@ fig1 <- tt_part_sum_stats_triplet_location %>%
                      geom = "errorbar",
                      size=0.5,
                      width=0.1,
-                     color='red') 
+                     color='red') +
+        coord_cartesian(ylim = ylimits)
 
 fig2 <- tt_part_sum_stats_triplet_location %>%
         filter(triplet_location == 'across_density_regions',

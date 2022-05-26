@@ -12,19 +12,19 @@ if (!exists('qc_filter')){
 }
 if (!exists('qc_filter_rt')){
         
-        qc_filter_rt <- F
+        qc_filter_rt <- T
         
 }
 
 if (!exists('which_paradigm')){
 
-        which_paradigm <- c(4)
+        which_paradigm <- c(3)
         
 }
 
 if (!exists('exclude_participants')){
         
-        exclude_participants <- T
+        exclude_participants <- F
         
 }
 

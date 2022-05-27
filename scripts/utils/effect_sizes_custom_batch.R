@@ -81,7 +81,7 @@ bf <- reportBF(ttestBF(
 
 ## Plot this
 
-ylimits <- c(-0.21,0.5)
+ylimits <- c(-0.25,0.5)
 
 fig1 <- tt_part_sum_stats_triplet_location %>%
         filter(triplet_location == 'across_density_regions',

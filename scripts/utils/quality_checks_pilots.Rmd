@@ -102,33 +102,62 @@ qc_table <- qc_table_button_seq %>%
 
 ## Missing trials:
 
-(code hidden)
+If in any session, they missed more than 20%, so 6 trials, then exclude them.
+
+Any trial with RT < 300 should be counted as missed
 
 ```{r qc-check-missing-trials}
 
-# perc_total_missing_allowed <- 20
-# 
-# n_trials_per_session <- tt_long %>% 
-#         filter(trial_stage != 'practice') %>% 
-#         count(prolific_id,trial_stage,session) %>%
-#         slice(1) %>%
-#         select(n) %>% .[[1]]
-# 
-# qc_table_missing_trials <- tt_long %>% 
-#         filter(trial_stage != 'practice') %>%
-#         count(prolific_id,trial_stage,session,response) %>% 
-#         filter(is.na(response)) %>% 
-#         mutate(perc_missed = n*100/n_trials_per_session,
-#                qc_fail_missing_trials = ifelse(perc_missed >= perc_total_missing_allowed, TRUE, FALSE)) %>%
-#         
-# 
-# qc_table <- merge(qc_table,select(qc_table_missing_trials,qc_fail_missing_trials),by = 'prolific_id')
+perc_total_missing_allowed <- 20
+
+n_trials_per_session <- tt_long %>%
+        filter(trial_stage != 'practice') %>%
+        count(prolific_id,trial_stage,session) %>%
+        slice(1) %>%
+        select(n) %>% .[[1]]
+
+qc_table_missing_trials <- tt_long %>%
+        filter(trial_stage != 'practice') %>%
+        mutate(response_rt_conditional = case_when(
+                rt < 300 ~ as.character(NA),
+                TRUE ~ as.character(response)
+        )) %>% 
+        count(prolific_id,trial_stage,session,response_rt_conditional) %>% 
+        filter(is.na(response_rt_conditional)) %>% 
+        mutate(perc_missed = n*100/n_trials_per_session, 
+               qc_fail_missing_trials = ifelse(perc_missed >= perc_total_missing_allowed, TRUE, FALSE)) %>%
+        group_by(prolific_id) %>%
+        summarise(qc_fail_missing_trials = any(qc_fail_missing_trials)) %>%
+        ungroup()
+
+qc_table <- merge(qc_table,qc_table_missing_trials,by = 'prolific_id', all.x = T)
+
+qc_table$qc_fail_missing_trials[is.na(qc_table$qc_fail_missing_trials)] <- FALSE
 
 ```
 
+## Really long breaks
+
+```{r break-duration-check}
+
+max_break_min <- 10
+
+breaks_duration_qc <- import('./results/pilots/preprocessed_data/breaks_feedback.csv')
+
+qc_table_break_duration <- breaks_duration_qc %>%
+        mutate(rt_min = rt/1000/60,
+                qc_fail_break_duration = rt > max_break_min*60*1000) %>%
+        group_by(prolific_id) %>%
+        summarise(qc_fail_break_duration = any(qc_fail_break_duration))
+
+qc_table <- merge(qc_table,qc_table_break_duration,by = 'prolific_id')
+
+```
+
+
 ## Check RT
 
-(code hidden)
+Less than 40% have RT < 1000msec          
 
 ```{r qc-check-rt}
 
@@ -173,7 +202,8 @@ qc_table <- qc_table %>%
 qc_table <- qc_table %>%
         rowwise() %>%
         mutate(qc_fail_overall = sum(qc_fail_button_sequence,
-                                     qc_fail_rt,
+                                     qc_fail_missing_trials,
+                                     qc_fail_break_duration,
                                      qc_fail_manual) > 0)
 
 # Add the counterbalancing column
@@ -181,6 +211,28 @@ cb <- tt_long %>% select(prolific_id,pilot_paradigm,counterbalancing) %>% group_
 
 qc_table <- merge(qc_table,cb,by = 'prolific_id')
 
+
+# If its experiment data, record which batch each participant belongs to
+batch_ids <- qc_table %>%
+        filter(!qc_fail_overall,
+               pilot_paradigm == 4) %>% 
+        droplevels() %>%
+        mutate(sub_num = parse_number(as.character(prolific_id))) %>%
+        arrange(sub_num) %>%        
+        add_rownames() %>% 
+        mutate(batch_id = case_when(
+                as.numeric(rowname) <= 20 ~ 1,
+                TRUE ~ floor((as.numeric(rowname)-0.01)/10)
+                
+        )) %>%
+        select(-rowname)
+
+qc_table <- merge(qc_table,batch_ids,all.x = T)
+
+qc_table <- qc_table %>%
+        mutate(sub_num = parse_number(as.character(prolific_id))) %>%
+        arrange(sub_num) %>%  
+        select(-sub_num)
 
 qc_table  %>%
         knitr::kable() %>%
@@ -494,15 +546,6 @@ exp_acc_by_type %>%
         ggtitle('Exposure accuracy: by trial type')
 
 ```
-
-# Table of counterbalancing conditions
-
-```{r counterbalancing-table}
-
-
-
-```
-
 
 
 ```{r}

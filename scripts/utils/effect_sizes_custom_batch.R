@@ -12,8 +12,8 @@ source('./scripts/utils/load_all_libraries.R')
 
 ## Load the data and set flags -------------------------------------------------
 
-qc_filter    <- T
-qc_filter_rt <- T
+qc_filter    <- F
+qc_filter_rt <- T # no longer used
 
 print(paste0('QC filter? ', qc_filter))
 
@@ -24,8 +24,8 @@ print(paste0('Which pilot paradigm? ', which_paradigm))
 
 # Which participants to analyze?
 exclude_participants <- F
-ptp_min_idx <- 10
-ptp_max_idx <- 50
+ptp_min_idx <- 1
+ptp_max_idx <- 57
 
 
 # Load and transform the data

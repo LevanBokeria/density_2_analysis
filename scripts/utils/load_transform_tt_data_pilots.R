@@ -153,19 +153,23 @@ if (qc_filter){
         qc_table <- import('./results/pilots/preprocessed_data/qc_table.csv')
  
         
-        if (!qc_filter_rt){
-                
-                qc_fail_ptps <- qc_table %>% 
-                        filter(qc_fail_button_sequence | qc_fail_manual) %>% 
-                        select(prolific_id) %>% .[[1]]                
-                
-        } else {
-                qc_fail_ptps <- qc_table %>% 
-                        filter(qc_fail_overall) %>% 
-                        select(prolific_id) %>% .[[1]]                
-                
-        }
+        # if (!qc_filter_rt){
+        #         
+        #         qc_fail_ptps <- qc_table %>% 
+        #                 filter(qc_fail_button_sequence | qc_fail_manual) %>% 
+        #                 select(prolific_id) %>% .[[1]]                
+        #         
+        # } else {
+        #         qc_fail_ptps <- qc_table %>% 
+        #                 filter(qc_fail_overall) %>% 
+        #                 select(prolific_id) %>% .[[1]]                
+        #         
+        # }
                
+        qc_fail_ptps <- qc_table %>% 
+                filter(qc_fail_overall) %>% 
+                select(prolific_id) %>% .[[1]]   
+        
         
         tt_long <-
                 tt_long %>%

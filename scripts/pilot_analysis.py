@@ -64,7 +64,7 @@ ind_exp = []
 #                                    header = None)
 
 # if it doesn't just start the loop
-for iF in file_list:
+for iF in file_list[90:100]:
     print(iF)
     
     f = open('./data/pilots/gui_downloads/' + iF,'r')    

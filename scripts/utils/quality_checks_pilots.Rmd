@@ -194,6 +194,37 @@ qc_table <- qc_table %>%
 ```
 
 
+## Check the easy trials:
+
+```{r triplet-easiness-catch}
+
+perc_wrong_responses_allowed <- 25
+
+n_easy_triplets <- tt_long %>%
+        group_by(prolific_id,triplet_easiness) %>%
+        filter(triplet_easiness == 16) %>%
+        summarise(n = n()) %>% 
+        ungroup() %>%
+        select(n) %>% .[[1]] %>% .[1]
+
+
+qc_table_easy_triplets <- tt_long %>%
+        filter(triplet_easiness == 16) %>% 
+        droplevels() %>%
+        count(prolific_id,correct) %>% 
+        filter(!correct) %>% 
+        mutate(qc_fail_easy_triplets = (n * 100 / n_easy_triplets) > perc_wrong_responses_allowed) %>%
+        select(-c(n,correct))
+
+# Combine with the main qc table
+qc_table <- merge(qc_table,qc_table_easy_triplets, by = 'prolific_id', all.x = T)
+
+qc_table$qc_fail_easy_triplets[is.na(qc_table$qc_fail_easy_triplets)] <- F
+
+```
+
+
+
 ## Output the resulting table:
 
 ```{r qc-table-report}
@@ -204,7 +235,8 @@ qc_table <- qc_table %>%
         mutate(qc_fail_overall = sum(qc_fail_button_sequence,
                                      qc_fail_missing_trials,
                                      qc_fail_break_duration,
-                                     qc_fail_manual) > 0)
+                                     qc_fail_manual,
+                                     qc_fail_easy_triplets) > 0)
 
 # Add the counterbalancing column
 cb <- tt_long %>% select(prolific_id,pilot_paradigm,counterbalancing) %>% group_by(prolific_id) %>% slice_head()

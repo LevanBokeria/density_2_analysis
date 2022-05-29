@@ -51,6 +51,8 @@ file_list = os.listdir('./data/pilots/gui_downloads/')
 # Remove the selftest I did on myself
 indices = [i for i, s in enumerate(file_list) if 'selftest' in s]
 del file_list[indices[0]]
+indices = [i for i, s in enumerate(file_list) if 'batch1' in s]
+del file_list[indices[0]]
 
 # Create empty data frames to append to
 ind_tt  = []

@@ -30,7 +30,11 @@ os.chdir('../../')
 saveData       = True
 
 # %% Import the pid mappings
-pid_mapping = pd.read_excel('C:\\Users\\lb08\\Desktop\\density_pid_map.xlsx')
+
+if os.getenv('COMPUTERNAME') == 'DESKTOP-CILGRCL':
+    pid_mapping = pd.read_excel('C:\\Users\\levan\\Desktop\\density_pid_map.xlsx')
+else:
+    pid_mapping = pd.read_excel('C:\\Users\\lb08\\Desktop\\density_pid_map.xlsx')
 
 
 # %% Import the files

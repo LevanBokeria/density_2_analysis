@@ -133,6 +133,58 @@ grid.arrange(fig1,fig2,
 
 
 
+## ----------
 
+## Plot this
+
+ylimits <- c(-0.25,0.5)
+
+fig1 <- tt_part_sum_stats_curve_type %>%
+        filter(curve_type == 'convex',
+               dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x='All participants',
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,
+                    alpha = 0.2) +
+        geom_boxplot(width = 0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') +
+        coord_cartesian(ylim = ylimits)
+
+fig2 <- tt_part_sum_stats_curve_type %>%
+        filter(curve_type == 'convex',
+               dep_var_type == 'post_pre_diff') %>%
+        ggplot(aes(x=counterbalancing,
+                   y=mean_chose_towards_sparse)) +
+        geom_violin(fill = chose_sparse_color,
+                    alpha = 0.2) +
+        geom_boxplot(width = 0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') 
+
+
+grid.arrange(fig1,fig2,
+             nrow = 1,
+             top = 'Post minus pre')
 
 

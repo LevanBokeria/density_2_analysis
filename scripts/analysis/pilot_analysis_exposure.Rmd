@@ -37,8 +37,13 @@ pacman::p_load(pacman,
 qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(3)
+which_paradigm <- c(4)
 print(paste0('Which paradigm? ', which_paradigm))
+
+# Which participants to analyze?
+exclude_participants <- F
+ptp_min_idx <- 1
+ptp_max_idx <- 57
 
 source('./scripts/utils/load_transform_exp_data_pilots.R')
 

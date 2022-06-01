@@ -39,7 +39,7 @@ tt_long %>%
         group_by(prolific_id,
                  pilot_paradigm,
                  trial_stage) %>%
-        summarise(n_sessions = length(unique(session))) %>% View()
+        summarise(n_sessions = length(unique(session)))
 
 ## n trials per session ----------------
 
@@ -48,7 +48,7 @@ tt_long %>%
                  pilot_paradigm,
                  trial_stage,
                  session) %>%
-        summarise(n_trials = length(unique(trial_index))) %>% View()
+        summarise(n_trials = length(unique(trial_index))) 
 
 ## n trials per triplet left right ---------
 
@@ -57,7 +57,7 @@ tt_long %>%
                  pilot_paradigm,
                  trial_stage,
                  triplet_left_right_name) %>%
-        summarise(n_trials = length(prolific_id)) %>% View()
+        summarise(n_trials = length(prolific_id)) 
 
 ## n trials per unique triplet name ---------
 
@@ -66,7 +66,7 @@ tt_long %>%
                  pilot_paradigm,
                  trial_stage,
                  triplet_unique_name) %>%
-        summarise(n_trials = length(prolific_id)) %>% View()
+        summarise(n_trials = length(prolific_id)) 
 
 ## n triplet_left_right per triplet_unique
 tt_long %>%
@@ -75,13 +75,13 @@ tt_long %>%
                  trial_stage,
                  triplet_unique_name,
                  triplet_left_right_name) %>% 
-        summarise(n = length(triplet_left_right_name)) %>% View()
+        summarise(n = length(triplet_left_right_name))
 
 ## n participants per triplet_left_right
 tt_long %>%
         group_by(pilot_paradigm,
                  triplet_left_right_name) %>%
-        summarise(n = length(prolific_id)) %>% View()
+        summarise(n = length(prolific_id)) 
 
 ## triplets used -------------
 
@@ -134,17 +134,35 @@ for (iptp in all_ptp){
         # %>%
         #         unique()
 
-        print(all.equal(idata$triplet_left_right_name[order(idata)],
-                        all_triplet_left_right_name$triplet_left_right_name[order(all_triplet_left_right_name)]))
+        # print(all.equal(idata$triplet_left_right_name[order(idata)],
+        #                 all_triplet_left_right_name$triplet_left_right_name[order(all_triplet_left_right_name)]))
         
 }
 
 # Exposure ######################
 
+exp_long %>%
+        group_by(pilot_paradigm,
+                 counterbalancing,
+                 prolific_id,
+                 stimulus,
+                 .drop = F) %>%
+        summarise(n = n()) %>% View()
 
+exp_long %>%
+        group_by(pilot_paradigm,
+                 counterbalancing,
+                 prolific_id,
+                 stim_val,
+                 .drop = F) %>%
+        summarise(n = n()) %>% View()
 
-
-
+exp_long %>%
+        filter(counterbalancing == 'dense_right',
+               pilot_paradigm == 4) %>%
+        count(prolific_id,
+              stim_val) %>% 
+        select(stim_val) %>% unique()
 
 
 

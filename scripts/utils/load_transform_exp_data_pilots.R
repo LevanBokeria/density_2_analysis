@@ -8,6 +8,26 @@
 # Load the libraries ###########################################################
 source('./scripts/utils/load_all_libraries.R')
 
+
+if (!exists('qc_filter')){
+        
+        qc_filter <- T
+        
+}
+
+if (!exists('which_paradigm')){
+        
+        which_paradigm <- c(3)
+        
+}
+
+if (!exists('exclude_participants')){
+        
+        exclude_participants <- F
+        
+}
+
+
 # Read the txt file ###########################################################
 
 exp_long <- import('./results/pilots/preprocessed_data/exposure_task_long_form.csv')
@@ -15,6 +35,8 @@ exp_long <- import('./results/pilots/preprocessed_data/exposure_task_long_form.c
 
 # Start various transformations of columns######################################
 exp_long %<>%
+        filter(pilot_paradigm %in% which_paradigm) %>%
+        droplevels() %>%
         mutate(dist_abs_from_prev = as.factor(dist_abs_from_prev),
                response = as.factor(response),
                session = as.factor(session)) %>%
@@ -34,4 +56,21 @@ if (qc_filter){
                 exp_long %>%
                 filter(!prolific_id %in% qc_fail_ptps) %>%
                 droplevels()
+}
+
+
+# If excluding some participants?
+if (exclude_participants){
+        
+        # Get the full vector of ptp names
+        ptp_names <- exp_long$prolific_id %>% as.character() %>% unique()
+        
+        ptp_names <- str_sort(ptp_names, numeric = T)
+        
+        ptp_to_include <- ptp_names[ptp_min_idx:ptp_max_idx]
+        
+        exp_long <- exp_long %>%
+                filter(prolific_id %in% ptp_to_include) %>%
+                droplevels()
+        
 }

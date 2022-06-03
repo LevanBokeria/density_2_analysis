@@ -111,6 +111,10 @@ sub_190,"No, the instructions were clear and the trial was helpful in understand
 sub_191,no,by shape ,yes,no,no,yes,no
 sub_192,no,the shape and curve,yes,no,no,yes,no
 sub_193,No,Looking at the border and trying to decide if it woas more similar to a triangular shape or the more rounded one,Yes,No,No,Yes,No
+sub_194,no,it's hard to explain in words but I thought about how much you would have to change the middle shape in order to turn it into the left or right shape and judged the similarity based on that,"no, the time pressure made it very difficult to judge accurately",no,no,"no, the time pressure made it very difficult",no
+sub_195,No.,"I looked for similarities in the shaded part of each shape, this helped me see which was more similar to the target.",Just about.,No.,No.,Yes.,No.
+sub_196,"
+No",Shape and size,Yes,No,No,Yes,None
 sub_20,no,I just compared the objects,yes,no,no,yes,no
 sub_21,No,By deciding if the middle object was more round or triangular and then comparing to the others ,Yes,No,No,Yes,No
 sub_22,"No, very simple and easy to understand",Looked if the sides were more straight or curved,yes,No,No also very easy to understand,yes,No

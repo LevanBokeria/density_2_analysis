@@ -17,7 +17,7 @@ source('./scripts/utils/load_all_libraries.R')
 
 # flags
 
-save_qc_table  <- T
+save_qc_table  <- F
 qc_filter      <- F
 qc_filter_rt   <- F
 which_paradigm <- c(4)
@@ -301,24 +301,10 @@ qc_table %>%
 
 ```{r plots-per-participant-tt, fig.height=8, fig.width=10, warning=FALSE, message=FALSE}
 
-plot_tt_per_part <- F
+plot_tt_per_part <- T
 
 if (plot_tt_per_part){
-        for (iP in c('sub_61',
-'sub_77',
-'sub_80',
-'sub_87',
-'sub_91',
-'sub_95',
-'sub_99',
-'sub_101',
-'sub_121',
-'sub_126',
-'sub_132',
-'sub_135',
-'sub_158',
-'sub_164',
-'sub_177')){ #unique(tt_long$prolific_id)){
+        for (iP in c('sub_186','sub_193')){ #unique(tt_long$prolific_id)){
                 print(iP)
                 
                 

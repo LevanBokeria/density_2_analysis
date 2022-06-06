@@ -12,6 +12,8 @@ qc_filter <- FALSE
 saveTable <- T
 filter_some_participants <- T
 
+which_paradigm <- 4
+
 # Read the txt file
 source('./scripts/utils/load_transform_tt_data_pilots.R')
 
@@ -48,16 +50,33 @@ if (filter_some_participants){
         # Load the qc table
         qc_table <- import('./results/pilots/preprocessed_data/qc_table.csv')
         
+        to_pay <- c('sub_182',
+        'sub_183',
+        'sub_184',
+        'sub_185',
+        'sub_186',
+        'sub_187',
+        'sub_188',
+        'sub_189',
+        'sub_190',
+        'sub_191',
+        'sub_192',
+        'sub_193',
+        'sub_194',
+        'sub_195',
+        'sub_196')
         
-        dont_pay <- qc_table %>%
-                select(prolific_id,qc_fail_easy_triplets) %>%
-                filter(qc_fail_easy_triplets) %>%
-                .$prolific_id
         
-        dont_pay <- c(dont_pay,'sub_163','sub_149')
+        # dont_pay <- qc_table %>%
+        #         select(prolific_id,qc_fail_easy_triplets) %>%
+        #         filter(qc_fail_easy_triplets) %>%
+        #         .$prolific_id
+        
+        dont_pay <- c('sub_193')
         
         payment <- payment %>%
-                filter(!prolific_id %in% dont_pay)
+                filter(!prolific_id %in% dont_pay) %>%
+                filter(prolific_id %in% to_pay)
 }
 
 

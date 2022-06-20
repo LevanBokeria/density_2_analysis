@@ -173,7 +173,8 @@ qc_table <- qc_table %>%
         rowwise() %>%
         mutate(qc_fail_overall = sum(qc_fail_button_sequence,
                                      qc_fail_rt,
-                                     qc_fail_manual) > 0)
+                                     qc_fail_manual) > 0) %>%
+        ungroup()
 
 # Add the counterbalancing column
 cb <- tt_long %>% select(prolific_id,experiment,counterbalancing) %>% group_by(prolific_id) %>% slice_head()

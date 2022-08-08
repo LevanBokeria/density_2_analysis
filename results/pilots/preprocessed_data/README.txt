@@ -9,4 +9,9 @@ sub_16 - sub_30
 Pilot paradigm 3:
 dimension was 30-110
 also presented low density exemplars during exposure
-sub_31 - sub_45
+sub_31 - sub_57
+
+Experiment 1:
+dimensions were 30-110
+This was the main experiment with Bayes analysis.
+sub_58 - sub_196

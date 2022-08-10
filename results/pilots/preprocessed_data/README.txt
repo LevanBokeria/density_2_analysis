@@ -1,3 +1,6 @@
+NOTE:
+The subject notation here refers to the old way of mapping prolific IDs to anonymous IDs. We've since changed this. 
+
 Pilot paradigm 1: 
 dimension was 30-118
 sub_01 - sub_16

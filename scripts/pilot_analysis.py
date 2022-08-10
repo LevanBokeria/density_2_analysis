@@ -46,13 +46,10 @@ if save_nothing:
 
 # %% Import the files
 
-file_list = os.listdir('./data/pilots/gui_downloads/')
+# Open the file telling us which sub_id is which experiment
+sub_id_to_exp = pd.read_csv('./docs/sub_id_to_experiment_mapping.csv')
 
-# Remove the selftest I did on myself
-indices = [i for i, s in enumerate(file_list) if 'selftest' in s]
-del file_list[indices[0]]
-indices = [i for i, s in enumerate(file_list) if 'batch1' in s]
-del file_list[indices[0]]
+file_list = os.listdir('./data/anonymized_jatos_data/')
 
 # Create empty data frames to append to
 ind_tt  = []
@@ -69,7 +66,7 @@ ind_exp = []
 for iF in file_list:
     print(iF)
     
-    f = open('./data/pilots/gui_downloads/' + iF,'r')    
+    f = open('./data/anonymized_jatos_data/' + iF,'r')    
 
     rawtext = f.read()
     
@@ -115,36 +112,55 @@ for iF in file_list:
     if 'prolific_ID' in data_decoded['inputData']:
         data_decoded['prolific_ID'] = data_decoded['inputData']['prolific_ID']        
     
-    # Is this the first pilot paradigm or second? Below sub_16 is the first
-    # - get the subject number
-    sub_numeric = [int(s) for s in data_decoded['prolific_ID'].split('_') if s.isdigit()]
+    # Which pilot or experiment?
+    which_experiment = sub_id_to_exp.which_experiment[
+        np.where(sub_id_to_exp.anonymous_id == data_decoded['prolific_ID'])[0][0]
+        ]
     
-    pilot_1_subjects = np.arange(1,17)
-    pilot_2_subjects = np.arange(17,31)
-    pilot_3_subjects = np.arange(31,58)
-    
-    if sub_numeric in pilot_1_subjects:
+    if which_experiment == 'pilot_1':
+        
         exemplar_min = 30
         exemplar_max = 118
         
-        pilot_paradigm = 1
-        
-        # density boundary
         density_boundary = 78
-        
+    
     else:
         
-        if sub_numeric in pilot_2_subjects:
-            pilot_paradigm = 2   
-        elif sub_numeric in pilot_3_subjects:
-            pilot_paradigm = 3
-        else:
-            pilot_paradigm = 4
-
         exemplar_min = 30
         exemplar_max = 110
         
-        density_boundary = 70
+        density_boundary = 70    
+    
+    # # Is this the first pilot paradigm or second? Below sub_16 is the first
+    # # - get the subject number
+    # sub_numeric = [int(s) for s in data_decoded['prolific_ID'].split('_') if s.isdigit()]
+    
+    # pilot_1_subjects = np.arange(1,17)
+    # pilot_2_subjects = np.arange(17,31)
+    # pilot_3_subjects = np.arange(31,58)
+    
+    # if sub_numeric in pilot_1_subjects:
+    #     exemplar_min = 30
+    #     exemplar_max = 118
+        
+    #     which_experiment = 1
+        
+    #     # density boundary
+    #     density_boundary = 78
+        
+    # else:
+        
+    #     if sub_numeric in pilot_2_subjects:
+    #         which_experiment = 2   
+    #     elif sub_numeric in pilot_3_subjects:
+    #         which_experiment = 3
+    #     else:
+    #         which_experiment = 4
+
+    #     exemplar_min = 30
+    #     exemplar_max = 110
+        
+    #     density_boundary = 70
     
     # Whats the mid point in the stimulus space?
     mid_point = (exemplar_max - exemplar_min)/2 + exemplar_min
@@ -470,11 +486,11 @@ for iF in file_list:
     
 
 
-    # %% Add the counterbalancing and pilot_paradigm conditions as a columns
+    # %% Add the counterbalancing and which_experiment conditions as a columns
     tt.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])
-    tt.insert(loc=0, column='pilot_paradigm', value=pilot_paradigm)
+    tt.insert(loc=0, column='which_experiment', value=which_experiment)
     exp.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])        
-    exp.insert(loc=0, column='pilot_paradigm', value=pilot_paradigm)        
+    exp.insert(loc=0, column='which_experiment', value=which_experiment)        
     
     # %% Classify the triplet as being slanted towards the dense or sparse part of the space
     

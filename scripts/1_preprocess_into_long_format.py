@@ -33,7 +33,7 @@ save_breaks       = True
 save_exposure     = True
 
 # A quick flag
-save_nothing = True
+save_nothing = False
 
 if save_nothing:
     save_tt_data      = False
@@ -497,7 +497,16 @@ for iF in range(len(file_list)):
     tt.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])
     tt.insert(loc=0, column='which_experiment', value=which_experiment)
     exp.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])        
-    exp.insert(loc=0, column='which_experiment', value=which_experiment)        
+    exp.insert(loc=0, column='which_experiment', value=which_experiment) 
+
+    instructions.insert(loc=0, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])        
+    instructions.insert(loc=0, column='which_experiment', value=which_experiment)        
+    
+    debriefing.insert(loc=1, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])        
+    debriefing.insert(loc=1, column='which_experiment', value=which_experiment)    
+
+    breaks_output.insert(loc=1, column='counterbalancing', value=data_decoded['inputData']['cb_condition'])        
+    breaks_output.insert(loc=1, column='which_experiment', value=which_experiment)            
     
     # %% Classify the triplet as being slanted towards the dense or sparse part of the space
     
@@ -580,16 +589,16 @@ large_exp    = pd.concat(ind_exp, ignore_index=True)
 
 # %% Save data files
 if save_tt_data:
-    large_tt.to_csv('./results/pilots/preprocessed_data/triplet_task_long_form.csv',index=False)
+    large_tt.to_csv('./results/preprocessed_data/triplet_task_long_form.csv',index=False)
     
 if save_debriefing:
-    large_debri.to_csv('./results/pilots/preprocessed_data/debriefings.csv',index=False)
+    large_debri.to_csv('./results/preprocessed_data/debriefings.csv',index=False)
     
 if save_instructions:
-    large_instr.to_csv('./results/pilots/preprocessed_data/instructions.csv',index=False)
+    large_instr.to_csv('./results/preprocessed_data/instructions.csv',index=False)
 
 if save_breaks:
-    large_breaks.to_csv('./results/pilots/preprocessed_data/breaks_feedback.csv',index=False)
+    large_breaks.to_csv('./results/preprocessed_data/breaks_feedback.csv',index=False)
 
 if save_exposure:
-    large_exp.to_csv('./results/pilots/preprocessed_data/exposure_task_long_form.csv',index=False)
+    large_exp.to_csv('./results/preprocessed_data/exposure_task_long_form.csv',index=False)

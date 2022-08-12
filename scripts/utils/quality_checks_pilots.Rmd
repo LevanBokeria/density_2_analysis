@@ -18,8 +18,6 @@ source('./scripts/utils/load_all_libraries.R')
 # flags
 
 save_qc_table  <- F
-qc_filter      <- F
-qc_filter_rt   <- F
 which_paradigm <- c(4)
 
 

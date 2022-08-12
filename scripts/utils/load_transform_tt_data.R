@@ -10,10 +10,21 @@ if (!exists('qc_filter')){
         qc_filter <- F
                
 }
+if (!exists('qc_filter_rt')){
+        
+        qc_filter_rt <- T
+        
+}
 
 if (!exists('which_experiment')){
 
-        which_experiment <- c(1)
+        which_experiment <- c('experiment_1')
+        
+}
+
+if (!exists('exclude_participants')){
+        
+        exclude_participants <- F
         
 }
 
@@ -23,20 +34,18 @@ source('./scripts/utils/load_all_libraries.R')
 
 # Read the txt file ###########################################################
 
-tt_long <- import('./results/experiments/preprocessed_data/triplet_task_long_form.csv')
-
-
+tt_long <- import('./results/preprocessed_data/triplet_task_long_form.csv')
 
 # Start various transformations of columns######################################
 
 tt_long %<>% 
         filter(trial_stage != 'practice',
-               which_experiment %in% experiment) %>%
+               which_experiment %in% which_experiment) %>%
         droplevels() %>%
         mutate(across(c(triplet_easiness,
                         prolific_id,
                         counterbalancing,
-                        experiment,
+                        which_experiment,
                         query_stimulus,
                         ref_left_stimulus,
                         ref_right_stimulus,                        
@@ -141,17 +150,50 @@ if (!1 %in% which_experiment){
 if (qc_filter){
         
         # Load the qc table
-        qc_table <- import('./results/experiments/preprocessed_data/qc_table.csv')
+        qc_table <- import('./results/preprocessed_data/qc_table.csv')
+ 
         
+        # if (!qc_filter_rt){
+        #         
+        #         qc_fail_ptps <- qc_table %>% 
+        #                 filter(qc_fail_button_sequence | qc_fail_manual) %>% 
+        #                 select(prolific_id) %>% .[[1]]                
+        #         
+        # } else {
+        #         qc_fail_ptps <- qc_table %>% 
+        #                 filter(qc_fail_overall) %>% 
+        #                 select(prolific_id) %>% .[[1]]                
+        #         
+        # }
+               
         qc_fail_ptps <- qc_table %>% 
                 filter(qc_fail_overall) %>% 
-                select(prolific_id) %>% .[[1]]
+                select(prolific_id) %>% .[[1]]   
+        
         
         tt_long <-
                 tt_long %>%
                 filter(!prolific_id %in% qc_fail_ptps) %>%
                 droplevels()
 }
+
+
+# If excluding some participants?
+if (exclude_participants){
+        
+        # Get the full vector of ptp names
+        ptp_names <- tt_long$prolific_id %>% as.character() %>% unique()
+        
+        ptp_names <- str_sort(ptp_names, numeric = T)
+        
+        ptp_to_include <- ptp_names[ptp_min_idx:ptp_max_idx]
+        
+        tt_long <- tt_long %>%
+                filter(prolific_id %in% ptp_to_include) %>%
+                droplevels()
+
+}
+
 
 # Various long-to-wide-to-long form transformations ##########################
 
@@ -160,7 +202,7 @@ if (qc_filter){
 tt_wide_reps <- tt_long %>%
         pivot_wider(
                 id_cols = c(prolific_id,
-                            experiment,
+                            which_experiment,
                             trial_stage,
                             counterbalancing,
                             query_item,
@@ -213,7 +255,7 @@ tt_wide_reps <- tt_wide_reps %>%
 tt_wide_reps_wide_trial_stage <- 
         tt_wide_reps %>%
         pivot_wider(id_cols = c(prolific_id,
-                                experiment,
+                                which_experiment,
                                 counterbalancing,
                                 query_item,
                                 ref_lowdim,

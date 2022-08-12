@@ -58,20 +58,39 @@ ind_debri = []
 ind_breaks = []
 ind_exp = []
 
+
+# Create a table to write out which participants completed, errored etc
+ptp_status = pd.DataFrame(columns=['anonymous_id','which_experiment',
+                                   'multiple_tries','data_submitted',
+                                   'excluded','exclusion_reason'])
+
+
 # Read the qc fail participant file
 # qc_fail_participants = pd.read_csv('./results/qc_fail_participants.csv',
 #                                    header = None)
 
 # if it doesn't just start the loop
-for iF in file_list:
-    print(iF)
+for iF in range(len(file_list)):
+    print(file_list[iF])
     
-    f = open('./data/anonymized_jatos_data/' + iF,'r')    
+    f = open('./data/anonymized_jatos_data/' + file_list[iF],'r')    
 
     rawtext = f.read()
     
     # Get the data submission component
     if rawtext.find('[data_submission_start---') == -1:
+        
+        # Get the anonymous ID
+        aid = file_list[iF].split('_')[2].split('.')[0]
+        
+        ptp_status = ptp_status.append({'anonymous_id': aid,
+                                        'which_experiment': sub_id_to_exp['which_experiment'][iF],
+                                        'multiple_tries': sub_id_to_exp['multiple_tries'][iF],
+                                        'data_submitted': False,
+                                        'excluded': True,
+                                        'exclusion_reason': 'no_data_submitted'},\
+                                        ignore_index=True)
+        
         continue
         # # So there is no data submission. Take the last component
         # start_loc = rawtext.rfind('[break_start_---') + \
@@ -86,6 +105,25 @@ for iF in file_list:
 
     # %% Decode the JSON
     data_decoded = json.loads(data_submission_text)
+
+    # Sanity check, that the prolific ID is the same as in the sub_id_to_experiment_mapping
+    if data_decoded['prolific_ID'] != sub_id_to_exp['anonymous_id'][iF]:
+        raise Exception('sub_id_to_exp dataframe and the file_list are not sorted in the same way')
+
+
+    # Some participants saw a glitched version of the task, whereby images 
+    # flashed by. Exclude those, RTs there would 
+    if data_decoded['inputData']['experiment_parameters']['triplet_trial_dur'] == 100:
+        
+        ptp_status = ptp_status.append({'anonymous_id': data_decoded['prolific_ID'],
+                                'which_experiment': sub_id_to_exp['which_experiment'][iF],
+                                'multiple_tries': sub_id_to_exp['multiple_tries'][iF],
+                                'data_submitted': True,
+                                'excluded': True,
+                                'exclusion_reason': 'saw_debugging_version'},\
+                                ignore_index=True)
+        
+        continue
 
     # Deal with the instructions and debriefing first
     debriefing = data_decoded['outputData']['debriefing'][0]['response']
@@ -130,37 +168,6 @@ for iF in file_list:
         exemplar_max = 110
         
         density_boundary = 70    
-    
-    # # Is this the first pilot paradigm or second? Below sub_16 is the first
-    # # - get the subject number
-    # sub_numeric = [int(s) for s in data_decoded['prolific_ID'].split('_') if s.isdigit()]
-    
-    # pilot_1_subjects = np.arange(1,17)
-    # pilot_2_subjects = np.arange(17,31)
-    # pilot_3_subjects = np.arange(31,58)
-    
-    # if sub_numeric in pilot_1_subjects:
-    #     exemplar_min = 30
-    #     exemplar_max = 118
-        
-    #     which_experiment = 1
-        
-    #     # density boundary
-    #     density_boundary = 78
-        
-    # else:
-        
-    #     if sub_numeric in pilot_2_subjects:
-    #         which_experiment = 2   
-    #     elif sub_numeric in pilot_3_subjects:
-    #         which_experiment = 3
-    #     else:
-    #         which_experiment = 4
-
-    #     exemplar_min = 30
-    #     exemplar_max = 110
-        
-    #     density_boundary = 70
     
     # Whats the mid point in the stimulus space?
     mid_point = (exemplar_max - exemplar_min)/2 + exemplar_min
@@ -546,6 +553,15 @@ for iF in file_list:
     # else:
     #     tt['qc_pass']  = 1  
     #     exp['qc_pass'] = 1          
+    
+    # %% Record this participants details
+    ptp_status = ptp_status.append({'anonymous_id': data_decoded['prolific_ID'],
+                                    'which_experiment': sub_id_to_exp['which_experiment'][iF],
+                                    'multiple_tries': sub_id_to_exp['multiple_tries'][iF],
+                                    'data_submitted': True,
+                                    'excluded': False,
+                                    'exclusion_reason': ''},\
+                                    ignore_index=True)    
     
     # %% Append dataframes 
     # %% Append dataframes 

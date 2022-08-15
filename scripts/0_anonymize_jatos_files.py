@@ -143,4 +143,4 @@ if savePidMap:
     pid_map_df.to_csv('../../OwnCloud/Cambridge/PhD/projects/density_2/pid_map.csv',index=False)
     
     # save just subject ID to experiment mapping, without the prol_ID
-    pid_map_df.drop(['prolific_id'], axis = 1).to_csv('./docs/sub_id_to_experiment_mapping.csv',index=False)
+    pid_map_df.drop(['prolific_id'], axis = 1).to_csv('./docs/participant_metadata.csv',index=False)

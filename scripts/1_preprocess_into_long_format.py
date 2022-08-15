@@ -31,6 +31,7 @@ save_debriefing   = True
 save_instructions = True
 save_breaks       = True
 save_exposure     = True
+save_ptp_status   = True
 
 # A quick flag
 save_nothing = False
@@ -41,13 +42,13 @@ if save_nothing:
     save_instructions = False
     save_breaks       = False
     save_exposure     = False
-    
+    save_ptp_status   = False
     
 
 # %% Import the files
 
 # Open the file telling us which sub_id is which experiment
-sub_id_to_exp = pd.read_csv('./docs/sub_id_to_experiment_mapping.csv')
+participant_metadata = pd.read_csv('./docs/participant_metadata.csv')
 
 file_list = os.listdir('./data/anonymized_jatos_data/')
 
@@ -61,13 +62,15 @@ ind_exp = []
 
 # Create a table to write out which participants completed, errored etc
 ptp_status = pd.DataFrame(columns=['anonymous_id','which_experiment',
-                                   'multiple_tries','data_submitted',
+                                   'multiple_tries','consented','data_submitted',
                                    'excluded','exclusion_reason'])
 
+consented = False
 
 # Read the qc fail participant file
 # qc_fail_participants = pd.read_csv('./results/qc_fail_participants.csv',
 #                                    header = None)
+
 
 # if it doesn't just start the loop
 for iF in range(len(file_list)):
@@ -77,6 +80,13 @@ for iF in range(len(file_list)):
 
     rawtext = f.read()
     
+    # Was this participant consented?
+    if rawtext.find('[consent_start---') != -1:
+        consented = True
+    else:
+        consented = False
+        
+    
     # Get the data submission component
     if rawtext.find('[data_submission_start---') == -1:
         
@@ -84,8 +94,9 @@ for iF in range(len(file_list)):
         aid = file_list[iF].split('_')[2].split('.')[0]
         
         ptp_status = ptp_status.append({'anonymous_id': aid,
-                                        'which_experiment': sub_id_to_exp['which_experiment'][iF],
-                                        'multiple_tries': sub_id_to_exp['multiple_tries'][iF],
+                                        'which_experiment': participant_metadata['which_experiment'][iF],
+                                        'multiple_tries': participant_metadata['multiple_tries'][iF],
+                                        'consented': consented,
                                         'data_submitted': False,
                                         'excluded': True,
                                         'exclusion_reason': 'no_data_submitted'},\
@@ -106,9 +117,9 @@ for iF in range(len(file_list)):
     # %% Decode the JSON
     data_decoded = json.loads(data_submission_text)
 
-    # Sanity check, that the prolific ID is the same as in the sub_id_to_experiment_mapping
-    if data_decoded['prolific_ID'] != sub_id_to_exp['anonymous_id'][iF]:
-        raise Exception('sub_id_to_exp dataframe and the file_list are not sorted in the same way')
+    # Sanity check, that the prolific ID is the same as in the participant_metadataeriment_mapping
+    if data_decoded['prolific_ID'] != participant_metadata['anonymous_id'][iF]:
+        raise Exception('participant_metadata dataframe and the file_list are not sorted in the same way')
 
 
     # Some participants saw a glitched version of the task, whereby images 
@@ -116,8 +127,9 @@ for iF in range(len(file_list)):
     if data_decoded['inputData']['experiment_parameters']['triplet_trial_dur'] == 100:
         
         ptp_status = ptp_status.append({'anonymous_id': data_decoded['prolific_ID'],
-                                'which_experiment': sub_id_to_exp['which_experiment'][iF],
-                                'multiple_tries': sub_id_to_exp['multiple_tries'][iF],
+                                'which_experiment': participant_metadata['which_experiment'][iF],
+                                'multiple_tries': participant_metadata['multiple_tries'][iF],
+                                'consented': consented,
                                 'data_submitted': True,
                                 'excluded': True,
                                 'exclusion_reason': 'saw_debugging_version'},\
@@ -151,8 +163,8 @@ for iF in range(len(file_list)):
         data_decoded['prolific_ID'] = data_decoded['inputData']['prolific_ID']        
     
     # Which pilot or experiment?
-    which_experiment = sub_id_to_exp.which_experiment[
-        np.where(sub_id_to_exp.anonymous_id == data_decoded['prolific_ID'])[0][0]
+    which_experiment = participant_metadata.which_experiment[
+        np.where(participant_metadata.anonymous_id == data_decoded['prolific_ID'])[0][0]
         ]
     
     if which_experiment == 'pilot_1':
@@ -565,8 +577,9 @@ for iF in range(len(file_list)):
     
     # %% Record this participants details
     ptp_status = ptp_status.append({'anonymous_id': data_decoded['prolific_ID'],
-                                    'which_experiment': sub_id_to_exp['which_experiment'][iF],
-                                    'multiple_tries': sub_id_to_exp['multiple_tries'][iF],
+                                    'which_experiment': participant_metadata['which_experiment'][iF],
+                                    'multiple_tries': participant_metadata['multiple_tries'][iF],
+                                    'consented': consented,
                                     'data_submitted': True,
                                     'excluded': False,
                                     'exclusion_reason': ''},\
@@ -602,3 +615,6 @@ if save_breaks:
 
 if save_exposure:
     large_exp.to_csv('./results/preprocessed_data/exposure_task_long_form.csv',index=False)
+    
+if save_ptp_status:
+    ptp_status.to_csv('./docs/participant_metadata.csv',index=False)    

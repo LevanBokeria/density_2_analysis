@@ -1,5 +1,5 @@
 ---
-title: "QC for the initial pilots"
+title: "QC for all pilots and experiments"
 output:
   html_document: default
 ---
@@ -17,8 +17,8 @@ source('./scripts/utils/load_all_libraries.R')
 
 # flags
 
-save_qc_table  <- F
-which_paradigm <- c(4)
+save_qc_table  <- T
+experiment <- c('experiment_1')
 
 
 ```
@@ -26,12 +26,12 @@ which_paradigm <- c(4)
 ```{r import-data}
 # Read the txt file
 
-source('./scripts/utils/load_transform_tt_data_pilots.R')
-source('./scripts/utils/load_transform_exp_data_pilots.R')
+source('./scripts/utils/load_transform_tt_data.R')
+source('./scripts/utils/load_transform_exp_data.R')
 
 # Filter to only have that pilot paradigm data which we specified above
 exp_long <- exp_long %>%
-        filter(pilot_paradigm %in% which_paradigm) %>%
+        filter(which_experiment %in% experiment) %>%
         droplevels()
 
 ```
@@ -39,7 +39,6 @@ exp_long <- exp_long %>%
 Will create a table called qc_table, listing which participants failed which of the checks.
 
 # Check QC for the triplet task:
-
 
 ## Button response sequences:
 
@@ -140,7 +139,7 @@ qc_table$qc_fail_missing_trials[is.na(qc_table$qc_fail_missing_trials)] <- FALSE
 
 max_break_min <- 10
 
-breaks_duration_qc <- import('./results/pilots/preprocessed_data/breaks_feedback.csv')
+breaks_duration_qc <- import('./results/preprocessed_data/breaks_feedback.csv')
 
 qc_table_break_duration <- breaks_duration_qc %>%
         mutate(rt_min = rt/1000/60,
@@ -181,7 +180,7 @@ qc_table <- merge(qc_table,select(qc_table_rt,prolific_id,qc_fail_rt), by = 'pro
 
 ```{r qc-check-technical-debriefing}
 
-manual_qc <- import('./results/pilots/preprocessed_data/qc_manual_for_breaks_debriefing.csv')
+manual_qc <- import('./results/preprocessed_data/qc_manual_for_breaks_debriefing.csv')
 
 qc_table <- qc_table %>% 
         mutate(qc_fail_manual = case_when(
@@ -237,7 +236,7 @@ qc_table <- qc_table %>%
                                      qc_fail_easy_triplets) > 0)
 
 # Add the counterbalancing column
-cb <- tt_long %>% select(prolific_id,pilot_paradigm,counterbalancing) %>% group_by(prolific_id) %>% slice_head()
+cb <- tt_long %>% select(prolific_id,which_experiment,counterbalancing) %>% group_by(prolific_id) %>% slice_head()
 
 qc_table <- merge(qc_table,cb,by = 'prolific_id')
 
@@ -245,7 +244,7 @@ qc_table <- merge(qc_table,cb,by = 'prolific_id')
 # If its experiment data, record which batch each participant belongs to
 batch_ids <- qc_table %>%
         filter(!qc_fail_overall,
-               pilot_paradigm == 4) %>% 
+               which_experiment == 'experiment_1') %>% 
         droplevels() %>%
         mutate(sub_num = parse_number(as.character(prolific_id))) %>%
         arrange(sub_num) %>%        
@@ -271,7 +270,7 @@ qc_table  %>%
 # Save qc_table
 if (save_qc_table){
 
-        export(qc_table,file = './results/pilots/preprocessed_data/qc_table.csv')
+        export(qc_table,file = './results/preprocessed_data/qc_table.csv')
 
 
 }
@@ -299,7 +298,7 @@ qc_table %>%
 
 ```{r plots-per-participant-tt, fig.height=8, fig.width=10, warning=FALSE, message=FALSE}
 
-plot_tt_per_part <- T
+plot_tt_per_part <- F
 
 if (plot_tt_per_part){
         for (iP in c('sub_186','sub_193')){ #unique(tt_long$prolific_id)){

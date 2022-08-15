@@ -17,9 +17,9 @@ source('./scripts/utils/load_all_libraries.R')
 
 # flags
 
-save_qc_table  <- T
+save_qc_table  <- F
 qc_filter      <- F
-which_experiment <- c(1)
+which_paradigm <- c(4)
 
 
 ```
@@ -27,12 +27,12 @@ which_experiment <- c(1)
 ```{r import-data}
 # Read the txt file
 
-source('./scripts/utils/load_transform_tt_data.R')
-source('./scripts/utils/load_transform_exp_data.R')
+source('./scripts/utils/load_transform_tt_data_pilots.R')
+source('./scripts/utils/load_transform_exp_data_pilots.R')
 
 # Filter to only have that experiment paradigm data which we specified above
 exp_long <- exp_long %>%
-        filter(experiment %in% which_experiment) %>%
+        filter(pilot_paradigm %in% which_paradigm) %>%
         droplevels()
 
 ```

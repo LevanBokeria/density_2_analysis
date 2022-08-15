@@ -16,9 +16,9 @@ if (!exists('qc_filter_rt')){
         
 }
 
-if (!exists('which_experiment')){
+if (!exists('experiment')){
 
-        which_experiment <- c('experiment_1')
+        experiment <- c('experiment_1')
         
 }
 
@@ -40,7 +40,7 @@ tt_long <- import('./results/preprocessed_data/triplet_task_long_form.csv')
 
 tt_long %<>% 
         filter(trial_stage != 'practice',
-               which_experiment %in% which_experiment) %>%
+               which_experiment %in% experiment) %>%
         droplevels() %>%
         mutate(across(c(triplet_easiness,
                         prolific_id,
@@ -76,7 +76,7 @@ tt_long %<>%
         reorder_levels(correct_ref_lowdim_highdim,order = c('ref_lowdim','ref_highdim'))
 
 # If its paradigm 2 or 3, then reorder the triplets this way
-if (!1 %in% which_experiment){
+if (!1 %in% experiment){
         
         # Get a sorted array of triplet_unique_names
         triplet_unique_name_order <- tt_long %>%

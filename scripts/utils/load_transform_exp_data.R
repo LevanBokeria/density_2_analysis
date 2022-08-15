@@ -6,38 +6,47 @@
 
 
 # Load the libraries ###########################################################
-pacman::p_load(pacman,
-               rio,
-               tidyverse,
-               rstatix,
-               DT,
-               kableExtra,
-               readr,
-               writexl,
-               jsonlite,
-               stringr,
-               gridExtra,
-               knitr,
-               magrittr,
-               Hmisc,
-               psycho)
+source('./scripts/utils/load_all_libraries.R')
+
+
+if (!exists('qc_filter')){
+        
+        qc_filter <- F
+        
+}
+
+if (!exists('which_experiment')){
+        
+        which_experiment <- c('experiment_1')
+        
+}
+
+if (!exists('exclude_participants')){
+        
+        exclude_participants <- F
+        
+}
+
 
 # Read the txt file ###########################################################
 
-exp_long <- import('./results/pilots/preprocessed_data/exposure_task_long_form.csv')
+exp_long <- import('./results/preprocessed_data/exposure_task_long_form.csv')
 
 
 # Start various transformations of columns######################################
 exp_long %<>%
+        filter(which_experiment %in% which_experiment) %>%
+        droplevels() %>%
         mutate(dist_abs_from_prev = as.factor(dist_abs_from_prev),
                response = as.factor(response),
-               session = as.factor(session))
+               session = as.factor(session)) %>%
+        reorder_levels(response, order = c('q','p'))
 
 # Do a QC filtering
 if (qc_filter){
         
         # Load the qc table
-        qc_table <- import('./results/pilots/preprocessed_data/qc_table.csv')
+        qc_table <- import('./results/preprocessed_data/qc_table.csv')
         
         qc_fail_ptps <- qc_table %>% 
                 filter(qc_fail_overall) %>% 
@@ -47,4 +56,21 @@ if (qc_filter){
                 exp_long %>%
                 filter(!prolific_id %in% qc_fail_ptps) %>%
                 droplevels()
+}
+
+
+# If excluding some participants?
+if (exclude_participants){
+        
+        # Get the full vector of ptp names
+        ptp_names <- exp_long$prolific_id %>% as.character() %>% unique()
+        
+        ptp_names <- str_sort(ptp_names, numeric = T)
+        
+        ptp_to_include <- ptp_names[ptp_min_idx:ptp_max_idx]
+        
+        exp_long <- exp_long %>%
+                filter(prolific_id %in% ptp_to_include) %>%
+                droplevels()
+        
 }

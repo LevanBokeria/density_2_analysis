@@ -1,5 +1,5 @@
 ---
-title: "QC for the initial pilots"
+title: "QC for experiment 1"
 output:
   html_document: default
 ---
@@ -11,25 +11,15 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r}
 rm(list=ls())
 
-pacman::p_load(pacman,
-               rio,
-               tidyverse,
-               rstatix,
-               DT,
-               kableExtra,
-               readr,
-               writexl,
-               jsonlite,
-               stringr,
-               gridExtra,
-               knitr,
-               magrittr)
+source('./scripts/utils/load_all_libraries.R')
 
 # Some global setup ###########################################################
 
 # flags
 
-save_qc_table <- T
+save_qc_table  <- F
+qc_filter      <- F
+which_paradigm <- c(4)
 
 
 ```
@@ -37,47 +27,20 @@ save_qc_table <- T
 ```{r import-data}
 # Read the txt file
 
-tt_long <- import('./results/pilots/preprocessed_data/triplet_task_long_form.csv')
+source('./scripts/utils/load_transform_tt_data_pilots.R')
+source('./scripts/utils/load_transform_exp_data_pilots.R')
 
-tt_long %<>% 
-        mutate(across(c(triplet_easiness,
-                        prolific_id,
-                        counterbalancing,
-                        response,
-                        trial_stage,
-                        session,
-                        correct_response,
-                        query_stimulus,
-                        ref_left_stimulus,
-                        ref_right_stimulus,
-                        triplet_left_right_name,
-                        triplet_unique_name,
-                        template_distances,
-                        template_abs_distances,
-                        query_position,
-                        chosen_ref_lowdim_highdim,
-                        correct_ref_lowdim_highdim,
-                        correct_ref_left_right),as.factor),
-               correct = as.numeric(correct)) %>%
-        reorder_levels(trial_stage,order=c('practice','pre_exposure','post_exposure')) %>% 
-        reorder_levels(response, order = c('q','p'))
+# Filter to only have that experiment paradigm data which we specified above
+exp_long <- exp_long %>%
+        filter(pilot_paradigm %in% which_paradigm) %>%
+        droplevels()
 
-
-# Now load the exposure data
-exp_long <- import('./results/pilots/preprocessed_data/exposure_task_long_form.csv')
-
-exp_long %<>%
-        mutate(dist_abs_from_prev = as.factor(dist_abs_from_prev),
-               response = as.factor(response),
-               session = as.factor(session)) %>%
-        reorder_levels(response, order = c('q','p'))
 ```
-
-Quality checks for initial 10 participants acquired on Feb 3-4, 2022
 
 Will create a table called qc_table, listing which participants failed which of the checks.
 
 # Check QC for the triplet task:
+
 
 ## Button response sequences:
 
@@ -185,6 +148,22 @@ qc_table <- merge(qc_table,select(qc_table_rt,prolific_id,qc_fail_rt), by = 'pro
 
 ```
 
+
+## Technical difficulties or debriefing-based
+
+```{r qc-check-technical-debriefing}
+
+manual_qc <- import('./results/experiments/preprocessed_data/qc_manual_for_breaks_debriefing.csv')
+
+qc_table <- qc_table %>% 
+        mutate(qc_fail_manual = case_when(
+                prolific_id %in% manual_qc$ID ~ TRUE,
+                TRUE ~ FALSE
+        ))
+
+```
+
+
 ## Output the resulting table:
 
 ```{r qc-table-report}
@@ -192,7 +171,16 @@ qc_table <- merge(qc_table,select(qc_table_rt,prolific_id,qc_fail_rt), by = 'pro
 # Which failed?
 qc_table <- qc_table %>%
         rowwise() %>%
-        mutate(qc_fail_overall = sum(qc_fail_button_sequence,qc_fail_rt) > 0)
+        mutate(qc_fail_overall = sum(qc_fail_button_sequence,
+                                     qc_fail_rt,
+                                     qc_fail_manual) > 0) %>%
+        ungroup()
+
+# Add the counterbalancing column
+cb <- tt_long %>% select(prolific_id,experiment,counterbalancing) %>% group_by(prolific_id) %>% slice_head()
+
+qc_table <- merge(qc_table,cb,by = 'prolific_id')
+
 
 qc_table  %>%
         knitr::kable() %>%
@@ -201,7 +189,7 @@ qc_table  %>%
 # Save qc_table
 if (save_qc_table){
 
-        export(qc_table,file = './results/pilots/preprocessed_data/qc_table.csv')
+        export(qc_table,file = './results/experiments/preprocessed_data/qc_table.csv')
 
 
 }
@@ -214,7 +202,7 @@ if (save_qc_table){
 
 ```{r plots-per-participant-tt, fig.height=8, fig.width=10, warning=FALSE, message=FALSE}
 
-plot_tt_per_part <- T
+plot_tt_per_part <- F
 
 if (plot_tt_per_part){
         for (iP in unique(tt_long$prolific_id)){
@@ -300,38 +288,44 @@ if (plot_tt_per_part){
 
 ## Exposure
 
-```{r per-participant, fig.height=5, fig.width=8, warning=FALSE, message=FALSE}
+```{r per-participant, fig.height=5, fig.width=8, message=FALSE, warning=FALSE}
 
-for (iP in unique(tt_long$prolific_id)){
-        print(iP)
+plot_exp_per_part <- F
 
-        p5 <- 
-                exp_long %>%
-                filter(prolific_id == iP) %>%
-                ggplot(aes(x=rt,fill=session)) +
-                geom_histogram(color="#e9ecef", alpha=0.6, position = 'identity') + 
-                facet_grid(~session, labeller = label_both) + 
-                geom_vline(xintercept = 500,color='red',linetype='dashed') + 
-                ggtitle('Same/different task: RT') + 
-                theme(legend.position = '') + 
-                scale_x_continuous(limits = c(0,3000))
-
-        p6 <- exp_long %>%
-                filter(prolific_id == iP) %>%
-                ggplot(aes(x=response,fill=session)) +
-                geom_histogram(color="#e9ecef", alpha=0.6, 
-                               position = 'identity', stat = 'count') + 
-                facet_grid(~session, labeller = label_both) + 
-                ggtitle('Same/Different task: responses') + 
-                theme(legend.position = '')
+if (plot_exp_per_part){
+                
         
-        grid.arrange(p5,p6,
-             ncol=1,
-             top=iP) 
         
+        for (iP in unique(tt_long$prolific_id)){
+                print(iP)
+        
+                p5 <- 
+                        exp_long %>%
+                        filter(prolific_id == iP) %>%
+                        ggplot(aes(x=rt,fill=session)) +
+                        geom_histogram(color="#e9ecef", alpha=0.6, position = 'identity') + 
+                        facet_grid(~session, labeller = label_both) + 
+                        geom_vline(xintercept = 500,color='red',linetype='dashed') + 
+                        ggtitle('Same/different task: RT') + 
+                        theme(legend.position = '') + 
+                        scale_x_continuous(limits = c(0,3000))
+        
+                p6 <- exp_long %>%
+                        filter(prolific_id == iP) %>%
+                        ggplot(aes(x=response,fill=session)) +
+                        geom_histogram(color="#e9ecef", alpha=0.6, 
+                                       position = 'identity', stat = 'count') + 
+                        facet_grid(~session, labeller = label_both) + 
+                        ggtitle('Same/Different task: responses') + 
+                        theme(legend.position = '')
+                
+                grid.arrange(p5,p6,
+                     ncol=1,
+                     top=iP) 
+                
+        }
+
 }
-
- 
 
 ```
 
@@ -368,7 +362,7 @@ tt_acc %>%
         ggplot(aes(x=trial_stage,y=mean_acc)) +
         geom_point() +
         geom_line(aes(group=prolific_id,color=prolific_id)) +
-        facet_wrap(~prolific_id, nrow = 1) +
+        facet_wrap(~prolific_id, nrow = 2) +
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
         ggtitle('Triplet task accuracy')
 
@@ -392,22 +386,22 @@ Red dots are mean accuracy. Black dots are individual trials, either correct or 
 
 Triplet easiness of 8 means that the absolute difference between the dist(query,ref1) and dist(query,ref2) is 8. The higher this difference, the easier it is for participants to spot which of the refs is more similar to the query.
 
-```{r, fig.height = 4, fig.width = 11}
+```{r, fig.height = 4, fig.width = 15}
 ## Accuracy by triplet easiness ----------------------------------------------
 tt_long %>%
         filter(correct_response != '',
                trial_stage != 'practice') %>%
         droplevels() %>%
-        reorder_levels(triplet_easiness,order = c("0",'8','16',"24",'48',"56","64")) %>%
+        reorder_levels(triplet_easiness,order = c("0",'8','16')) %>%
         group_by(prolific_id,trial_stage,triplet_easiness) %>%
         summarise(mean_acc = mean(correct,na.rm=F)) %>%
         ggplot(aes(x=triplet_easiness,y=mean_acc)) +
         # geom_bar(stat='identity') +
-        geom_dotplot(mapping = aes(x=triplet_easiness,y=correct),
-                     data=filter(tt_long,correct_response != '',trial_stage != 'practice'),
-                     binaxis='y',
-                     stackdir='centerwhole',
-                     stackratio=1, dotsize=0.5, fill="black") +
+        # geom_dotplot(mapping = aes(x=triplet_easiness,y=correct),
+        #              data=filter(tt_long,correct_response != '',trial_stage != 'practice'),
+        #              binaxis='y',
+        #              stackdir='centerwhole',
+        #              stackratio=1, dotsize=0.5, fill="black") +
         geom_point(color='red') +     
         geom_line(group='prolific_id') +
         facet_grid(trial_stage~prolific_id) +
@@ -486,16 +480,25 @@ exp_acc_by_type %>%
 
 ```
 
+# Table of counterbalancing conditions
+
+```{r counterbalancing-table}
+
+
+
+```
+
+
 
 ```{r}
 ## Overall accuracy for payment ----------------------------------------------
-# overall_acc <- rbind(select(tt_acc,prolific_id,correct),exp_acc)
-# 
-# overall_acc %>%
-#         mutate(correct = as.numeric(correct)) %>%
-#         group_by(prolific_id) %>%
-#         get_summary_stats(correct,type='mean_sd') %>% 
-#         mutate(payment = 2*mean) %>% select(prolific_id,payment) %>% View()
-#         write_csv('payment.csv')
+overall_acc <- rbind(select(tt_acc,prolific_id,correct),exp_acc)
+
+overall_acc %>%
+        mutate(correct = as.numeric(correct)) %>%
+        group_by(prolific_id) %>%
+        get_summary_stats(correct,type='mean_sd') %>%
+        mutate(payment = 2*mean) %>% select(prolific_id,payment) %>% View()
+        write_csv('payment.csv')
 
 ```

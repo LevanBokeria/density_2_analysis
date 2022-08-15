@@ -1,4 +1,4 @@
-function save_triplet_screenshots()
+function save_triplet_screenshots_only_density_inset()
 
 %% Description
 
@@ -29,17 +29,22 @@ debugMode = 1;
 saveImg      = 1;
 saveImgNames = 0;
 
-flip_space = 1;
+flip_space = 0;
+density_absent = 0;
 
 % If flipping the space, whats the flip value
-flip_value = ((118-30)/2 + 30)*2;
+flip_value = ((110-30)/2 + 30)*2;
 
 %% Load the appropriate subject and condition specific files
 
-saveFolder = 'try_7';
+saveFolder = 'try_8';
 
 if flip_space
     saveFolder = [saveFolder '_flipped'];
+end
+
+if density_absent
+    saveFolder = [saveFolder '_no_density'];
 end
 
 % Make save folders
@@ -147,11 +152,16 @@ end
 
 %% Read the inset picture
 [inset, ~, ~] = imread(fullfile(home,'docs',...
-    'density_space_2.png'));
+    'density_space.png'));
 
 if flip_space
     [inset, ~, ~] = imread(fullfile(home,'docs',...
-    'density_space_2_flipped.png'));
+    'density_space_flipped.png'));
+end
+
+if density_absent
+    [inset, ~, ~] = imread(fullfile(home,'docs',...
+    'density_space_no_density.png'));
 end
 
 inset_idx = Screen('MakeTexture', ptb_window, inset);
@@ -263,10 +273,10 @@ for iTriplet = 1:nTriplets
     
     % Draw the query and refs on the density map
     
-    inset_left_edge_to_30 = 72; % How many pixels from the left corner to the 30th x tick?
-    inset_right_edge_to_118 = 23;
-    inset_30_to_118_width = inset_width - inset_left_edge_to_30 - inset_right_edge_to_118;
-    inset_unit_pixel_value = inset_30_to_118_width/90;
+    inset_left_edge_to_30 = 70; % How many pixels from the left corner to the 30th x tick?
+    inset_right_edge_to_110 = 33;
+    inset_30_to_110_width = inset_width - inset_left_edge_to_30 - inset_right_edge_to_110;
+    inset_unit_pixel_value = inset_30_to_110_width/80;
     
     % Query
     qval = triplets.query(iTriplet);
@@ -311,7 +321,7 @@ for iTriplet = 1:nTriplets
         
     % GetImage call. Alter the rect argument to change the location of the screen shot
     rect_to_save = [screenXpixels/2+50 - inset_width/2,...
-        85,...
+        82,...
         screenXpixels/2+50 + inset_width/2,...
         inset_y_center + inset_height/2];
     

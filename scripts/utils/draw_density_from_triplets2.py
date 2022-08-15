@@ -159,11 +159,15 @@ params = {
 upd_dns = False
 
 # Show low density stimuli
-expose_low_density = False
+expose_low_density = True
+
+# balance Parducci frequency?
+parducci_balance = True
 
 # all possible stimuli (to set the density map, index stimuli, etc.)
 px_min = 30
 px_max = 110
+mid_point = (px_max - px_min)/2 + px_min
 all_stim = np.arange(px_min, px_max+1, dtype=float)  # assumning stimuli start from 10-300 pixels
 
 # input stimuli (exposure phase)
@@ -173,22 +177,33 @@ step_dense  = 2
 step_sparse = 8
 
 # - make the dense and sparse sections
-section_1 = np.arange(px_min,px_min+(px_max-px_min)/2,step_sparse, dtype=int)
+section_1 = np.arange(px_min,mid_point,step_sparse, dtype=int)
 
 section_2 = np.arange(section_1[-1]+step_sparse,px_max+1,step_dense, dtype=int)
+section_2 = np.arange(section_1[-1]+step_sparse,91,step_dense, dtype=int)
+# section_2 = np.arange(90,px_max+1,step_dense, dtype=int)
 # Drop the ones less than mid point
-section_2 = np.delete(section_2,np.where(section_2 < px_min + (px_max-px_min)/2))
+section_2 = np.delete(section_2,np.where(section_2 < mid_point))
 
 if expose_low_density:
+    
     stim_exposure = np.concatenate((section_1,section_2))    
+    
+    if parducci_balance:
+        
+        density_ratio = step_sparse / step_dense
+        density_ratio = (len(section_2)-1)/len(section_1)
+        
+        stim_exposure = np.concatenate((np.repeat(section_1,density_ratio),section_2))    
+        
 else:
     stim_exposure = section_2
 
 # %% Load the manually selected triplets
-chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets_2.xlsx')
+chosen_triplets_df = pd.read_excel('../../docs/choosing_triplets.xlsx')
 
 skip_balancing_from_excel = True
-plot_only_balancing = False
+plot_only_balancing       = False
 
 if skip_balancing_from_excel:
     chosen_triplets_df = chosen_triplets_df.loc[
@@ -206,10 +221,10 @@ stim_triplets = chosen_triplets_df.loc[:,'query':'ref2'].values.flatten()
 flip_space = False
 
 if flip_space:
-    stim_triplets = (px_min+(px_max-px_min)/2)*2 - stim_triplets
-    section_1 = (px_min+(px_max-px_min)/2)*2 - section_1
-    section_2 = (px_min+(px_max-px_min)/2)*2 - section_2
-    stim_exposure = (px_min+(px_max-px_min)/2)*2 - stim_exposure
+    stim_triplets = (mid_point)*2 - stim_triplets
+    section_1 = (mid_point)*2 - section_1
+    section_2 = (mid_point)*2 - section_2
+    stim_exposure = (mid_point)*2 - stim_exposure
 
 # %% initialize model
 model = DensityModel(model_type, params, all_stim)
@@ -232,7 +247,7 @@ if plot_initial_density:
 
 # %% Supplement with X number of balancing triplets
 
-plot_each_step      = False
+plot_each_step      = True
 choose_any_exemplar = False
 
 n_balance = 10
@@ -277,78 +292,83 @@ for iBal in range(n_balance):
                         str(iBal+1) + ' additional triplet', ylims)
 
 # %% Move around exemplars in the balanced triplet set, if triplets are "bad"
-triplets_good = False
+fix_balancing_triplets = False
 
-# threshold_diff = 8
 
-# threshold_easy = 3*step_sparse
-threshold_hard = 2*step_sparse
+if fix_balancing_triplets:
 
-perc_hard_min = 40
-perc_hard_max = 60
-# perc_easy = 30
-
-n_hard_min = round(len(bal_triplets)*perc_hard_min/100)
-n_hard_max = round(len(bal_triplets)*perc_hard_max/100)
-# n_easy_wanted = round(len(bal_triplets)*perc_easy/100)
-
-i = 1
-
-while not triplets_good:
-    print(i)
+    triplets_good = False
     
-    i+=1    
+    # threshold_diff = 8
     
-    # Sort each row 
-    bal_triplets = np.sort(bal_triplets, axis=1)
+    # threshold_easy = 3*step_sparse
+    threshold_hard = 2*step_sparse
     
-    # Take a difference between the columns
-    col_diff  = abs(bal_triplets[:,0] - bal_triplets[:,1])
-    col_diff2 = abs(bal_triplets[:,1] - bal_triplets[:,2])
-    col_diff3 = abs(bal_triplets[:,0] - bal_triplets[:,2])
+    perc_hard_min = 40
+    perc_hard_max = 60
+    # perc_easy = 30
     
-    all_col_diffs = np.concatenate((col_diff,col_diff2,col_diff3))
+    n_hard_min = round(len(bal_triplets)*perc_hard_min/100)
+    n_hard_max = round(len(bal_triplets)*perc_hard_max/100)
+    # n_easy_wanted = round(len(bal_triplets)*perc_easy/100)
     
-    # How easy are each triplet?
-    diff_of_distances = abs(col_diff - col_diff2)
+    i = 1
     
-    # How many are below our threshold of difference of distances
-    # n_easy = sum(diff_of_distances >= threshold_easy)
-    n_hard = sum(diff_of_distances < threshold_hard)
-    
-    # If not satisfied, shuffle
-    if (n_hard > n_hard_max) | (n_hard < n_hard_min) | sum(all_col_diffs < step_sparse):
+    while not triplets_good:
+        print(i)
         
-        # Randomly choose another row
-        # row_idx = np.random.randint(0,n_balance)
-        # col_idx = np.random.randint(0,3)
+        i+=1    
         
-        # # Swap the min value
+        # Sort each row 
+        bal_triplets = np.sort(bal_triplets, axis=1)
         
-        # min_idx = np.argmin(col_diff)
+        # Take a difference between the columns
+        col_diff  = abs(bal_triplets[:,0] - bal_triplets[:,1])
+        col_diff2 = abs(bal_triplets[:,1] - bal_triplets[:,2])
+        col_diff3 = abs(bal_triplets[:,0] - bal_triplets[:,2])
         
-        # bal_triplets[min_idx,0], bal_triplets[row_idx,col_idx] = \
-        #     bal_triplets[row_idx,col_idx], bal_triplets[min_idx,0]
+        all_col_diffs = np.concatenate((col_diff,col_diff2,col_diff3))
         
-        # Shuffle the whole array
-        bal_triplets = bal_triplets.flatten()
+        # How easy are each triplet?
+        diff_of_distances = abs(col_diff - col_diff2)
         
-        np.random.shuffle(bal_triplets)
+        # How many are below our threshold of difference of distances
+        # n_easy = sum(diff_of_distances >= threshold_easy)
+        n_hard = sum(diff_of_distances < threshold_hard)
         
-        bal_triplets = bal_triplets.reshape(n_balance,3)
-        
-        print(bal_triplets)
-        print(n_hard)
-        
-    else:
-        triplets_good = True
+        # If not satisfied, shuffle
+        if (n_hard > n_hard_max) | (n_hard < n_hard_min) | sum(all_col_diffs < step_sparse):
+            
+            # Randomly choose another row
+            # row_idx = np.random.randint(0,n_balance)
+            # col_idx = np.random.randint(0,3)
+            
+            # # Swap the min value
+            
+            # min_idx = np.argmin(col_diff)
+            
+            # bal_triplets[min_idx,0], bal_triplets[row_idx,col_idx] = \
+            #     bal_triplets[row_idx,col_idx], bal_triplets[min_idx,0]
+            
+            # Shuffle the whole array
+            bal_triplets = bal_triplets.flatten()
+            
+            np.random.shuffle(bal_triplets)
+            
+            bal_triplets = bal_triplets.reshape(n_balance,3)
+            
+            print(bal_triplets)
+            print(n_hard)
+            
+        else:
+            triplets_good = True
 
 # %% Add exposure trials and see what the final density space looks like
 
 skip_balancing = False
 
 n_triplet_rep  = 2
-n_exposure_rep = 10
+n_exposure_rep = 0
 
 stim_seq = np.concatenate((np.repeat(stim_triplets,n_triplet_rep),
                            np.repeat(stim_exposure,n_exposure_rep)))
@@ -361,12 +381,12 @@ model_after_bal = DensityModel(model_type, params, all_stim)
 res = model_after_bal.train(stim_seq, test_upd_density=upd_dns)
 
 # Plot
-lower_ylim = 20
+lower_ylim = 0
 if n_exposure_rep == 0:
-    upper_ylim = 40
+    upper_ylim = 110
     titlestr = 'Pre'
 else:
-    upper_ylim = 110
+    upper_ylim = 60
     titlestr = 'Post'
     
 plot_density_fn(model_after_bal,stim_seq,titlestr + '-exposure\n' + \
@@ -385,16 +405,15 @@ if plot_average_density:
         
     x_pos = np.arange(len(materials))
     
-    mid_point = 78
     mid_point_idx = np.where(all_stim == mid_point)[0][0]
         
     # %% Density at each possible exemplar
     sparse_sum  = model_after_bal.density_map[range(0,mid_point_idx)].sum()
     sparse_mean = model_after_bal.density_map[range(0,mid_point_idx)].mean()
     sparse_std  = model_after_bal.density_map[range(0,mid_point_idx)].std()
-    dense_sum   = model_after_bal.density_map[range(mid_point_idx,len(model_after_bal.density_map))].sum()
-    dense_mean  = model_after_bal.density_map[range(mid_point_idx,len(model_after_bal.density_map))].mean()
-    dense_std   = model_after_bal.density_map[range(mid_point_idx,len(model_after_bal.density_map))].std()
+    dense_sum   = model_after_bal.density_map[range(mid_point_idx+1,len(model_after_bal.density_map))].sum()
+    dense_mean  = model_after_bal.density_map[range(mid_point_idx+1,len(model_after_bal.density_map))].mean()
+    dense_std   = model_after_bal.density_map[range(mid_point_idx+1,len(model_after_bal.density_map))].std()
     
     CTEs_each_possible  = [sparse_mean,dense_mean]
     error_each_possible = [sparse_std,dense_std]
@@ -403,12 +422,12 @@ if plot_average_density:
     
     # %% Density at allowed exemplars
     sparse_allowed = np.unique(stim_seq)
-    sparse_allowed = np.delete(sparse_allowed,np.where(sparse_allowed >= px_min + (px_max-px_min)/2))
+    sparse_allowed = np.delete(sparse_allowed,np.where(sparse_allowed >= mid_point))
     sparse_allowed_idx = sparse_allowed - px_min
     sparse_allowed_idx = sparse_allowed_idx.astype(int)
     
     dense_allowed = np.unique(stim_seq)
-    dense_allowed = np.delete(dense_allowed,np.where(dense_allowed < px_min + (px_max-px_min)/2))    
+    dense_allowed = np.delete(dense_allowed,np.where(dense_allowed <= mid_point))    
     dense_allowed_idx = dense_allowed - px_min
     dense_allowed_idx = dense_allowed_idx.astype(int)
     
@@ -423,10 +442,10 @@ if plot_average_density:
     error_allowed = [sparse_std,dense_std]    
     
     # %% Get count of exemplars at each location
-    count_sparse = np.delete(stim_seq,np.where(stim_seq >= px_min + (px_max-px_min)/2)).astype(int)
+    count_sparse = np.delete(stim_seq,np.where(stim_seq >= mid_point)).astype(int)
     count_sparse = np.bincount(count_sparse)[np.unique(count_sparse)]
     
-    count_dense = np.delete(stim_seq,np.where(stim_seq < px_min + (px_max-px_min)/2)).astype(int)
+    count_dense = np.delete(stim_seq,np.where(stim_seq <= mid_point)).astype(int)
     count_dense = np.bincount(count_dense)[np.unique(count_dense)]    
     
     sparse_sum  = count_sparse.sum()

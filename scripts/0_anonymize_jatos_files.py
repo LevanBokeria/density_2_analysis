@@ -25,9 +25,9 @@ import json
 print(os.getcwd())
 
 # Set the working directory
-os.chdir(r'C:\Users\levan\GitHub\density_2_analysis')
+os.chdir(r'C:\Users\lb08\GitHub\density_2_analysis')
 
-saveData = False
+saveData = True
 savePidMap = True
 
 # %% Import the files
@@ -89,6 +89,11 @@ for key in files_to_experiments:
         
         # Join all these componenets
         tosave = '\n'.join(rawtext_split[iIdx_start:iIdx_end])
+        
+        
+        # Does this participant have a consent page? Then we record the data
+        if tosave.find('[instructions_start_---') == -1:
+            continue
         
         # Whats the prolific ID
         json_start_loc = rawtext_split[iIdx_start].find('[get_pid_comp_start---') + \

@@ -62,8 +62,8 @@ ind_exp = []
 
 # Create a table to write out which participants completed, errored etc
 ptp_status = pd.DataFrame(columns=['anonymous_id','which_experiment',
-                                   'multiple_tries','consented','data_submitted',
-                                   'excluded','exclusion_reason'])
+                                   'consented','data_submitted',
+                                   'excluded_at_preprocessing','exclusion_reason'])
 
 consented = False
 
@@ -95,10 +95,9 @@ for iF in range(len(file_list)):
         
         ptp_status = ptp_status.append({'anonymous_id': aid,
                                         'which_experiment': participant_metadata['which_experiment'][iF],
-                                        'multiple_tries': participant_metadata['multiple_tries'][iF],
                                         'consented': consented,
                                         'data_submitted': False,
-                                        'excluded': True,
+                                        'excluded_at_preprocessing': True,
                                         'exclusion_reason': 'no_data_submitted'},\
                                         ignore_index=True)
         
@@ -128,10 +127,9 @@ for iF in range(len(file_list)):
         
         ptp_status = ptp_status.append({'anonymous_id': data_decoded['prolific_ID'],
                                 'which_experiment': participant_metadata['which_experiment'][iF],
-                                'multiple_tries': participant_metadata['multiple_tries'][iF],
                                 'consented': consented,
                                 'data_submitted': True,
-                                'excluded': True,
+                                'excluded_at_preprocessing': True,
                                 'exclusion_reason': 'saw_debugging_version'},\
                                 ignore_index=True)
         
@@ -578,10 +576,9 @@ for iF in range(len(file_list)):
     # %% Record this participants details
     ptp_status = ptp_status.append({'anonymous_id': data_decoded['prolific_ID'],
                                     'which_experiment': participant_metadata['which_experiment'][iF],
-                                    'multiple_tries': participant_metadata['multiple_tries'][iF],
                                     'consented': consented,
                                     'data_submitted': True,
-                                    'excluded': False,
+                                    'excluded_at_preprocessing': False,
                                     'exclusion_reason': ''},\
                                     ignore_index=True)    
     

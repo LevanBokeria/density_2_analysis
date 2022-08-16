@@ -1,0 +1,296 @@
+---
+title: "QC for all pilots and experiments"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+rm(list=ls())
+
+source('./scripts/utils/load_all_libraries.R')
+
+# Some global setup ###########################################################
+
+# flags
+
+save_qc_table  <- T
+experiment <- c('pilot_1',
+                'pilot_2',
+                'pilot_3',
+                'experiment_1')
+
+
+```
+
+```{r import-data}
+# Read the txt file
+
+source('./scripts/utils/load_transform_tt_data.R')
+source('./scripts/utils/load_transform_exp_data.R')
+
+# Filter to only have that pilot paradigm data which we specified above
+exp_long <- exp_long %>%
+        filter(which_experiment %in% experiment) %>%
+        droplevels()
+
+```
+
+Will create a table called qc_table, listing which participants failed which of the checks.
+
+# Check QC for the triplet task:
+
+## Button response sequences:
+
+(code hidden)
+
+```{r qc-check-button-sequence-ideal-observer-comparison}
+
+percentile_threshold <- 5
+
+
+# Load the ideal observer table
+button_press_distr <- import('./results/qc_check_permutations/same_button_press_distributions.RData')
+
+
+# For each participant, count repetitions of certain length
+n_perm <- nrow(button_press_distr)
+all_lengths <- c(4,5,6,7,8,9,10)
+
+qc_table_button_seq <- tt_long %>%
+                filter(trial_stage != 'practice') %>%
+                select(prolific_id,response) %>%
+                mutate(response = as.character(response),
+                       response = replace_na(response,'_')) %>%
+                group_by(prolific_id) %>%
+                mutate(response_str = paste(response, collapse = '')) %>% 
+                select(prolific_id,response_str) %>% unique() %>%
+        ungroup()
+
+for (iL in all_lengths){
+        
+
+        # Find same_button_reps
+        p_rep <- strrep('p',iL)
+        q_rep <- strrep('q',iL)
+        
+        qc_table_button_seq <- qc_table_button_seq %>%
+                group_by(prolific_id) %>%
+                mutate(total_rep = nrow(str_locate_all(response_str,p_rep)[[1]]) + nrow(str_locate_all(response_str,q_rep)[[1]]),
+                       n_perms_larger = sum(button_press_distr[as.character(iL)][[1]] >= total_rep),
+                       perc_perms = n_perms_larger*100/n_perm) %>%
+                ungroup()
+        
+        # Now rename the column
+        names(qc_table_button_seq)[names(qc_table_button_seq) == "total_rep"]      <- paste0("total_rep_for_",iL)
+        names(qc_table_button_seq)[names(qc_table_button_seq) == "n_perms_larger"] <- paste0("n_perms_larger_for_",iL)
+        names(qc_table_button_seq)[names(qc_table_button_seq) == "perc_perms"]     <- paste0("perc_perms_for_",iL)
+
+}
+
+# Classify as pass of fail
+qc_table_button_seq <- qc_table_button_seq %>% 
+        mutate(qc_fail_button_sequence = ifelse(rowSums(select(qc_table_button_seq,starts_with('perc')) < percentile_threshold) > 0,TRUE,FALSE))
+
+# Create a concise qc table
+qc_table <- qc_table_button_seq %>%
+        select(prolific_id,qc_fail_button_sequence)
+```
+
+## Missing trials:
+
+If in any session, they missed more than 20%, so 6 trials, then exclude them.
+
+Any trial with RT < 300 should be counted as missed
+
+```{r qc-check-missing-trials}
+
+perc_total_missing_allowed <- 20
+
+n_trials_per_session <- tt_long %>%
+        filter(trial_stage != 'practice') %>%
+        count(prolific_id,trial_stage,session) %>%
+        slice(1) %>%
+        select(n) %>% .[[1]]
+
+qc_table_missing_trials <- tt_long %>%
+        filter(trial_stage != 'practice') %>%
+        mutate(response_rt_conditional = case_when(
+                rt < 300 ~ as.character(NA),
+                TRUE ~ as.character(response)
+        )) %>% 
+        count(prolific_id,trial_stage,session,response_rt_conditional) %>% 
+        filter(is.na(response_rt_conditional)) %>% 
+        mutate(perc_missed = n*100/n_trials_per_session, 
+               qc_fail_missing_trials = ifelse(perc_missed >= perc_total_missing_allowed, TRUE, FALSE)) %>%
+        group_by(prolific_id) %>%
+        summarise(qc_fail_missing_trials = any(qc_fail_missing_trials)) %>%
+        ungroup()
+
+qc_table <- merge(qc_table,qc_table_missing_trials,by = 'prolific_id', all.x = T)
+
+qc_table$qc_fail_missing_trials[is.na(qc_table$qc_fail_missing_trials)] <- FALSE
+
+```
+
+## Really long breaks
+
+```{r break-duration-check}
+
+max_break_min <- 10
+
+breaks_duration_qc <- import('./results/preprocessed_data/breaks_feedback.csv')
+
+qc_table_break_duration <- breaks_duration_qc %>%
+        mutate(rt_min = rt/1000/60,
+                qc_fail_break_duration = rt > max_break_min*60*1000) %>%
+        group_by(prolific_id) %>%
+        summarise(qc_fail_break_duration = any(qc_fail_break_duration))
+
+qc_table <- merge(qc_table,qc_table_break_duration,by = 'prolific_id')
+
+```
+
+
+## Check RT
+
+Less than 40% have RT < 1000msec          
+
+```{r qc-check-rt}
+
+rt_threshold      <- 1000
+rt_perc_threshold <- 40
+
+qc_table_rt <- tt_long %>%
+        filter(trial_stage != 'practice') %>%
+        group_by(prolific_id) %>%
+        summarise(n_rt_less_than_threshold = sum(rt <= rt_threshold, na.rm = T),
+                  perc_rt_less_than_threshold = n_rt_less_than_threshold*100/n(),
+                  n = n()) %>%
+        mutate(qc_fail_rt = perc_rt_less_than_threshold >= rt_perc_threshold) %>%
+        ungroup()
+
+# Combine with the main qc table
+qc_table <- merge(qc_table,select(qc_table_rt,prolific_id,qc_fail_rt), by = 'prolific_id')
+
+```
+
+
+## Technical difficulties or debriefing-based
+
+```{r qc-check-technical-debriefing}
+
+manual_qc <- import('./results/preprocessed_data/qc_manual_for_breaks_debriefing.csv')
+
+qc_table <- qc_table %>% 
+        mutate(qc_fail_manual = case_when(
+                prolific_id %in% manual_qc$ID ~ TRUE,
+                TRUE ~ FALSE
+        ))
+
+```
+
+
+## Check the easy trials:
+
+```{r triplet-easiness-catch}
+
+perc_wrong_responses_allowed <- 25
+
+n_easy_triplets <- tt_long %>%
+        group_by(prolific_id,triplet_easiness) %>%
+        filter(triplet_easiness == 16) %>%
+        summarise(n = n()) %>% 
+        ungroup() %>%
+        select(n) %>% .[[1]] %>% .[1]
+
+
+qc_table_easy_triplets <- tt_long %>%
+        filter(triplet_easiness == 16) %>% 
+        droplevels() %>%
+        count(prolific_id,correct) %>% 
+        filter(!correct) %>% 
+        mutate(qc_fail_easy_triplets = (n * 100 / n_easy_triplets) > perc_wrong_responses_allowed) %>%
+        select(-c(n,correct))
+
+# Combine with the main qc table
+qc_table <- merge(qc_table,qc_table_easy_triplets, by = 'prolific_id', all.x = T)
+
+qc_table$qc_fail_easy_triplets[is.na(qc_table$qc_fail_easy_triplets)] <- F
+
+```
+
+
+
+## Output the resulting table:
+
+```{r qc-table-report}
+
+# Which failed?
+qc_table <- qc_table %>%
+        rowwise() %>%
+        mutate(qc_fail_overall = sum(qc_fail_button_sequence,
+                                     qc_fail_missing_trials,
+                                     qc_fail_break_duration,
+                                     qc_fail_manual,
+                                     qc_fail_easy_triplets) > 0)
+
+# Add the counterbalancing column
+cb <- tt_long %>% select(prolific_id,which_experiment,counterbalancing) %>% group_by(prolific_id) %>% slice_head()
+
+qc_table <- merge(qc_table,cb,by = 'prolific_id')
+
+
+# If its experiment data, record which batch each participant belongs to
+batch_ids <- qc_table %>%
+        filter(!qc_fail_overall,
+               which_experiment == 'experiment_1') %>% 
+        droplevels() %>%
+        mutate(sub_num = parse_number(as.character(prolific_id))) %>%
+        arrange(sub_num) %>%        
+        add_rownames() %>% 
+        mutate(batch_id = case_when(
+                as.numeric(rowname) <= 20 ~ 1,
+                TRUE ~ floor((as.numeric(rowname)-0.01)/10)
+                
+        )) %>%
+        select(-rowname)
+
+qc_table <- merge(qc_table,batch_ids,all.x = T)
+
+qc_table <- qc_table %>%
+        mutate(sub_num = parse_number(as.character(prolific_id))) %>%
+        arrange(sub_num) %>%  
+        select(-sub_num)
+
+qc_table  %>%
+        knitr::kable() %>%
+        kable_styling(bootstrap_options = "striped")
+
+# Save qc_table
+if (save_qc_table){
+
+        export(qc_table,file = './results/preprocessed_data/qc_table.csv')
+
+
+}
+
+```
+
+## Count QC pass per counterbalancing
+
+```{r count-how-many-we-need}
+
+qc_table %>%
+        group_by(which_experiment,
+                 counterbalancing,
+                 qc_fail_overall) %>%
+        summarise(n = n()) %>%
+        ungroup() %>%
+        knitr::kable() %>%
+        kable_styling(bootstrap_options = "striped")
+
+```

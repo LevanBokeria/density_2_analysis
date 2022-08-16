@@ -47,7 +47,7 @@ files_to_experiments = {
     }
 
 # %% Create a dataframe for prolific IDs and anonymized IDs
-pid_map_df = pd.DataFrame(columns=['prolific_id','anonymous_id','which_experiment','multiple_tries'])
+pid_map_df = pd.DataFrame(columns=['prolific_id','anonymous_id','which_experiment'])
 duplicate = 0
 
 ptp_coutner = 1
@@ -106,26 +106,12 @@ for key in files_to_experiments:
         elif 'prolific_ID' in iData_decoded['inputData']:
             iPID = iData_decoded['inputData']['prolific_ID']
         
-        # Did this participant already try?
-        if len(pid_map_df) > 0:
-                    
-            if pid_map_df.prolific_id.str.contains(iPID).any():
-                duplicate = 1
-                
-                # Assign duplicate to the matching rows too
-                pid_map_df.multiple_tries[pid_map_df.prolific_id.str.contains(iPID)] = 1
-                
-                
-            else:
-                duplicate = 0
-        
         # Assign an anonymized ID and record in a dataframe
         aid = 'sub' + str(ptp_coutner).zfill(3)
         
         pid_map_df = pid_map_df.append({'prolific_id': iPID, \
                                         'anonymous_id': aid, \
-                                        'which_experiment': files_to_experiments[key], \
-                                        'multiple_tries': duplicate},\
+                                        'which_experiment': files_to_experiments[key]},\
                                         ignore_index=True)
             
         # Substitute the pid with aid

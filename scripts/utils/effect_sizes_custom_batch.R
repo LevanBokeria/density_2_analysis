@@ -17,7 +17,7 @@ qc_filter_rt <- T # no longer used
 
 print(paste0('QC filter? ', qc_filter))
 
-experiment <- c('experiment_1')
+experiment <- c('pilot_3')
 
 print(paste0('Which pilot paradigm? ', experiment))
 

@@ -17,9 +17,9 @@ qc_filter_rt <- T # no longer used
 
 print(paste0('QC filter? ', qc_filter))
 
-which_paradigm <- c(4)
+experiment <- c('experiment_1')
 
-print(paste0('Which pilot paradigm? ', which_paradigm))
+print(paste0('Which pilot paradigm? ', experiment))
 
 
 # Which participants to analyze?
@@ -29,7 +29,7 @@ ptp_max_idx <- 57
 
 
 # Load and transform the data
-source('./scripts/utils/load_transform_tt_data_pilots.R')
+source('./scripts/utils/load_transform_tt_data.R')
 source('./scripts/utils/summary_stats_for_various_factors.R')
 
 # Flags and settings

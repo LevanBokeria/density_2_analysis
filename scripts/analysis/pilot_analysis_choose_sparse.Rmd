@@ -10,8 +10,8 @@ knit: (function(input, ...) {
       knit_root_dir = rprojroot::find_rstudio_root_file(),
       output_file = paste0(
       rprojroot::find_rstudio_root_file(),
-      '/results/pilots/',
-      'pilot_chose_sparse_paradigm_2_3_qc_filtered_',Sys.Date(),'.html'
+      '/results/',
+      'chose_sparse_paradigm_2_3_qc_filtered_',Sys.Date(),'.html'
 
       ),
       envir = globalenv()
@@ -47,9 +47,9 @@ qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
 
-which_paradigm <- c(3)
+experiment <- c('pilot_3')
 
-print(paste0('Which pilot paradigm? ', which_paradigm))
+print(paste0('Which pilot paradigm? ', experiment))
 
 source('./scripts/utils/load_transform_tt_data.R')
 source('./scripts/utils/summary_stats_for_various_factors.R')

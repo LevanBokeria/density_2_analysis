@@ -17,9 +17,9 @@ qc_filter_rt <- T # no longer used
 
 print(paste0('QC filter? ', qc_filter))
 
-experiment <- c('pilot_3')
+experiment <- c('experiment_1')
 
-print(paste0('Which pilot paradigm? ', experiment))
+print(paste0('Which experiment paradigm? ', experiment))
 
 
 # Which participants to analyze?

@@ -60,6 +60,15 @@ tbl2_1 <- tt_part_sum_stats_triplet_location %>%
                  mu = 0,
                  hedges.correction = FALSE)
 
+# How about the hardest triplets? 
+tbl2_2 <- tt_part_sum_stats_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff',
+               triplet_location == 'across_density_regions',
+               triplet_easiness == 0) %>%
+        cohens_d(mean_chose_towards_sparse ~ 1,
+                 mu = 0,
+                 hedges.correction = FALSE)
+
 ## BF test against 0 
 reportBF = function(x, digits){
         round(as.numeric(as.vector(x)), digits)
@@ -78,8 +87,20 @@ bf <- reportBF(ttestBF(
         nullInterval = null_interval
 )[1],4)
 
+## BF test against 0 for harders triplets
+bf_data_hardest <- tt_part_sum_stats_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff',
+               triplet_location == 'across_density_regions',
+               triplet_easiness == 0) %>%
+        droplevels() %>% 
+        select(mean_chose_towards_sparse) %>% .[[1]]
 
-## Plot this
+bf_hardest <- reportBF(ttestBF(
+        bf_data_hardest,
+        nullInterval = null_interval
+)[1],4)
+
+## Plot this --------------
 
 ylimits <- c(-0.25,0.5)
 
@@ -131,17 +152,14 @@ grid.arrange(fig1,fig2,
              nrow = 1,
              top = 'Post minus pre')
 
+## Plot for hardest  --------------
 
+ylimits <- c(-1,1)
 
-## ----------
-
-## Plot this
-
-ylimits <- c(-0.25,0.5)
-
-fig1 <- tt_part_sum_stats_curve_type %>%
-        filter(curve_type == 'convex',
-               dep_var_type == 'post_pre_diff') %>%
+fig1 <- tt_part_sum_stats_triplet_location_easiness %>%
+        filter(triplet_location == 'across_density_regions',
+               dep_var_type == 'post_pre_diff',
+               triplet_easiness == 0) %>%
         ggplot(aes(x='All participants',
                    y=mean_chose_towards_sparse)) +
         geom_violin(fill = chose_sparse_color,
@@ -161,9 +179,10 @@ fig1 <- tt_part_sum_stats_curve_type %>%
                      color='red') +
         coord_cartesian(ylim = ylimits)
 
-fig2 <- tt_part_sum_stats_curve_type %>%
-        filter(curve_type == 'convex',
-               dep_var_type == 'post_pre_diff') %>%
+fig2 <- tt_part_sum_stats_triplet_location_easiness %>%
+        filter(triplet_location == 'across_density_regions',
+               dep_var_type == 'post_pre_diff',
+               triplet_easiness == 0) %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_chose_towards_sparse)) +
         geom_violin(fill = chose_sparse_color,
@@ -187,4 +206,59 @@ grid.arrange(fig1,fig2,
              nrow = 1,
              top = 'Post minus pre')
 
+
+## ----------
+
+## Plot this
+# 
+# ylimits <- c(-0.25,0.5)
+# 
+# fig1 <- tt_part_sum_stats_curve_type %>%
+#         filter(curve_type == 'convex',
+#                dep_var_type == 'post_pre_diff') %>%
+#         ggplot(aes(x='All participants',
+#                    y=mean_chose_towards_sparse)) +
+#         geom_violin(fill = chose_sparse_color,
+#                     alpha = 0.2) +
+#         geom_boxplot(width = 0.15,
+#                      outlier.shape = '',
+#                      fatten = 4) +
+#         geom_jitter(width = 0.05,
+#                     height = 0,
+#                     alpha = 0.3) +
+#         stat_summary(fun = mean,
+#                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+#         stat_summary(fun.data = mean_cl_normal,
+#                      geom = "errorbar",
+#                      size=0.5,
+#                      width=0.1,
+#                      color='red') +
+#         coord_cartesian(ylim = ylimits)
+# 
+# fig2 <- tt_part_sum_stats_curve_type %>%
+#         filter(curve_type == 'convex',
+#                dep_var_type == 'post_pre_diff') %>%
+#         ggplot(aes(x=counterbalancing,
+#                    y=mean_chose_towards_sparse)) +
+#         geom_violin(fill = chose_sparse_color,
+#                     alpha = 0.2) +
+#         geom_boxplot(width = 0.15,
+#                      outlier.shape = '',
+#                      fatten = 4) +
+#         geom_jitter(width = 0.05,
+#                     height = 0,
+#                     alpha = 0.3) +
+#         stat_summary(fun = mean,
+#                      color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+#         stat_summary(fun.data = mean_cl_normal,
+#                      geom = "errorbar",
+#                      size=0.5,
+#                      width=0.1,
+#                      color='red') 
+# 
+# 
+# grid.arrange(fig1,fig2,
+#              nrow = 1,
+#              top = 'Post minus pre')
+# 
 

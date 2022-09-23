@@ -638,7 +638,7 @@ x_font_angle <- 20
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -665,7 +665,7 @@ fig1 <- tt_part_sum_stats_triplet_location_differences %>%
 # Now plot this
 fig2 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -703,7 +703,7 @@ x_font_angle <- 20
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -730,7 +730,7 @@ fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
 # Now plot this
 fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -771,7 +771,7 @@ grid.arrange(fig1,fig2,
 fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_dense',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) +
@@ -788,7 +788,7 @@ fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
 fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_dense',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value,
                    fill=counterbalancing)) +
@@ -810,7 +810,7 @@ fig3 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_right',
                dep_var_type == plot_dep_var,
                difference_type == 'across_minus_dense',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) +
@@ -828,7 +828,7 @@ fig4 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_left',
                dep_var_type == plot_dep_var,
                difference_type == 'across_minus_dense',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) +
@@ -861,7 +861,7 @@ grid.arrange(fig1,fig2,fig3,fig4,
 fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == 'post_pre_diff',
                difference_type == 'across_minus_sparse',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) +
@@ -878,7 +878,7 @@ fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
 fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_sparse',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value,
                    fill=counterbalancing)) +
@@ -899,7 +899,7 @@ fig3 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_right',
                dep_var_type == 'post_pre_diff',
                difference_type == 'across_minus_sparse',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) +
@@ -917,7 +917,7 @@ fig4 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_left',
                dep_var_type == 'post_pre_diff',
                difference_type == 'across_minus_sparse',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) +
@@ -946,7 +946,7 @@ grid.arrange(fig1,fig2,fig3,fig4,
 fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_avg_dense_sparse',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) +
@@ -963,7 +963,7 @@ fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
 fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_avg_dense_sparse',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value,
                    fill=counterbalancing)) +
@@ -985,7 +985,7 @@ fig3 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_right',
                dep_var_type == plot_dep_var,
                difference_type == 'across_minus_avg_dense_sparse',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) +
@@ -1003,7 +1003,7 @@ fig4 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_left',
                dep_var_type == plot_dep_var,
                difference_type == 'across_minus_avg_dense_sparse',
-               chose_towards_type == 'chose_towards_sparse') %>%
+               measure_type == 'chose_towards_sparse') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) +
@@ -1172,7 +1172,7 @@ grid.arrange(fig1,fig2,
 
 tt_bw_part_sum_stats_triplets_difference %>%
         filter(dep_var_type == 'post_pre_diff',
-               chose_towards_type == 'chose_towards_highdim') %>%
+               measure_type == 'chose_towards_highdim') %>%
         ggplot(aes(x=triplet_unique_name,
                    y=difference_value)) +
         geom_hline(yintercept = 0, linetype = 'dashed') +

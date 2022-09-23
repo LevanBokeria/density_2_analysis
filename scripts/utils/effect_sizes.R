@@ -55,7 +55,7 @@ plot_dep_var <- 'post_pre_diff'
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               measure_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -84,7 +84,7 @@ print(fig1)
 # Effect size
 tbl1 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse',
+               measure_type == 'chose_towards_sparse',
                difference_type == 'across_minus_avg_dense_sparse') %>% 
         cohens_d(difference_value ~ 1,
                  mu = 0,
@@ -231,7 +231,7 @@ source('./scripts/utils/summary_stats_for_various_factors.R')
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == plot_dep_var,
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               measure_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +

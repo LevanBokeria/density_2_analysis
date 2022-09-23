@@ -441,7 +441,7 @@ x_font_angle <- 10
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == 'post_pre_diff',
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               measure_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -468,7 +468,7 @@ fig1 <- tt_part_sum_stats_triplet_location_differences %>%
 # Now plot this
 fig2 <- tt_part_sum_stats_triplet_location_differences %>%
         filter(dep_var_type == 'post_pre_diff',
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               measure_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -566,7 +566,7 @@ x_font_angle <- 10
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == 'post_pre_diff',
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               measure_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
@@ -593,7 +593,7 @@ fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
 # Now plot this
 fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == 'post_pre_diff',
-               chose_towards_type == 'chose_towards_sparse') %>% 
+               measure_type == 'chose_towards_sparse') %>% 
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +

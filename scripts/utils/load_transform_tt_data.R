@@ -223,6 +223,7 @@ tt_wide_reps <- tt_long %>%
                             curve_type),
                 names_from = 'triplet_rep',
                 values_from = c(response,
+                                rt,
                                 correct,
                                 correct_numeric,
                                 correct_response,
@@ -238,6 +239,9 @@ tt_wide_reps <- tt_wide_reps %>%
         mutate(correct_avg_across_reps = rowMeans(
                 tt_wide_reps[,c('correct_rep1','correct_rep2')],na.rm=T
                 ),
+               rt_avg_across_reps = rowMeans(
+                       tt_wide_reps[,c('rt_rep1','rt_rep2')],na.rm=T
+               ),               
                chose_towards_sparse_avg_across_reps = rowMeans(
                        tt_wide_reps[,c('chose_towards_sparse_rep1','chose_towards_sparse_rep2')],na.rm=T
                ),
@@ -277,9 +281,10 @@ tt_wide_reps_wide_trial_stage <-
                     values_from = c(choice_numeric_sum_across_reps,
                                     change_across_rep,
                                     correct_avg_across_reps,
+                                    rt_avg_across_reps,
                                     chose_towards_sparse_avg_across_reps,
                                     chose_towards_highdim_avg_across_reps),
-                    names_glue = "{trial_stage}__{.value}") %>%
+                    names_glue = "{trial_stage}__{.value}") %>% 
         mutate(post_pre_diff__choice_numeric_sum_across_reps = 
                 post_exposure__choice_numeric_sum_across_reps - 
                 pre_exposure__choice_numeric_sum_across_reps,
@@ -291,7 +296,9 @@ tt_wide_reps_wide_trial_stage <-
                        pre_exposure__chose_towards_sparse_avg_across_reps,
                post_pre_diff__chose_towards_highdim_avg_across_reps = 
                        post_exposure__chose_towards_highdim_avg_across_reps - 
-                       pre_exposure__chose_towards_highdim_avg_across_reps,               
+                       pre_exposure__chose_towards_highdim_avg_across_reps, 
+               post_pre_diff__rt_avg_across_reps = 
+                       post_exposure__rt_avg_across_reps - pre_exposure__rt_avg_across_reps
                )
 
 tt_long_post_pre_and_diff <- tt_wide_reps_wide_trial_stage %>%
@@ -309,7 +316,12 @@ tt_long_post_pre_and_diff <- tt_wide_reps_wide_trial_stage %>%
                       
                       post_exposure__choice_numeric_sum_across_reps,
                       pre_exposure__choice_numeric_sum_across_reps,
-                      post_pre_diff__choice_numeric_sum_across_reps),
+                      post_pre_diff__choice_numeric_sum_across_reps,
+                      
+                      post_exposure__rt_avg_across_reps,
+                      pre_exposure__rt_avg_across_reps,
+                      post_pre_diff__rt_avg_across_reps
+                      ),
                      names_to = c('dep_var_type','.value'),
                      names_pattern = '(.+)__(.+)') %>%
         reorder_levels(dep_var_type,order = c('pre_exposure',

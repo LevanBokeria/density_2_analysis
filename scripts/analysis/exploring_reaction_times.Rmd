@@ -1,5 +1,5 @@
 ---
-title: "Thesis writeup analysis scripts and plots"
+title: "Exploring reaction times"
 output:
   html_document:
     number_sections: false

@@ -65,6 +65,7 @@ source('./scripts/utils/summary_stats_for_various_factors.R')
 chose_sparse_color  <- 'blue'
 chose_highdim_color <- 'green'
 accuracy_color      <- 'yellow'
+rt_color            <- 'gray'
 
 # Show the basic table
 tt_long %>%
@@ -89,8 +90,8 @@ fig1 <- tt_part_sum_stats_triplet_location %>%
         filter(triplet_location == 'across_density_regions',
                dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x='All participants',
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,
                     alpha = 0.2) +
         geom_boxplot(width = 0.15,
                      outlier.shape = '',
@@ -110,8 +111,8 @@ fig2 <- tt_part_sum_stats_triplet_location %>%
         filter(triplet_location == 'across_density_regions',
                dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,
                     alpha = 0.2) +
         geom_boxplot(width = 0.15,
                      outlier.shape = '',
@@ -140,7 +141,7 @@ grid.arrange(fig1,fig2,
 tbl_effsize <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions') %>%
-        cohens_d(mean_chose_towards_sparse ~ 1,
+        cohens_d(mean_rt ~ 1,
                  mu = 0,
                  hedges.correction = FALSE)
 
@@ -152,9 +153,9 @@ bf_data <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions') %>%
         droplevels() %>% 
-        select(mean_chose_towards_sparse) %>% .[[1]]
+        select(mean_rt) %>% .[[1]]
 
-null_interval <- c(0,Inf)
+null_interval <- c(-Inf,Inf)
 
 bf <- reportBF(ttestBF(
         bf_data,
@@ -170,16 +171,16 @@ bf_data_dense_left <- tt_part_sum_stats_triplet_location %>%
                triplet_location == 'across_density_regions',
                counterbalancing == 'dense_left') %>%
         droplevels() %>% 
-        select(mean_chose_towards_sparse) %>% .[[1]]
+        select(mean_rt) %>% .[[1]]
 
 bf_data_dense_right <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions',
                counterbalancing == 'dense_right') %>%
         droplevels() %>% 
-        select(mean_chose_towards_sparse) %>% .[[1]]
+        select(mean_rt) %>% .[[1]]
 
-null_interval <- c(0,Inf)
+null_interval <- c(-Inf,Inf)
 
 bf_compare_cb <- reportBF(ttestBF(
         bf_data_dense_left,bf_data_dense_right,
@@ -212,8 +213,8 @@ fig1 <- tt_part_sum_stats_triplet_location_easiness %>%
                dep_var_type == 'post_pre_diff',
                triplet_easiness == 0) %>%
         ggplot(aes(x='All participants',
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,
                     alpha = 0.2) +
         geom_boxplot(width = 0.15,
                      outlier.shape = '',
@@ -234,8 +235,8 @@ fig2 <- tt_part_sum_stats_triplet_location_easiness %>%
                dep_var_type == 'post_pre_diff',
                triplet_easiness == 0) %>%
         ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,
                     alpha = 0.2) +
         geom_boxplot(width = 0.15,
                      outlier.shape = '',
@@ -265,7 +266,7 @@ tbl_effsize <- tt_part_sum_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions',
                triplet_easiness == 0) %>%
-        cohens_d(mean_chose_towards_sparse ~ 1,
+        cohens_d(mean_rt ~ 1,
                  mu = 0,
                  hedges.correction = FALSE)
 
@@ -278,9 +279,9 @@ bf_data <- tt_part_sum_stats_triplet_location_easiness %>%
                triplet_location == 'across_density_regions',
                triplet_easiness == 0) %>%
         droplevels() %>% 
-        select(mean_chose_towards_sparse) %>% .[[1]]
+        select(mean_rt) %>% .[[1]]
 
-null_interval <- c(0,Inf)
+null_interval <- c(-Inf,Inf)
 
 bf <- reportBF(ttestBF(
         bf_data,
@@ -297,7 +298,7 @@ bf_data_dense_left <- tt_part_sum_stats_triplet_location_easiness %>%
                counterbalancing == 'dense_left',
                triplet_easiness == 0) %>%
         droplevels() %>% 
-        select(mean_chose_towards_sparse) %>% .[[1]]
+        select(mean_rt) %>% .[[1]]
 
 bf_data_dense_right <- tt_part_sum_stats_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff',
@@ -305,9 +306,9 @@ bf_data_dense_right <- tt_part_sum_stats_triplet_location_easiness %>%
                counterbalancing == 'dense_right',
                triplet_easiness == 0) %>%
         droplevels() %>% 
-        select(mean_chose_towards_sparse) %>% .[[1]]
+        select(mean_rt) %>% .[[1]]
 
-null_interval <- c(0,Inf)
+null_interval <- c(-Inf,Inf)
 
 bf_compare_cb <- reportBF(ttestBF(
         bf_data_dense_left,bf_data_dense_right,
@@ -339,12 +340,12 @@ x_font_angle <- 20
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == plot_dep_var,
-               measure_type == 'chose_towards_sparse',
+               measure_type == 'rt',
                triplet_easiness == 0,
                difference_type == 'across_minus_avg_dense_sparse') %>% 
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+        geom_violin(fill = rt_color,alpha = 0.2) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -362,16 +363,16 @@ fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         geom_hline(yintercept = 0, linetype = 'dashed') +      
         theme(text = element_text(size=x_font_size)) + 
         theme(axis.text.x = element_text(angle = x_font_angle)) + 
-        ggtitle(paste0(plot_dep_var, '. chose towards sparse. Diff scores'))
+        ggtitle(paste0(plot_dep_var, '. rt. Diff scores'))
 
 fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == plot_dep_var,
-               measure_type == 'chose_towards_sparse',
+               measure_type == 'rt',
                triplet_easiness == 0,
                difference_type == 'across_minus_avg_dense_sparse') %>% 
         ggplot(aes(x=difference_type,
                    y=difference_value)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+        geom_violin(fill = rt_color,alpha = 0.2) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -390,7 +391,7 @@ fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         theme(text = element_text(size=x_font_size)) + 
         theme(axis.text.x = element_text(angle = x_font_angle)) + 
         facet_wrap(~counterbalancing) +
-        ggtitle(paste0(plot_dep_var, '. chose towards sparse. Diff scores'))
+        ggtitle(paste0(plot_dep_var, '. rt. Diff scores'))
 
 grid.arrange(fig1,fig2,
              nrow = 1,
@@ -403,12 +404,12 @@ grid.arrange(fig1,fig2,
 ```{r bf-regional-analysis}
 data_for_bf_regional_analysis <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == plot_dep_var,
-               measure_type == 'chose_towards_sparse',
+               measure_type == 'rt',
                triplet_easiness == 0,
                difference_type == 'across_minus_avg_dense_sparse') %>% 
         select(difference_value) %>% .[[1]]
 
-null_interval <- c(0,Inf)
+null_interval <- c(-Inf,Inf)
 
 bf_regional_analysis <- reportBF(ttestBF(
         data_for_bf_regional_analysis,
@@ -419,7 +420,7 @@ bf_regional_analysis <- reportBF(ttestBF(
 
 bf_regional_analysis_cb_groups <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == plot_dep_var,
-               measure_type == 'chose_towards_sparse',
+               measure_type == 'rt',
                triplet_easiness == 0,
                difference_type == 'across_minus_avg_dense_sparse') %>% 
         group_by(counterbalancing) %>%
@@ -441,7 +442,7 @@ data_for_bayes_anova <- tt_part_sum_stats_triplet_location %>%
                dep_var_type == 'post_pre_diff') %>%
         rename(
                 Cb = counterbalancing,
-                diff_scores = mean_chose_towards_sparse
+                diff_scores = mean_rt
         )
 
 bayes_aov <- anovaBF(diff_scores~
@@ -485,8 +486,8 @@ bayes_aov_sorted %>% knitr::kable(caption = 'Against the Null model') %>%
 fig3 <- tt_part_sum_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,alpha = 0.2) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', 
                      fatten = 6) +
@@ -503,13 +504,13 @@ fig3 <- tt_part_sum_stats %>%
              width=0.1,
              color='red') +         
         geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +         
-        ggtitle('chose towards sparse')
+        ggtitle('rt')
 
 fig4 <- tt_part_sum_stats %>%
         #filter(dep_var_type == 'post_pre_diff') %>% 
         ggplot(aes(x=dep_var_type,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,alpha = 0.2) +
         geom_boxplot(width=0.15,
                      outlier.shape = '',
                      fatten = 6) +
@@ -540,8 +541,8 @@ x_font_size <- 10
 fig3 <- tt_part_sum_stats_triplet_location %>%
         # filter(dep_var_type == plot_dep_var) %>% 
         ggplot(aes(x=triplet_location,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,alpha = 0.2) +
         geom_boxplot(width=0.2,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -558,14 +559,14 @@ fig3 <- tt_part_sum_stats_triplet_location %>%
              color='red') +          
         geom_hline(yintercept = c(0,0.5), linetype = 'dashed') +   
         theme(text = element_text(size=x_font_size)) + 
-        ggtitle(paste0('All stages','; chose towards sparse')) +
+        ggtitle(paste0('All stages','; rt')) +
         facet_wrap(~dep_var_type, ncol = 1, strip.position = 'right')
 
 fig4 <- tt_part_sum_stats_triplet_location %>%
         # filter(dep_var_type == plot_dep_var) %>% 
         ggplot(aes(x=triplet_location,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,alpha = 0.2) +
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,alpha = 0.2) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', fatten = 4) +
         geom_jitter(width = 0.05,
@@ -899,7 +900,7 @@ grid.arrange(fig1,fig2,fig3,
 fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_dense',
-               measure_type == 'chose_towards_sparse') %>% 
+               measure_type == 'rt') %>% 
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) + 
@@ -916,7 +917,7 @@ fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
 fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_dense',
-               measure_type == 'chose_towards_sparse') %>%
+               measure_type == 'rt') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value,
                    fill=counterbalancing)) +
@@ -938,7 +939,7 @@ fig3 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_right',
                dep_var_type == plot_dep_var,
                difference_type == 'across_minus_dense',
-               measure_type == 'chose_towards_sparse') %>%
+               measure_type == 'rt') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) + 
@@ -956,7 +957,7 @@ fig4 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_left',
                dep_var_type == plot_dep_var,
                difference_type == 'across_minus_dense',
-               measure_type == 'chose_towards_sparse') %>%
+               measure_type == 'rt') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) + 
@@ -989,7 +990,7 @@ grid.arrange(fig1,fig2,fig3,fig4,
 fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == 'post_pre_diff',
                difference_type == 'across_minus_sparse',
-               measure_type == 'chose_towards_sparse') %>%
+               measure_type == 'rt') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) + 
@@ -1006,7 +1007,7 @@ fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
 fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_sparse',
-               measure_type == 'chose_towards_sparse') %>%
+               measure_type == 'rt') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value,
                    fill=counterbalancing)) +
@@ -1027,7 +1028,7 @@ fig3 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_right',
                dep_var_type == 'post_pre_diff',
                difference_type == 'across_minus_sparse',
-               measure_type == 'chose_towards_sparse') %>%
+               measure_type == 'rt') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) + 
@@ -1045,7 +1046,7 @@ fig4 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_left',
                dep_var_type == 'post_pre_diff',
                difference_type == 'across_minus_sparse',
-               measure_type == 'chose_towards_sparse') %>%
+               measure_type == 'rt') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) + 
@@ -1074,7 +1075,7 @@ grid.arrange(fig1,fig2,fig3,fig4,
 fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_avg_dense_sparse',
-               measure_type == 'chose_towards_sparse') %>% 
+               measure_type == 'rt') %>% 
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) + 
@@ -1091,7 +1092,7 @@ fig1 <- tt_part_sum_stats_triplet_location_template_differences %>%
 fig2 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(dep_var_type == plot_dep_var,
                difference_type == 'across_minus_avg_dense_sparse',
-               measure_type == 'chose_towards_sparse') %>%
+               measure_type == 'rt') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value,
                    fill=counterbalancing)) +
@@ -1113,7 +1114,7 @@ fig3 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_right',
                dep_var_type == plot_dep_var,
                difference_type == 'across_minus_avg_dense_sparse',
-               measure_type == 'chose_towards_sparse') %>%
+               measure_type == 'rt') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) + 
@@ -1131,7 +1132,7 @@ fig4 <- tt_part_sum_stats_triplet_location_template_differences %>%
         filter(counterbalancing == 'dense_left',
                dep_var_type == plot_dep_var,
                difference_type == 'across_minus_avg_dense_sparse',
-               measure_type == 'chose_towards_sparse') %>%
+               measure_type == 'rt') %>%
         ggplot(aes(x=reorder(template_distances,-difference_value),
                    y=difference_value)) +
         geom_boxplot(fatten = 4,aes(color=template_distances)) + 
@@ -1165,8 +1166,8 @@ ylimits <- c(-0.2,0.2)
 fig1 <- tt_part_sum_stats %>%
         filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,
                     alpha = 0.2) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', 
@@ -1182,7 +1183,7 @@ fig1 <- tt_part_sum_stats %>%
                      width=0.1,
                      color='red') + 
         coord_cartesian(ylim = ylimits) + 
-        ggtitle('Chose towards sparse')
+        ggtitle('rt')
 
 fig2 <- tt_part_sum_stats %>%
         filter(dep_var_type == 'post_pre_diff') %>%
@@ -1222,8 +1223,8 @@ ylimits <- c(-0.4,0.4)
 fig1 <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
-                   y=mean_chose_towards_sparse)) +
-        geom_violin(fill = chose_sparse_color,
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,
                     alpha = 0.2) +
         geom_boxplot(width=0.15,
                      outlier.shape = '', 
@@ -1240,7 +1241,7 @@ fig1 <- tt_part_sum_stats_triplet_location %>%
                      color='red') + 
         coord_cartesian(ylim = ylimits) + 
         facet_wrap(~triplet_location) +
-        ggtitle('Chose towards sparse')
+        ggtitle('rt')
 
 fig2 <- tt_part_sum_stats_triplet_location %>%
         filter(dep_var_type == 'post_pre_diff') %>%

@@ -63,6 +63,20 @@ tt_part_sum_stats_template_triplet_location_easiness <- tt_long_post_pre_and_dif
                   mean_rt                    = mean(rt_avg_across_reps, na.rm = T)) %>%
         ungroup()
 
+tt_part_sum_stats_correct_ref_triplet_location_easiness <- tt_long_post_pre_and_diff %>%
+        group_by(prolific_id,
+                 counterbalancing,
+                 correct_ref_towards_dense_sparse,
+                 triplet_location,
+                 triplet_easiness,
+                 dep_var_type) %>%
+        summarise(n_datapoints               = n(),
+                  mean_chose_towards_sparse  = mean(chose_towards_sparse_avg_across_reps),
+                  mean_chose_towards_highdim = mean(chose_towards_highdim_avg_across_reps),
+                  mean_correct               = mean(correct_avg_across_reps, na.rm = T),
+                  mean_rt                    = mean(rt_avg_across_reps, na.rm = T)) %>%
+        ungroup()
+
 tt_part_sum_stats_curve_type_template <- tt_long_post_pre_and_diff %>%
         group_by(prolific_id,
                  counterbalancing,

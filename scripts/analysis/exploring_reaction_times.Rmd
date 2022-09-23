@@ -86,8 +86,9 @@ tt_long %>%
 
 ylimits <- c(-0.2,0.2)
 
-fig1 <- tt_part_sum_stats_triplet_location %>%
-        filter(triplet_location == 'across_density_regions',
+fig1 <- tt_part_sum_stats %>%
+        filter(
+                # triplet_location == 'across_density_regions',
                dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x='All participants',
                    y=mean_rt)) +
@@ -107,8 +108,9 @@ fig1 <- tt_part_sum_stats_triplet_location %>%
                      width=0.1,
                      color='red') 
 
-fig2 <- tt_part_sum_stats_triplet_location %>%
-        filter(triplet_location == 'across_density_regions',
+fig2 <- tt_part_sum_stats %>%
+        filter(
+                # triplet_location == 'across_density_regions',
                dep_var_type == 'post_pre_diff') %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_rt)) +
@@ -328,6 +330,42 @@ bf_dense_right <- reportBF(ttestBF(
 ```
 
 
+# Asymmetric triplets: interaction between skew and RT
+
+```{r asymmetric-interaction-skew-rt}
+
+tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff',
+               triplet_location == 'across_density_regions',
+               triplet_easiness == 8) %>%
+        droplevels() %>%
+        ggplot(aes(x=correct_ref_towards_dense_sparse,
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,
+                    alpha = 0.2) +
+        geom_boxplot(width = 0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') +
+        facet_wrap(~triplet_easiness+counterbalancing)
+
+
+
+
+
+```
+
+
+
 # Regional analysis: across minus other areas
 
 ## Violin plots
@@ -428,6 +466,8 @@ bf_regional_analysis_cb_groups <- tt_part_sum_stats_triplet_location_easiness_di
         summarise(bf = reportBF(ttestBF(cur_data()$difference_value,
                                         nullInterval = null_interval)[1],4)) %>%
         ungroup()
+
+1/bf_regional_analysis_cb_groups$bf
 
 ```
 

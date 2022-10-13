@@ -330,14 +330,73 @@ bf_dense_right <- reportBF(ttestBF(
 ```
 
 
+# Accuracy and RT dependence on triplet easiness
+
+```{r accuracy-easiness}
+
+tt_part_sum_stats_triplet_easiness %>%
+        # filter() %>%
+        # droplevels() %>%
+        ggplot(aes(x=triplet_easiness,
+                   y=mean_rt)) +
+        geom_violin(fill = rt_color,
+                    alpha = 0.2) +
+        geom_boxplot(width = 0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +
+        facet_wrap(~dep_var_type)
+
+tt_part_sum_stats_triplet_easiness %>%
+        # filter() %>%
+        # droplevels() %>%
+        ggplot(aes(x=triplet_easiness,
+                   y=mean_correct)) +
+        geom_violin(fill = rt_color,
+                    alpha = 0.2) +
+        geom_boxplot(width = 0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +
+        facet_wrap(~dep_var_type)
+
+```
+
+
+
 # Asymmetric triplets: interaction between skew and RT
 
-```{r asymmetric-interaction-skew-rt}
+## Plot
 
-tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
+```{r asymmetric-interaction-skew-rt, fig.height=5, fig.width=7}
+
+fig1 <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions',
-               triplet_easiness == 8) %>%
+               triplet_easiness %in% c(8)
+               ) %>%
         droplevels() %>%
         ggplot(aes(x=correct_ref_towards_dense_sparse,
                    y=mean_rt)) +
@@ -356,15 +415,83 @@ tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
                      size=0.5,
                      width=0.1,
                      color='red') +
-        facet_wrap(~triplet_easiness+counterbalancing)
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +
+        xlab('')
+
+# Calculate the difference between ref_right and ref_left
+ref_towards_dense_min_ref_towards_sparse_rt <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff',
+               triplet_location == 'across_density_regions',
+               triplet_easiness %in% c(8)
+               ) %>%
+        droplevels() %>% 
+        pivot_wider(id_cols = c(prolific_id,
+                                counterbalancing),
+                    names_from = correct_ref_towards_dense_sparse,
+                    values_from = mean_rt) %>% 
+        mutate(ref_dense_min_ref_sparse = ref_towards_dense - ref_towards_sparse) 
+
+fig2 <- ref_towards_dense_min_ref_towards_sparse_rt %>%
+        ggplot(aes(x='',
+                   y=ref_dense_min_ref_sparse)) +
+        geom_violin(fill = rt_color,
+                    alpha = 0.2) +
+        geom_boxplot(width = 0.15,
+                     outlier.shape = '',
+                     fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) +
+        stat_summary(fun = mean,
+                     color = 'red') + geom_hline(yintercept = 0, linetype = 'dashed') + 
+        stat_summary(fun.data = mean_cl_normal,
+                     geom = "errorbar",
+                     size=0.5,
+                     width=0.1,
+                     color='red') +
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.2) +
+        xlab('')
 
 
-
-
+grid.arrange(fig1,fig2,
+             nrow = 1,
+             top = 'RT post-pre, different skew triplets')
 
 ```
 
+## Bayes factor
 
+```{r asymmetric-triplets-8-rt-effect-size}
+
+tbl_effsize <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff',
+               triplet_location == 'across_density_regions',
+               triplet_easiness == 8) %>% View()
+        cohens_d(mean_rt ~ 1,
+                 mu = 0,
+                 hedges.correction = FALSE)
+
+```
+
+```{r mid-hardest-triplets-vs-0-bayes-factor}
+
+bf_data <- tt_part_sum_stats_triplet_location_easiness %>%
+        filter(dep_var_type == 'post_pre_diff',
+               triplet_location == 'across_density_regions',
+               triplet_easiness == 0) %>%
+        droplevels() %>% 
+        select(mean_rt) %>% .[[1]]
+
+null_interval <- c(-Inf,Inf)
+
+bf <- reportBF(ttestBF(
+        bf_data,
+        nullInterval = null_interval
+)[1],4)
+
+```
 
 # Regional analysis: across minus other areas
 

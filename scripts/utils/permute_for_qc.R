@@ -10,6 +10,7 @@ pacman::p_load(pacman,
                writexl,
                jsonlite,
                stringr,
+               stringi,
                gridExtra,
                knitr,
                magrittr)

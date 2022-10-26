@@ -395,7 +395,7 @@ tt_part_sum_stats_triplet_easiness %>%
 fig1 <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions',
-               triplet_easiness %in% c(8)
+               triplet_easiness %in% c(16)
                ) %>%
         droplevels() %>%
         ggplot(aes(x=correct_ref_towards_dense_sparse,
@@ -423,7 +423,7 @@ fig1 <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
 ref_towards_dense_min_ref_towards_sparse_rt <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions',
-               triplet_easiness %in% c(8)
+               triplet_easiness %in% c(16)
                ) %>%
         droplevels() %>% 
         pivot_wider(id_cols = c(prolific_id,

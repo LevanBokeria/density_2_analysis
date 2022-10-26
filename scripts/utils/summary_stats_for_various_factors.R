@@ -49,6 +49,7 @@ tt_part_sum_stats_curve_type <- tt_long_post_pre_and_diff %>%
         ungroup()
 
 tt_part_sum_stats_triplet_location_easiness <- tt_long_post_pre_and_diff %>%
+        # filter(template_distances != '24_-24_-48') %>%
         group_by(prolific_id,
                  counterbalancing,
                  triplet_location,

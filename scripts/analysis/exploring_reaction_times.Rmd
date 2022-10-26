@@ -468,7 +468,7 @@ grid.arrange(fig1,fig2,
 tbl_effsize <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions',
-               triplet_easiness == 8) %>% View()
+               triplet_easiness == 8) %>% 
         cohens_d(mean_rt ~ 1,
                  mu = 0,
                  hedges.correction = FALSE)
@@ -497,7 +497,7 @@ bf <- reportBF(ttestBF(
 
 ## Violin plots
 
-```{r triplet-location-differences-easiness-levels, fig.width=8, fig.height=6, warning=F}
+```{r triplet-location-differences-easiness-levels, fig.width=9, fig.height=7, warning=F}
 
 x_font_size <- 10
 x_font_angle <- 20
@@ -508,7 +508,7 @@ fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
                measure_type == 'rt',
                triplet_easiness == 0,
                difference_type == 'across_minus_avg_dense_sparse') %>% 
-        ggplot(aes(x=difference_type,
+        ggplot(aes(x='middle-avg(high+low)',
                    y=difference_value)) +
         geom_violin(fill = rt_color,alpha = 0.2) +
         geom_boxplot(width=0.2,
@@ -535,7 +535,7 @@ fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
                measure_type == 'rt',
                triplet_easiness == 0,
                difference_type == 'across_minus_avg_dense_sparse') %>% 
-        ggplot(aes(x=difference_type,
+        ggplot(aes(x='middle-avg(high+low)',
                    y=difference_value)) +
         geom_violin(fill = rt_color,alpha = 0.2) +
         geom_boxplot(width=0.2,

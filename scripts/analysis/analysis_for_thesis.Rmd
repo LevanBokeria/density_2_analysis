@@ -331,7 +331,7 @@ bf_dense_right <- reportBF(ttestBF(
 
 ## Violin plots
 
-```{r triplet-location-differences-easiness-levels, fig.width=8, fig.height=6, warning=F}
+```{r triplet-location-differences-easiness-levels, fig.width=9, fig.height=7, warning=F}
 
 x_font_size <- 10
 x_font_angle <- 20
@@ -342,7 +342,7 @@ fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
                measure_type == 'chose_towards_sparse',
                triplet_easiness == 0,
                difference_type == 'across_minus_avg_dense_sparse') %>% 
-        ggplot(aes(x=difference_type,
+        ggplot(aes(x='Middle - avg(low+high)',
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
         geom_boxplot(width=0.2,
@@ -369,7 +369,7 @@ fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
                measure_type == 'chose_towards_sparse',
                triplet_easiness == 0,
                difference_type == 'across_minus_avg_dense_sparse') %>% 
-        ggplot(aes(x=difference_type,
+        ggplot(aes(x='Middle - avg(low+high)',
                    y=difference_value)) +
         geom_violin(fill = chose_sparse_color,alpha = 0.2) +
         geom_boxplot(width=0.2,

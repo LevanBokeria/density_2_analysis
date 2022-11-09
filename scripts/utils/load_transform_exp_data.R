@@ -15,9 +15,9 @@ if (!exists('qc_filter')){
         
 }
 
-if (!exists('which_experiment')){
+if (!exists('experiment')){
         
-        which_experiment <- c('experiment_1')
+        experiment <- c('experiment_1')
         
 }
 
@@ -35,12 +35,20 @@ exp_long <- import('./results/preprocessed_data/exposure_task_long_form.csv')
 
 # Start various transformations of columns######################################
 exp_long %<>%
-        filter(which_experiment %in% which_experiment) %>%
+        filter(which_experiment %in% experiment) %>%
         droplevels() %>%
         mutate(dist_abs_from_prev = as.factor(dist_abs_from_prev),
                response = as.factor(response),
                session = as.factor(session)) %>%
         reorder_levels(response, order = c('q','p'))
+
+# Add the previous stimulus column
+exp_long <- exp_long %>%
+        group_by(prolific_id,
+                 session) %>%
+        mutate(prev_stim_val = lag(stim_val)) %>%
+        ungroup()
+
 
 # Do a QC filtering
 if (qc_filter){

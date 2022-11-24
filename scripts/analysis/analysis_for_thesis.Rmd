@@ -53,12 +53,12 @@ qc_filter <- T
 print(paste0('QC filter? ', qc_filter))
 
 
-experiment <- c('experiment_1')
+experiment <- c('experiment_1') # experiment_1 is the main experiment, pilot_3 is the last pilot
 
 print(paste0('Which pilot paradigm? ', experiment))
 
 source('./scripts/utils/load_transform_tt_data.R')
-source('./scripts/utils/summary_stats_for_various_factors.R')
+source('./scripts/utils/summary_stats_for_various_factors.R') #this will calculate various summary statistics, grouped by different factors (and their combinations) like triplet easiness, triplet location, template, etc
 
 # Flags and settings
 

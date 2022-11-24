@@ -123,6 +123,191 @@ same_resp_table %>%
 
 # Analyze "same" response for each pair of items. 
 
+## On true "same" trials
+
+```{r exp-long-add-column}
+
+exp_long <- exp_long %>%
+        mutate(stim_val_density = case_when(
+                counterbalancing == 'dense_left' & stim_val %in% seq(0,69) ~ 'high',
+                counterbalancing == 'dense_left' & stim_val %in% seq(70,110) ~ 'low',
+                counterbalancing == 'dense_right' & stim_val %in% seq(0,69) ~ 'low',
+                counterbalancing == 'dense_right' & stim_val %in% seq(70,110) ~ 'high',
+                TRUE ~ as.character(NA)
+        ),
+        prev_stim_val_density = case_when(
+                counterbalancing == 'dense_left' & prev_stim_val %in% seq(0,69) ~ 'high',
+                counterbalancing == 'dense_left' & prev_stim_val %in% seq(70,110) ~ 'low',
+                counterbalancing == 'dense_right' & prev_stim_val %in% seq(0,69) ~ 'low',
+                counterbalancing == 'dense_right' & prev_stim_val %in% seq(70,110) ~ 'high',
+                TRUE ~ as.character(NA)
+        ))
+
+```
+
+
+```{r same-trials, fig.height=5, fig.width=6}
+
+# For each exemplar, whats the histogram of distances that we have 
+which_distances <- seq(0,0, by = 0)
+which_counterbalancing <- c('dense_right','dense_left')
+which_stimuli <- seq(30,110, by = 2)
+
+n_tot_same_trials <- exp_long %>%
+        select(counterbalancing,
+               prolific_id,
+               session,
+               response,
+               stim_val,
+               stim_val_density,
+               dist_abs_from_prev) %>%
+        filter(!is.na(response),
+               counterbalancing %in% which_counterbalancing,
+               dist_abs_from_prev %in% which_distances,
+               stim_val %in% which_stimuli) %>%
+        count(counterbalancing,
+              prolific_id,
+              session,
+              stim_val_density,
+              .drop = F) %>%
+        rename(n_total = n)
+
+n_same_resp_same_trials <- exp_long %>%
+        filter(!is.na(response),
+               counterbalancing %in% which_counterbalancing,
+               dist_abs_from_prev %in% which_distances,
+               stim_val %in% which_stimuli) %>%
+        select(counterbalancing,
+               prolific_id,
+               session,
+               response,
+               stim_val,
+               stim_val_density,
+               dist_abs_from_prev) %>%        
+        count(counterbalancing,
+              prolific_id,
+              session,
+              stim_val_density,
+              response,
+              .drop = F) %>% 
+        rename(n_resp = n) %>% 
+        filter(response == 'q')
+
+same_resp_table_same_trials <- 
+        merge(n_same_resp_same_trials,
+              n_tot_same_trials,
+              by=c('counterbalancing','prolific_id','stim_val_density','session')) %>% 
+        mutate(prob_same_resp = n_resp/n_total) %>% 
+        ungroup()
+
+plot_which_session <- c(1)
+
+same_resp_table_same_trials %>%
+        filter(session %in% plot_which_session) %>%
+        group_by(counterbalancing,
+                 prolific_id,
+                 stim_val_density) %>%
+        summarise(prob_same_resp = mean(prob_same_resp)) %>% 
+        ggplot(aes(x=stim_val_density,
+                   y=prob_same_resp)) +
+        geom_violin() +
+        geom_boxplot(width = 0.1,
+                     fatten = 5) +
+        geom_jitter(height = 0,
+                    width = 0.1,
+                    alpha = 0.1) +
+        geom_line(aes(group=prolific_id),
+                  alpha=0.2) +
+        # geom_boxplot(aes(group=stim_val)) +
+        stat_summary(fun=mean,
+                 color='red',
+                 size = 1) +
+        facet_grid(~counterbalancing) +
+        ggtitle('Same trials: % Same response in the 1st session')
+
+```
+
+```{r diff-trials, fig.height=5, fig.width=6}
+
+# For each exemplar, whats the histogram of distances that we have 
+which_distances <- seq(8,80, by = 8)
+which_counterbalancing <- c('dense_right','dense_left')
+which_stimuli <- seq(30,110, by = 2)
+
+n_tot_diff_trials <- exp_long %>%
+        select(counterbalancing,
+               prolific_id,
+               session,
+               response,
+               stim_val,
+               stim_val_density,
+               dist_abs_from_prev) %>%
+        filter(!is.na(response),
+               counterbalancing %in% which_counterbalancing,
+               dist_abs_from_prev %in% which_distances,
+               stim_val %in% which_stimuli) %>%
+        count(counterbalancing,
+              prolific_id,
+              session,
+              stim_val_density,
+              .drop = F) %>%
+        rename(n_total = n)
+
+n_same_resp_diff_trials <- exp_long %>%
+        filter(!is.na(response),
+               counterbalancing %in% which_counterbalancing,
+               dist_abs_from_prev %in% which_distances,
+               stim_val %in% which_stimuli) %>%
+        select(counterbalancing,
+               prolific_id,
+               session,
+               response,
+               stim_val,
+               stim_val_density,
+               dist_abs_from_prev) %>%        
+        count(counterbalancing,
+              prolific_id,
+              session,
+              stim_val_density,
+              response,
+              .drop = F) %>% 
+        rename(n_resp = n) %>% 
+        filter(response == 'q')
+
+same_resp_table_diff_trials <- 
+        merge(n_same_resp_diff_trials,
+              n_tot_diff_trials,
+              by=c('counterbalancing','prolific_id','stim_val_density','session')) %>% 
+        mutate(prob_same_resp = n_resp/n_total) %>% 
+        ungroup()
+
+plot_which_session <- c(1)
+
+same_resp_table_diff_trials %>%
+        filter(session %in% plot_which_session) %>%
+        group_by(counterbalancing,
+                 prolific_id,
+                 stim_val_density) %>%
+        summarise(prob_same_resp = mean(prob_same_resp)) %>% 
+        ggplot(aes(x=stim_val_density,
+                   y=prob_same_resp)) +
+        geom_violin() +
+        geom_boxplot(width = 0.1,
+                     fatten = 5) +
+        geom_jitter(height = 0,
+                    width = 0.1,
+                    alpha = 0.1) +
+        geom_line(aes(group=prolific_id),
+                  alpha=0.2) +
+        # geom_boxplot(aes(group=stim_val)) +
+        stat_summary(fun=mean,
+                 color='red',
+                 size = 1) +
+        facet_grid(~counterbalancing) +
+        ggtitle('Diff trials: % Same response in the 1st session')
+
+```
+
 ```{r analyze-same-diff-response-probability, fig.width=15, fig.height=6}
 
 # For each exemplar, whats the histogram of distances that we have 

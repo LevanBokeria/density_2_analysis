@@ -272,6 +272,126 @@ grid.arrange(fig3,fig4,
 
 ```
 
+# Curvature, easiness, block
+
+```{r curvature-easiness-block, fig.width=10, fig.height=5, warning=F}
+x_font_size <- 10
+
+a <- tt_long %>% 
+        filter(
+                # trial_stage == 'pre_exposure',
+               triplet_easiness == 0,
+               ) %>%
+        droplevels() %>%
+        group_by(prolific_id,
+                 counterbalancing,
+                 curve_type,
+                 trial_stage,
+                 ) %>%
+        summarise(n = n(),
+                  mean_chose_towards_highdim = mean(chose_towards_highdim, na.rm = T)) %>%
+        ungroup() 
+
+a_by_block <- tt_long %>% 
+        filter(
+                # trial_stage == 'pre_exposure',
+               triplet_easiness == 0,
+               ) %>%
+        droplevels() %>%
+        group_by(prolific_id,
+                 counterbalancing,
+                 curve_type,
+                 trial_stage,
+                 session,
+                 ) %>%
+        summarise(n = n(),
+                  mean_chose_towards_highdim = mean(chose_towards_highdim, na.rm = T)) %>%
+        ungroup() 
+
+x_font_size <- 10
+
+fig1 <- a %>%
+        ggplot(aes(x=curve_type,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.1) +     
+        stat_summary(fun = mean,
+                     color = 'red') + 
+        stat_summary(fun.data = mean_cl_normal,
+             geom = "errorbar",
+             size=1,
+             width=0.1,
+             color='red') +          
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +   
+        theme(text = element_text(size=x_font_size)) + 
+        facet_wrap(~trial_stage, ncol = 2, strip.position = 'top') +
+        # geom_text(aes(x=0.5,y=1,label=triplet_easiness)) +
+        ggtitle(paste0(plot_dep_var, '; chose towards high dimension'))
+
+fig2 <- a_by_block %>%
+        filter(trial_stage == 'pre_exposure') %>%
+        ggplot(aes(x=curve_type,
+                   y=mean_chose_towards_highdim)) +
+        geom_violin(fill = chose_highdim_color,
+                    alpha = 0.2) +
+        geom_boxplot(width=0.2,
+                     outlier.shape = '', fatten = 4) +
+        geom_jitter(width = 0.05,
+                    height = 0,
+                    alpha = 0.3) + 
+        geom_line(aes(group=prolific_id),
+                  alpha = 0.1) +     
+        stat_summary(fun = mean,
+                     color = 'red') + 
+        stat_summary(fun.data = mean_cl_normal,
+             geom = "errorbar",
+             size=1,
+             width=0.1,
+             color='red') +          
+        geom_hline(yintercept = y_intercept, linetype = 'dashed') +   
+        theme(text = element_text(size=x_font_size)) + 
+        facet_wrap(~trial_stage+session, ncol = 2, strip.position = 'top') +
+        # geom_text(aes(x=0.5,y=1,label=triplet_easiness)) +
+        ggtitle(paste0(plot_dep_var, '; chose towards high dimension'))
+
+print(fig1)
+print(fig2)
+
+# fig4 <- a %>%
+#         ggplot(aes(x=curve_type,
+#                    y=mean_chose_towards_highdim)) +
+#         geom_violin(fill = chose_highdim_color,alpha = 0.2) +
+#         geom_boxplot(width=0.15,
+#                      outlier.shape = '', fatten = 4) +
+#         geom_jitter(width = 0.05,
+#                     height = 0,
+#                     alpha = 0.3) +
+#         geom_line(aes(group=prolific_id),
+#                   alpha = 0.1) +    
+#         stat_summary(fun = mean,
+#                      color = 'red') + 
+#         stat_summary(fun.data = mean_cl_normal,
+#              geom = "errorbar",
+#              size=1,
+#              width=0.1,
+#              color='red') +          
+#         geom_hline(yintercept = y_intercept, linetype = 'dashed') +      
+#         theme(text = element_text(size=x_font_size)) + 
+#         geom_text(aes(x=0.5,y=1,label=triplet_easiness)) +
+#         facet_grid(template_distances~session)
+
+# grid.arrange(fig3,fig4,
+#              nrow = 1,
+#              widths = 1:2)
+
+```
 
 ```{r curvature-template-easiness-session, fig.width=12, fig.height=5, warning=F}
 

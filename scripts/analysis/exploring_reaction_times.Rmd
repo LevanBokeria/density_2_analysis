@@ -392,14 +392,16 @@ tt_part_sum_stats_triplet_easiness %>%
 
 ```{r asymmetric-interaction-skew-rt, fig.height=5, fig.width=7}
 
+dep_var <- 'mean_correct'
+
 fig1 <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions',
-               triplet_easiness %in% c(16)
+               triplet_easiness %in% c(8)
                ) %>%
         droplevels() %>%
         ggplot(aes(x=correct_ref_towards_dense_sparse,
-                   y=mean_rt)) +
+                   y=.data[[dep_var]])) +
         geom_violin(fill = rt_color,
                     alpha = 0.2) +
         geom_boxplot(width = 0.15,
@@ -423,13 +425,13 @@ fig1 <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
 ref_towards_dense_min_ref_towards_sparse_rt <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions',
-               triplet_easiness %in% c(16)
+               triplet_easiness %in% c(8)
                ) %>%
         droplevels() %>% 
         pivot_wider(id_cols = c(prolific_id,
                                 counterbalancing),
                     names_from = correct_ref_towards_dense_sparse,
-                    values_from = mean_rt) %>% 
+                    values_from = dep_var) %>% 
         mutate(ref_dense_min_ref_sparse = ref_towards_dense - ref_towards_sparse) 
 
 fig2 <- ref_towards_dense_min_ref_towards_sparse_rt %>%

@@ -57,7 +57,9 @@ experiment <- c('experiment_1') # experiment_1 is the main experiment, pilot_3 i
 
 print(paste0('Which pilot paradigm? ', experiment))
 
-source('./scripts/utils/load_transform_tt_data.R')
+source('./scripts/utils/load_transform_tt_data.R') # loads the triplet task
+source('./scripts/utils/load_transform_exp_data.R') # loads the exposure task
+
 source('./scripts/utils/summary_stats_for_various_factors.R') #this will calculate various summary statistics, grouped by different factors (and their combinations) like triplet easiness, triplet location, template, etc
 
 # Flags and settings
@@ -78,6 +80,8 @@ tt_long %>%
 ```
 
 # Middle triplets, against 0
+
+All types of middle triplets, symmetric and asymmetric
 
 ## Plot:
 
@@ -133,7 +137,7 @@ grid.arrange(fig1,fig2,
 
 ```
 
-# Bayes Factors
+## Bayes Factors
 
 ```{r mid-triplets-vs-0-effect-size}
 
@@ -200,6 +204,8 @@ bf_dense_right <- reportBF(ttestBF(
 
 
 # Harderst middle triplets vs 0
+
+The easy-0 middle triplets, reported in the thesis.
 
 ## Plot
 
@@ -430,6 +436,76 @@ bf_regional_analysis_cb_groups <- tt_part_sum_stats_triplet_location_easiness_di
 
 ```
 
+
+# Exposure same-different task:
+
+```{r exposure-psychometric-curve, fig.width=15, fig.height=6}
+
+n_same_resp <- 
+        exp_long %>%
+        group_by(prolific_id,
+                 dist_abs_from_prev,
+                 response,
+                 .drop=FALSE) %>% 
+        summarise(n = n()) %>%
+        ungroup() %>%
+        filter(response == 'q')
+
+n_tot_resp <- 
+        exp_long %>%
+        group_by(prolific_id,
+                 dist_abs_from_prev) %>%
+        summarise(n = n()) %>%
+        ungroup()
+
+same_resp_table <- 
+        merge(n_same_resp,
+              n_tot_resp,
+              by=c('prolific_id','dist_abs_from_prev')) %>%
+        mutate(avg_same_resp = n.x/n.y) %>% 
+        ungroup()
+
+same_resp_table %>%
+        filter(!is.na(dist_abs_from_prev)) %>%
+        mutate(dist_abs_from_prev = as.numeric(as.character(dist_abs_from_prev))) %>%
+        ggplot(aes(x=dist_abs_from_prev,y=avg_same_resp)) +
+        # geom_point(size=0.7,
+        #            alpha = 0.2) +
+        geom_jitter(size = 0.7,
+                    alpha = 0.2,
+                    height = 0,
+                    width = 0.2) +
+        # geom_smooth(size=1) +
+        stat_summary(fun='mean',
+                     geom='line',
+                     size=1,
+                     color = 'red') +
+        stat_summary(fun='mean',
+                     geom='point',
+                     size=2,
+                     color = 'red') +        
+        scale_y_continuous(breaks=seq(0,1,0.05)) +
+        scale_x_continuous(breaks=seq(0,80,1)) +
+        ylab('Confusability') +
+        xlab('1-back distance in generative space') + 
+        theme_classic() +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = '') +
+        geom_hline(yintercept = 1-0.75,linetype='dashed') +
+        geom_hline(yintercept = 1-0.5,linetype='dashed') +
+        # stat_summary(aes(x=dist_abs_from_prev,y=n.y),
+        #              fun='mean',
+        #              geom='line',
+        #              size=1) + 
+        ggtitle('exposure psychometric curves')
+
+same_resp_table %>%
+  group_by(prolific_id,
+           dist_abs_from_prev) %>%
+  summarise(n = n())
+
+
+```
 
 
 # Other stuff

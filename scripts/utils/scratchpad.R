@@ -65,4 +65,6 @@ tt_long %>%
         pivot_longer(cols = c('query_item','ref_right','ref_left'),
                      names_to = 'exemplar_type',
                      values_to = 'exemplar_idx') %>% 
-        count(exemplar_idx)
+        count(exemplar_idx) %>%
+        ggplot(aes(x=as.numeric(exemplar_idx),y=n)) +
+        geom_col()

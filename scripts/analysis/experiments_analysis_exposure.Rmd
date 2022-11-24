@@ -64,16 +64,18 @@ same_resp_table %>%
         filter(!is.na(dist_abs_from_prev)) %>%
         mutate(dist_abs_from_prev = as.numeric(as.character(dist_abs_from_prev))) %>%
         ggplot(aes(x=dist_abs_from_prev,y=avg_same_resp)) +
-        geom_point(size=0.5) +
+        geom_point(size=0.5,
+                   alpha = 0.3) +
         # geom_line(size=0.5, aes(group=prolific_id,color=prolific_id)) +
         # geom_point(size=2, aes(group = prolific_id,color = prolific_id)) + 
         # geom_line(size=1, aes(group = prolific_id,color = prolific_id)) + 
-        geom_smooth() +
+        geom_smooth(size=1) +
         stat_summary(fun='mean',
                      geom='line',
                      size=1.5,
-                     color = 'blue',
-                     linetype = 'dashed') +
+                     color = 'red',
+                     linetype = 'dashed'
+                     ) +
         # geom_line(aes(x=dist_abs_from_prev,y=n.y),color='red') +
         scale_y_continuous(breaks=seq(0,100,5)) +
         scale_x_continuous(breaks=seq(0,80,1)) +
@@ -124,56 +126,91 @@ same_resp_table %>%
 ```{r analyze-same-diff-response-probability, fig.width=15, fig.height=6}
 
 # For each exemplar, whats the histogram of distances that we have 
-ss <- exp_long %>%
-        filter(dist_abs_from_prev %in% seq(0,2, by = 2)) %>%
-        add_count(counterbalancing,
-                  prolific_id,
-                  stim_val) %>% 
-        rename(n_total = n) %>% 
-        add_count(counterbalancing,
-                  prolific_id,
-                  stim_val,
-                  response) %>% 
-        na.omit() %>%
-        filter(response == 'q') %>% 
+which_distances <- seq(8,80, by = 8)
+which_counterbalancing <- c('dense_right','dense_left')
+
+# exp_long <-
+# exp_long %>%
+#         mutate(stim_val = case_when(
+#                 counterbalancing == 'dense_right' ~ as.numeric(stim_val),
+#                 TRUE ~ 2*70 - as.numeric(stim_val)
+#         )) %>%
+#         mutate(stim_val = as.factor(stim_val),
+#                counterbalancing = 'dense_right')
+
+n_tot_resp2 <- exp_long %>%
+        filter(!is.na(response),
+               counterbalancing %in% which_counterbalancing) %>% 
         select(counterbalancing,
                prolific_id,
-               stim_val,
                response,
-               n_total,
-               n) %>% 
-        distinct() %>%
-        mutate(perc_same = n * 100 / n_total) 
+               stim_val,
+               dist_abs_from_prev) %>%        
+        filter(
+                # prolific_id == prolific_id[1],
+               dist_abs_from_prev %in% which_distances) %>% 
+        count(counterbalancing,
+              prolific_id,
+              stim_val,
+              .drop = F) %>% 
+        rename(n_total = n)
 
-ss %>%
+n_same_resp2 <- exp_long %>%
+        filter(!is.na(response),
+               counterbalancing %in% which_counterbalancing) %>%
+        select(counterbalancing,
+               prolific_id,
+               response,
+               stim_val,
+               dist_abs_from_prev) %>%        
+        filter(
+                # prolific_id == prolific_id[1],
+               dist_abs_from_prev %in% which_distances) %>%
+        count(counterbalancing,
+              prolific_id,
+              stim_val,
+              response,
+              .drop = F) %>% 
+        rename(n_resp = n) %>% 
+        filter(response == 'q')
+
+same_resp_table2 <- 
+        merge(n_same_resp2,
+              n_tot_resp2,
+              by=c('counterbalancing','prolific_id','stim_val')) %>% 
+        mutate(perc_same_resp = n_resp*100/n_total) %>% 
+        ungroup()
+
+same_resp_table2 %>%
+        filter(!stim_val %in% seq(30,110, by = 8)) %>%
        ggplot(aes(x=reorder(stim_val,stim_val),
-                   y=perc_same,
+                   y=perc_same_resp,
                    group=stim_val)) +
         geom_violin(aes(group=stim_val)) +
+        geom_jitter(height = 0,
+                    width = 0.1,
+                    alpha = 0.1) +
         # geom_boxplot(aes(group=stim_val)) +
         stat_summary(fun=mean,
-                 color='red') +
-        facet_wrap(~counterbalancing)  
+                 color='red',
+                 size = 1) +
+        facet_wrap(~counterbalancing) +
+        ggtitle('% Same response')
 
-
-# exp_long %>%
-#         # filter(dist_abs_from_prev %in% c(8,16,24,32,40,48,56,64,72,80,88)) %>%
-#         filter(dist_abs_from_prev %in% seq(0,7,by=2)) %>%
-#         # filter(!prev_stim_val %in% seq(30,68)) %>%
-#         count(counterbalancing,
-#               prolific_id,
-#               stim_val,
-#               response) %>% 
-#         na.omit() %>% 
-#         filter(response == 'q') %>% 
-#         ggplot(aes(x=reorder(stim_val,stim_val),
-#                    y=n,
-#                    group=stim_val)) +
-#         geom_violin(aes(group=stim_val)) +
-#         # geom_boxplot(aes(group=stim_val)) +
-#         stat_summary(fun=mean,
-#                  color='red') +
-#         facet_wrap(~counterbalancing)
+same_resp_table2 %>%
+       ggplot(aes(x=reorder(stim_val,stim_val),
+                   y=n_total,
+                   group=stim_val)) +
+        geom_violin(aes(group=stim_val)) +
+        geom_jitter(height = 0,
+                    width = 0.1,
+                    alpha = 0.1) +
+        # geom_boxplot(aes(group=stim_val)) +
+        stat_summary(fun=mean,
+                 color='blue',
+                 size=1) +
+        facet_wrap(~counterbalancing) +
+        ggtitle('Count of trials')
 
 ```
 

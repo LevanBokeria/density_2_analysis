@@ -121,9 +121,7 @@ same_resp_table %>%
 
 ```
 
-# Analyze "same" response for each pair of items. 
-
-## On true "same" trials
+# Analyze "same" response for each pair of items
 
 ```{r exp-long-add-column}
 
@@ -145,6 +143,74 @@ exp_long <- exp_long %>%
 
 ```
 
+## Psych curve for high vs low denstiy stimulis
+
+```{r psych-curve-for-high-vs-low-density-stimuli}
+
+which_distances <- seq(8,88, by = 8)
+which_counterbalancing <- c('dense_right','dense_left')
+which_stimuli <- seq(30,110, by = 2)
+
+n_tot_same_trials <- exp_long %>%
+        select(counterbalancing,
+               prolific_id,
+               session,
+               response,
+               # stim_val,
+               stim_val_density,
+               dist_abs_from_prev) %>%
+        filter(!is.na(response),
+               counterbalancing %in% which_counterbalancing,
+               dist_abs_from_prev %in% which_distances,
+               # stim_val %in% which_stimuli
+               ) %>%
+        count(counterbalancing,
+              prolific_id,
+              session,
+              stim_val_density,
+              dist_abs_from_prev,
+              .drop = F) %>%
+        rename(n_total = n)
+
+n_same_resp_same_trials <- exp_long %>%
+        filter(!is.na(response),
+               counterbalancing %in% which_counterbalancing,
+               dist_abs_from_prev %in% which_distances,
+               # stim_val %in% which_stimuli
+               ) %>%
+        select(counterbalancing,
+               prolific_id,
+               session,
+               response,
+               # stim_val,
+               stim_val_density,
+               dist_abs_from_prev) %>%        
+        count(counterbalancing,
+              prolific_id,
+              session,
+              stim_val_density,
+              response,
+              dist_abs_from_prev,
+              .drop = F) %>% 
+        rename(n_resp = n) %>% 
+        filter(response == 'q')
+
+same_resp_table_same_trials <- 
+        merge(n_same_resp_same_trials,
+              n_tot_same_trials,
+              by=c('counterbalancing','prolific_id','stim_val_density','session','dist_abs_from_prev')) %>% 
+        mutate(prob_same_resp = n_resp/n_total) %>% 
+        ungroup()
+
+
+
+
+```
+
+
+## Perc "same" response by session, density, counterbalancing
+
+### On "same" trials 
 
 ```{r same-trials, fig.height=5, fig.width=6}
 
@@ -223,9 +289,11 @@ same_resp_table_same_trials %>%
                  color='red',
                  size = 1) +
         facet_grid(~counterbalancing) +
-        ggtitle('Same trials: % Same response in the 1st session')
+        ggtitle(paste0('Same trials: % Same response in session(s) ', paste(plot_which_session, sep = '_', collapse = '_')))
 
 ```
+
+### Now for "different" trials 
 
 ```{r diff-trials, fig.height=5, fig.width=6}
 
@@ -304,9 +372,66 @@ same_resp_table_diff_trials %>%
                  color='red',
                  size = 1) +
         facet_grid(~counterbalancing) +
-        ggtitle('Diff trials: % Same response in the 1st session')
+        ggtitle(paste0('Diff trials: % Same response in session(s) ', paste(plot_which_session, sep = '_', collapse = '_')))
 
 ```
+
+
+## Accuracy by session, density, coutnerbalancing
+
+```{r acc-by-session-density-counterbalancing}
+
+
+which_distances <- seq(0,80, by = 8)
+which_counterbalancing <- c('dense_right','dense_left')
+which_stimuli <- seq(30,110, by = 2)
+
+n_tot_correct_trials <- exp_long %>%
+        select(counterbalancing,
+               prolific_id,
+               session,
+               correct,
+               stim_val_density,
+               dist_abs_from_prev) %>%
+        filter(!is.na(correct),
+               counterbalancing %in% which_counterbalancing,
+               dist_abs_from_prev %in% which_distances) %>% 
+        droplevels() %>%
+        count(counterbalancing,
+              prolific_id,
+              session,
+              stim_val_density,
+              correct,
+              .drop = F) 
+
+plot_which_session <- c(4,5)
+
+n_tot_correct_trials %>%
+        filter(session %in% plot_which_session) %>%
+        group_by(counterbalancing,
+                 prolific_id,
+                 stim_val_density) %>%
+        summarise(mean_correct = mean(as.numeric(correct))) %>% 
+        ggplot(aes(x=stim_val_density,
+                   y=mean_correct)) +
+        geom_violin() +
+        geom_boxplot(width = 0.1,
+                     fatten = 5) +
+        geom_jitter(height = 0,
+                    width = 0.1,
+                    alpha = 0.1) +
+        geom_line(aes(group=prolific_id),
+                  alpha=0.2) +
+        # geom_boxplot(aes(group=stim_val)) +
+        stat_summary(fun=mean,
+                 color='red',
+                 size = 1) +
+        facet_grid(~counterbalancing) +
+        ggtitle(paste0('% Correct in session(s) ', paste(plot_which_session, sep = '_', collapse = '_')))
+
+```
+
+
 
 ```{r analyze-same-diff-response-probability, fig.width=15, fig.height=6}
 

@@ -212,7 +212,7 @@ same_resp_table_same_trials <-
 
 ### On "same" trials 
 
-```{r same-trials, fig.height=5, fig.width=6}
+```{r same-trials, fig.height=3, fig.width=3}
 
 # For each exemplar, whats the histogram of distances that we have 
 which_distances <- seq(0,0, by = 0)
@@ -266,9 +266,9 @@ same_resp_table_same_trials <-
         mutate(prob_same_resp = n_resp/n_total) %>% 
         ungroup()
 
-plot_which_session <- c(1)
+plot_which_session <- c(4,5)
 
-same_resp_table_same_trials %>%
+p <- same_resp_table_same_trials %>%
         filter(session %in% plot_which_session) %>%
         group_by(counterbalancing,
                  prolific_id,
@@ -276,26 +276,31 @@ same_resp_table_same_trials %>%
         summarise(prob_same_resp = mean(prob_same_resp)) %>% 
         ggplot(aes(x=stim_val_density,
                    y=prob_same_resp)) +
-        geom_violin() +
+        geom_violin(width = 1) +
         geom_boxplot(width = 0.1,
                      fatten = 5) +
-        geom_jitter(height = 0,
-                    width = 0.1,
-                    alpha = 0.1) +
+        geom_point(alpha = 0.1) +
         geom_line(aes(group=prolific_id),
-                  alpha=0.2) +
-        # geom_boxplot(aes(group=stim_val)) +
+                  alpha=0.05) +
         stat_summary(fun=mean,
                  color='red',
-                 size = 1) +
-        facet_grid(~counterbalancing) +
-        ggtitle(paste0('Same trials: % Same response in session(s) ', paste(plot_which_session, sep = '_', collapse = '_')))
+                 size = 0.6) +
+        ggtitle(paste0('True same trials')) +
+        theme(plot.title = element_text(hjust = 0.5)) +
+        # theme(plot.title = element_text(size = 15)) +
+        ylab('Prob. Respond "same"') +
+        xlab('') +
+        scale_x_discrete(labels = c('High density','Low density'))
+
+print(p)
+
+ggsave(filename = 'same_trials_same_response.png', plot = p, path = './results/plots/', width = 3, height = 3, device='png', dpi=300)
 
 ```
 
 ### Now for "different" trials 
 
-```{r diff-trials, fig.height=5, fig.width=6}
+```{r diff-trials, fig.height=3, fig.width=3}
 
 # For each exemplar, whats the histogram of distances that we have 
 which_distances <- seq(8,80, by = 8)
@@ -351,7 +356,7 @@ same_resp_table_diff_trials <-
 
 plot_which_session <- c(1)
 
-same_resp_table_diff_trials %>%
+p <- same_resp_table_diff_trials %>%
         filter(session %in% plot_which_session) %>%
         group_by(counterbalancing,
                  prolific_id,
@@ -362,17 +367,21 @@ same_resp_table_diff_trials %>%
         geom_violin() +
         geom_boxplot(width = 0.1,
                      fatten = 5) +
-        geom_jitter(height = 0,
-                    width = 0.1,
-                    alpha = 0.1) +
+        geom_point(alpha = 0.1) +
         geom_line(aes(group=prolific_id),
-                  alpha=0.2) +
-        # geom_boxplot(aes(group=stim_val)) +
+                  alpha=0.05) +
         stat_summary(fun=mean,
                  color='red',
-                 size = 1) +
-        facet_grid(~counterbalancing) +
-        ggtitle(paste0('Diff trials: % Same response in session(s) ', paste(plot_which_session, sep = '_', collapse = '_')))
+                 size = 0.6) +
+        # ggtitle(paste0('Diff trials: % Same response in session(s) ', paste(plot_which_session, sep = '_', collapse = '_')))
+        ggtitle(paste0('True different trials')) +
+        theme(plot.title = element_text(hjust = 0.5)) +
+        # theme(plot.title = element_text(size = 15)) +
+        ylab('Prob. Respond "same"') +
+        xlab('') +
+        scale_x_discrete(labels = c('High density','Low density'))
+print(p)
+ggsave(filename = 'diff_trials_same_response.png', plot = p, path = './results/plots/', width = 3, height = 3, device='png', dpi=300)
 
 ```
 

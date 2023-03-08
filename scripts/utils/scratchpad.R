@@ -59,7 +59,7 @@ tt_long %<>%
         reorder_levels(correct_ref_lowdim_highdim,order = c('ref_lowdim','ref_highdim'))
 
 # Get the practice trials
-tt_long %>%
+p<- tt_long %>%
         filter(prolific_id == 'sub061',
                trial_stage == 'practice') %>% 
         pivot_longer(cols = c('query_item','ref_right','ref_left'),
@@ -67,4 +67,14 @@ tt_long %>%
                      values_to = 'exemplar_idx') %>% 
         count(exemplar_idx) %>%
         ggplot(aes(x=as.numeric(exemplar_idx),y=n)) +
-        geom_col()
+        geom_col() +
+        ggtitle('Exemplar frequency in practice trials') +
+        xlab('Exemplar') +
+        ylab('Frequency') +
+        theme(plot.title = element_text(hjust = 0.5)) +
+        scale_x_continuous(breaks = seq(30,110,8))        
+print(p)
+
+ggsave(filename = 'exemplar_frequency_practice_trials.png', 
+       plot = p, path = './results/plots/', width = 4, height = 6, device='png', dpi=300)
+

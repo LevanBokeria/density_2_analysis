@@ -93,7 +93,8 @@ fig1 <- tt_part_sum_stats %>%
         ggplot(aes(x='All participants',
                    y=mean_rt)) +
         geom_violin(fill = rt_color,
-                    alpha = 0.2) +
+                    alpha = 0.2,
+                    width = 0.6) +
         geom_boxplot(width = 0.15,
                      outlier.shape = '',
                      fatten = 4) +
@@ -106,7 +107,12 @@ fig1 <- tt_part_sum_stats %>%
                      geom = "errorbar",
                      size=0.5,
                      width=0.1,
-                     color='red') 
+                     color='red')  +
+        ylab('Post-Pre Mean RT') +
+        xlab('') +
+        ggtitle('All participants') + 
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(plot.title = element_text(size = 10)) 
 
 fig2 <- tt_part_sum_stats %>%
         filter(
@@ -115,7 +121,8 @@ fig2 <- tt_part_sum_stats %>%
         ggplot(aes(x=counterbalancing,
                    y=mean_rt)) +
         geom_violin(fill = rt_color,
-                    alpha = 0.2) +
+                    alpha = 0.2,
+                    width = 0.6) +
         geom_boxplot(width = 0.15,
                      outlier.shape = '',
                      fatten = 4) +
@@ -128,11 +135,19 @@ fig2 <- tt_part_sum_stats %>%
                      geom = "errorbar",
                      size=0.5,
                      width=0.1,
-                     color='red')
+                     color='red')  +
+        ylab('Post-Pre Mean RT') +
+        xlab('') +
+        ggtitle('Each counterbalancing group') + 
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(plot.title = element_text(size = 10)) 
 
-grid.arrange(fig1,fig2,
-             nrow = 1,
-             top = 'Post minus pre')
+p <- grid.arrange(fig1,fig2,
+             nrow = 1
+             # top = 'Post-pre RT'
+             )
+
+ggsave(filename = 'rt_mean_post_pre_diff.png', plot = p, path = './results/plots/', width = 5, height = 4, device='png', dpi=300)
 
 ```
 
@@ -230,7 +245,12 @@ fig1 <- tt_part_sum_stats_triplet_location_easiness %>%
                      geom = "errorbar",
                      size=0.5,
                      width=0.1,
-                     color='red') 
+                     color='red')  +
+        ylab('Post-Pre Mean RT') +
+        xlab('') +
+        ggtitle('All participants') + 
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(plot.title = element_text(size = 10)) 
 
 fig2 <- tt_part_sum_stats_triplet_location_easiness %>%
         filter(triplet_location == 'across_density_regions',
@@ -252,11 +272,18 @@ fig2 <- tt_part_sum_stats_triplet_location_easiness %>%
                      geom = "errorbar",
                      size=0.5,
                      width=0.1,
-                     color='red')
+                     color='red') +
+        ylab('Post-Pre Mean RT') +
+        xlab('') +
+        ggtitle('Each counterbalancing group') + 
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(plot.title = element_text(size = 10)) +
+        scale_x_discrete(labels = c('Dense-Left','Dense-Right'))
 
-grid.arrange(fig1,fig2,
-             nrow = 1,
-             top = 'Post minus pre')
+p <- grid.arrange(fig1,fig2,
+             nrow = 1)
+
+ggsave(filename = 'rt_mean_post_pre_diff_middle_symmetric.png', plot = p, path = './results/plots/', width = 5, height = 4, device='png', dpi=300)
 
 ```
 
@@ -392,18 +419,21 @@ tt_part_sum_stats_triplet_easiness %>%
 
 ```{r asymmetric-interaction-skew-rt, fig.height=5, fig.width=7}
 
-dep_var <- 'mean_correct'
+dep_var <- 'mean_rt'
+which_easiness <- 8
+y_coords <- c(-1600,1600)
 
 fig1 <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions',
-               triplet_easiness %in% c(8)
+               triplet_easiness %in% c(which_easiness)
                ) %>%
         droplevels() %>%
         ggplot(aes(x=correct_ref_towards_dense_sparse,
                    y=.data[[dep_var]])) +
         geom_violin(fill = rt_color,
-                    alpha = 0.2) +
+                    alpha = 0.2,
+                    width = 0.6) +
         geom_boxplot(width = 0.15,
                      outlier.shape = '',
                      fatten = 4) +
@@ -418,14 +448,22 @@ fig1 <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
                      width=0.1,
                      color='red') +
         geom_line(aes(group=prolific_id),
-                  alpha = 0.2) +
-        xlab('')
+                  alpha = 0.1) +
+        ylab('RT Post-pre') +
+        xlab('') +
+        ggtitle('RT Post-pre') +
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(plot.title = element_text(size = 10)) +
+        theme(axis.text.x = element_text(size = 10)) +
+        scale_x_discrete(labels = c('Correct High-Density','Correct Low-Density'))
+# +
+#         coord_cartesian(ylim = y_coords)
 
 # Calculate the difference between ref_right and ref_left
 ref_towards_dense_min_ref_towards_sparse_rt <- tt_part_sum_stats_correct_ref_triplet_location_easiness %>%
         filter(dep_var_type == 'post_pre_diff',
                triplet_location == 'across_density_regions',
-               triplet_easiness %in% c(8)
+               triplet_easiness %in% c(which_easiness)
                ) %>%
         droplevels() %>% 
         pivot_wider(id_cols = c(prolific_id,
@@ -438,7 +476,8 @@ fig2 <- ref_towards_dense_min_ref_towards_sparse_rt %>%
         ggplot(aes(x='',
                    y=ref_dense_min_ref_sparse)) +
         geom_violin(fill = rt_color,
-                    alpha = 0.2) +
+                    alpha = 0.2,
+                    width = 0.6) +
         geom_boxplot(width = 0.15,
                      outlier.shape = '',
                      fatten = 4) +
@@ -454,12 +493,23 @@ fig2 <- ref_towards_dense_min_ref_towards_sparse_rt %>%
                      color='red') +
         geom_line(aes(group=prolific_id),
                   alpha = 0.2) +
-        xlab('')
+        ylab('Difference value') +
+        xlab('') +
+        ggtitle('Group difference') +
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(plot.title = element_text(size = 10))
+# +
+        # coord_cartesian(ylim = c(-2000,2000))
 
 
-grid.arrange(fig1,fig2,
+p <- grid.arrange(fig1,fig2,
              nrow = 1,
-             top = 'RT post-pre, different skew triplets')
+             widths = 2:1
+# ,             top = paste0('Easy-', which_easiness, ' triplets'
+                           )
+
+ggsave(filename = paste0('rt_asymmetric_easy_',which_easiness, '_mean_post_pre_diff.png'), plot = p, path = './results/plots/', width = 6, height = 4, device='png', dpi=300)
+
 
 ```
 
@@ -499,10 +549,10 @@ bf <- reportBF(ttestBF(
 
 ## Violin plots
 
-```{r triplet-location-differences-easiness-levels, fig.width=9, fig.height=7, warning=F}
+```{r triplet-location-differences-easiness-levels, fig.width=6, fig.height=4, warning=F}
 
 x_font_size <- 10
-x_font_angle <- 20
+x_font_angle <- 0
 
 # Now plot this
 fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
@@ -510,11 +560,12 @@ fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
                measure_type == 'rt',
                triplet_easiness == 0,
                difference_type == 'across_minus_avg_dense_sparse') %>% 
-        ggplot(aes(x='middle-avg(high+low)',
+        ggplot(aes(x='All participants',
                    y=difference_value)) +
         geom_violin(fill = rt_color,alpha = 0.2) +
         geom_boxplot(width=0.2,
-                     outlier.shape = '', fatten = 4) +
+                     outlier.shape = '', 
+                     fatten = 4) +
         geom_jitter(width = 0.05,
                     height = 0,
                     alpha = 0.3) + 
@@ -530,14 +581,20 @@ fig1 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         geom_hline(yintercept = 0, linetype = 'dashed') +      
         theme(text = element_text(size=x_font_size)) + 
         theme(axis.text.x = element_text(angle = x_font_angle)) + 
-        ggtitle(paste0(plot_dep_var, '. rt. Diff scores'))
+        ggtitle(paste0(plot_dep_var, '. rt. Diff scores'))  +
+        ylab('Middle-avg(high+low) diff score') +
+        xlab('') +
+        ggtitle('All participants') + 
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(plot.title = element_text(size = 10)) +
+        theme(axis.title.y = element_text(size = 10)) 
 
 fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         filter(dep_var_type == plot_dep_var,
                measure_type == 'rt',
                triplet_easiness == 0,
                difference_type == 'across_minus_avg_dense_sparse') %>% 
-        ggplot(aes(x='middle-avg(high+low)',
+        ggplot(aes(x=counterbalancing,
                    y=difference_value)) +
         geom_violin(fill = rt_color,alpha = 0.2) +
         geom_boxplot(width=0.2,
@@ -557,12 +614,21 @@ fig2 <- tt_part_sum_stats_triplet_location_easiness_differences %>%
         geom_hline(yintercept = 0, linetype = 'dashed') +      
         theme(text = element_text(size=x_font_size)) + 
         theme(axis.text.x = element_text(angle = x_font_angle)) + 
-        facet_wrap(~counterbalancing) +
-        ggtitle(paste0(plot_dep_var, '. rt. Diff scores'))
+        # facet_wrap(~counterbalancing) +
+        ggtitle(paste0(plot_dep_var, '. rt. Diff scores')) +
+        ylab('Middle-avg(high+low) diff score') +
+        xlab('') +
+        ggtitle('Each counterbalancing group') + 
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(plot.title = element_text(size = 10)) +
+        theme(axis.title.y = element_text(size = 10)) +
+        scale_x_discrete(labels = c('Dense-Left','Dense-Right'))
 
-grid.arrange(fig1,fig2,
+p <- grid.arrange(fig1,fig2,
              nrow = 1,
              widths = 1:2)
+
+ggsave(filename = 'rt_within_template_diff.png', plot = p, path = './results/plots/', width = 5, height = 4, device='png', dpi=300)
 
 ```
 
@@ -583,6 +649,11 @@ bf_regional_analysis <- reportBF(ttestBF(
         nullInterval = null_interval
 )[1],4)
 
+print('Mean value')
+mean(data_for_bf_regional_analysis)
+sd(data_for_bf_regional_analysis)
+
+print('BF01')
 1/bf_regional_analysis
 
 bf_regional_analysis_cb_groups <- tt_part_sum_stats_triplet_location_easiness_differences %>%
